@@ -1,0 +1,33 @@
+# Test profile - activated only via @ActiveProfiles("test") on the small
+# set of test classes that actually boot a Spring context (see
+# 11-Development-Rules.md §16.2). Exists so `./mvnw clean verify` is fully
+# self-contained: no MySQL install, no DB_PASSWORD, no network access
+# required - a fresh clone or a CI runner can run the full suite with
+# nothing beyond a JDK and this repository.
+#
+# H2 is a test-only convenience, never a stand-in for MySQL outside this
+# boundary (11-Development-Rules.md §16.2) - dev/prod are untouched by
+# this file and continue to require real MySQL, exactly as before.
+#
+# Flyway is intentionally not referenced here: it is not yet a project
+# dependency (11-Development-Rules.md §20 - still on the roadmap), so
+# there is no Flyway configuration for this profile to get right yet.
+# Schema for this ephemeral, recreated-every-run database is owned
+# entirely by Hibernate's ddl-auto below - that is correct specifically
+# because this database has no history to migrate and is never shared
+# between test runs, not a shortcut around Flyway.
+spring:
+  datasource:
+    url: jdbc:h2:mem:helpdesk_test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      # Safe ONLY because this database is created fresh and discarded at
+      # the end of every test-context lifecycle (11-Development-Rules.md
+      # §14.6's "throwaway local dev sandbox" exception applies equally
+      # here, for the same reason). Never used for dev or prod.
+      ddl-auto: create-drop
+    show-sql: false

@@ -88,6 +88,18 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- In-memory database for the "test" Spring profile only (see
+             application-test.yml) - test-scoped so it is never present on
+             the packaged runtime classpath (dev/prod always use real
+             MySQL, per 11-Development-Rules.md §14.6/§16.2: an in-memory
+             substitute is a test-only convenience, never a stand-in for
+             the real engine outside that boundary). -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Enables @PreAuthorize / method-security testing utilities in the default test starter -->
         <dependency>
             <groupId>org.springframework.security</groupId>
