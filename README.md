@@ -22,6 +22,7 @@ HelpDesk-Management-System/
 │   ├── 08-Security-Controls.md       SecAD Part II — Spring Security design, validation, file upload, API/application security
 │   ├── 09-Security-Operations.md     SecAD Part III — database security, audit, logging, configuration, error handling
 │   ├── 10-Security-Assurance.md      SecAD Part IV — security testing, OWASP Top 10 mapping, future roadmap, SDR index
+│   ├── 11-Development-Rules.md       Engineering handbook — coding, layering, testing, git, and review standards
 │   ├── ADR/                          Architecture Decision Records (0001–0012)
 │   ├── SDR/                          Security Decision Records (0001–0017)
 │   ├── Decisions.md                  Index of accepted ADRs
@@ -39,6 +40,7 @@ HelpDesk-Management-System/
 3. [docs/03-Security.md](docs/03-Security.md), [docs/04-API-Design.md](docs/04-API-Design.md), [docs/05-Database.md](docs/05-Database.md), [docs/06-Testing.md](docs/06-Testing.md) — detailed design following architecture sign-off.
 4. [docs/07-Security-Architecture.md](docs/07-Security-Architecture.md) → [08-Security-Controls.md](docs/08-Security-Controls.md) → [09-Security-Operations.md](docs/09-Security-Operations.md) → [10-Security-Assurance.md](docs/10-Security-Assurance.md) — the full Enterprise Security Architecture Document (SecAD): threat model, authentication/authorization/session design, Spring Security design, OWASP Top 10 compliance mapping, and the future security roadmap.
 5. [docs/ADR/](docs/ADR/) and [docs/SDR/](docs/SDR/) — the specific hard-to-reverse architecture and security decisions made along the way, indexed in [docs/Decisions.md](docs/Decisions.md) and [docs/Security-Decisions.md](docs/Security-Decisions.md) respectively.
+6. [docs/11-Development-Rules.md](docs/11-Development-Rules.md) — the binding coding standard for all implementation from this point forward. **Note:** this document targets MySQL/Thymeleaf/Tailwind/JavaScript as given for that phase, which differs from the PostgreSQL/React SPA stack chosen in [docs/02-Architecture.md](docs/02-Architecture.md)/ADR-0002 — this needs a reconciling decision before implementation begins in earnest.
 
 
 HelpDesk Management System

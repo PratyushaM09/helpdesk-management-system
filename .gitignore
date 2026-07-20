@@ -1,6 +1,9 @@
 # Maven
 target/
 
+# Maven Wrapper - auto-downloaded on first mvnw run, not committed
+backend/.mvn/wrapper/maven-wrapper.jar
+
 # IntelliJ
 .idea/
 

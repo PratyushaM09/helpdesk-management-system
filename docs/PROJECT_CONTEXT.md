@@ -14,7 +14,16 @@ Backend Development
 
 - 01-SRS.md
 - 02-Architecture.md
-- 03-Security.md
+- 03-Security.md (summary — see 07–10 for the full Security Architecture Document)
+- 04-API-Design.md
+- 05-Database.md
+- 06-Testing.md
+- 07-Security-Architecture.md through 10-Security-Assurance.md (full SecAD)
+- 11-Development-Rules.md (engineering handbook / coding standard)
+- ADR/ (0001–0012), Decisions.md
+- SDR/ (0001–0017), Security-Decisions.md
+
+**Open item:** 11-Development-Rules.md was written against MySQL + Thymeleaf + Tailwind + JavaScript (as specified for that task), which conflicts with the PostgreSQL + React SPA stack decided in 02-Architecture.md / ADR-0002. Needs a reconciling decision before backend development starts.
 
 ---
 
