@@ -315,7 +315,41 @@ A list endpoint accepts `page`/`size`/`sort` query parameters (bound via `Pageab
 A Controller never constructs an error response itself (no local `try/catch` building a custom error body) — every error propagates to the Global Exception Handler (Section 11). This is what keeps the error contract actually consistent across every endpoint.
 
 ### 9.8 API Documentation
-Every `@RestController` endpoint carries OpenAPI/Swagger annotations (`@Operation`, `@ApiResponse`) describing purpose, expected status codes, and auth requirements — documentation is generated from the code, not maintained separately, so it cannot silently drift out of sync (consistent with [02-Architecture.md](02-Architecture.md)'s choice of springdoc-openapi).
+Every `@RestController` endpoint carries OpenAPI/Swagger annotations describing purpose, expected status codes, and auth requirements — documentation is generated from the code, not maintained separately, so it cannot silently drift out of sync (consistent with [02-Architecture.md](02-Architecture.md)'s choice of springdoc-openapi, configured in [OpenApiConfig](../backend/src/main/java/com/helpdesk/config/OpenApiConfig.java)). No endpoint is merged undocumented — this is a review-blocking checklist item (Section 18), not a nice-to-have.
+
+**Required on every endpoint method:**
+
+| Annotation | Required content |
+|---|---|
+| `@Operation` | `summary` (one line, states the action in business terms — "Assign a ticket to an engineer", never "Handles PATCH request"), `description` (the *why*/business context a summary can't carry, only when it adds real information) |
+| `@ApiResponse` (repeated, one per realistic outcome) | Every status code the endpoint can actually return — the success code and every `ApplicationException` subtype it can throw (Section 11.2), each referencing the shared [ErrorResponse](../backend/src/main/java/com/helpdesk/exception/ErrorResponse.java)/[ApiResponse\<T\>](../backend/src/main/java/com/helpdesk/common/ApiResponse.java) schema — never only the happy path |
+| `@Parameter` | On every `@PathVariable`/`@RequestParam` not already self-explanatory from Bean Validation constraints alone — `description`, and `example` where a real value clarifies the expected format better than the type name does |
+| `@Tag` (class-level) | One tag per Controller, `name` matching the module it belongs to (Ticket, User, Comment, ...) — never a generic "API" tag; keeps the future Swagger UI grouped exactly the way [02-Architecture.md §4](02-Architecture.md#4-module-breakdown)'s modules are already organized |
+
+**Required only once auth exists:** `@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME_NAME)` on every authenticated operation — the scheme itself is already registered ([OpenApiConfig](../backend/src/main/java/com/helpdesk/config/OpenApiConfig.java), Milestone 5), so this is a one-annotation addition per endpoint when the Authentication milestone lands, not new infrastructure.
+
+**API grouping:** every endpoint under `ApiConstants.API_BASE_PATH` (`/api/v1`) is automatically included in the `v1` Swagger UI group with no extra annotation — group membership is path-based ([OpenApiConfig](../backend/src/main/java/com/helpdesk/config/OpenApiConfig.java)'s `GroupedOpenApi` bean), never something a controller has to opt into.
+
+**Minimal shape every endpoint follows** (illustrative — no business meaning implied by the example itself):
+
+```java
+@Tag(name = "Ticket")
+@RestController
+@RequestMapping(ApiConstants.API_BASE_PATH + "/tickets")
+class TicketController {
+
+    @Operation(summary = "Get a ticket by id")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ticket found")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Ticket not found or not visible to the caller")
+    @GetMapping("/{id}")
+    ResponseEntity<ApiResponse<TicketResponse>> getTicket(
+            @Parameter(description = "Ticket identifier", example = "42") @PathVariable Long id) {
+        ...
+    }
+}
+```
+
+**Note the fully-qualified `@io.swagger.v3.oas.annotations.responses.ApiResponse`** — this project's own response envelope ([com.helpdesk.common.ApiResponse](../backend/src/main/java/com/helpdesk/common/ApiResponse.java)) shares its simple name with Springdoc's response annotation. Import `com.helpdesk.common.ApiResponse` normally (it appears as a type far more often) and fully-qualify the Swagger annotation at each use site — never the reverse, and never rely on whichever one happens to resolve unqualified, which silently breaks the moment both are imported in the same file. Discovered and fixed during [HealthController](../backend/src/main/java/com/helpdesk/controller/HealthController.java)'s implementation (Milestone 6) — this file's own earlier example didn't compile as written until this note was added.
 
 ---
 
