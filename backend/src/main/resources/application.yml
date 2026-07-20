@@ -1,0 +1,122 @@
+spring:
+  application:
+    name: helpdesk-management-system
+
+  # Explicit even though "messages" is already Spring Boot's own default
+  # basename — matches messages.properties (task 5) and this project's
+  # explicit-over-implicit configuration convention (same reasoning as the
+  # naming strategy below).
+  messages:
+    basename: messages
+
+  # Default active profile — "dev" so a fresh checkout runs locally with no
+  # extra flags. Overridden at deploy time via SPRING_PROFILES_ACTIVE=prod
+  # (env var) or --spring.profiles.active=prod (CLI arg) — never edited here
+  # per environment.
+  profiles:
+    active: dev
+
+  lifecycle:
+    # Allow in-flight requests to finish (bounded by this timeout) instead of
+    # being cut off mid-response when the application is stopped/redeployed.
+    timeout-per-shutdown-phase: 30s
+
+  jpa:
+    # Never leave the persistence context open through view rendering. The
+    # Spring Boot default (true) silently masks N+1/lazy-loading mistakes and
+    # keeps a DB connection held for the full request lifecycle, which
+    # contradicts the transaction boundaries fixed at the Service layer
+    # (02-Architecture.md §7, 11-Development-Rules.md §8.4). Also removes the
+    # "spring.jpa.open-in-view is enabled by default" startup warning.
+    open-in-view: false
+    # Dialect is deliberately NOT pinned here. Hibernate 6 auto-detects the
+    # exact MySQL dialect/version from the live JDBC connection metadata,
+    # which is more accurate than a hardcoded class (and avoids a mismatch
+    # if MySQL's version ever differs between dev and prod). Setting
+    # spring.jpa.database-platform explicitly was tried and Hibernate itself
+    # flags it as unnecessary at startup (HHH90000025) — the auto-detected
+    # behavior is the correct choice here, not an omission.
+    hibernate:
+      naming:
+        # This is already Hibernate's own default; declared explicitly so
+        # the camelCase-to-snake_case column convention (11-Development-Rules.md
+        # §14.1) is a visible, reviewed decision rather than an implicit one.
+        # Entity-level @Column(name = "...") always takes precedence over
+        # this (11-Development-Rules.md §6.2).
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+server:
+  port: ${SERVER_PORT:8080}
+  # Stop accepting new requests but let in-flight ones complete, bounded by
+  # spring.lifecycle.timeout-per-shutdown-phase above.
+  shutdown: graceful
+
+# Cross-cutting, non-secret, environment-overridable settings.
+# CorsProperties / CorsConfig (com.helpdesk.config) bind to this block.
+app:
+  cors:
+    # Dev-friendly default (local Vite/CRA dev servers). Overridden with a
+    # required, no-default value in application-prod.yml — production must
+    # declare its real allowed origin(s) explicitly, never inherit this
+    # localhost default (08-Security-Controls.md §10, CORS never wildcards
+    # or silently reuses a dev-shaped allow-list).
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+  # OpenAPiConfig binds this block (OpenApiProperties). Contact/license
+  # values are clearly-generic placeholders — replace with real
+  # organizational details before a production release; nothing in the
+  # config depends on their content.
+  openapi:
+    title: HelpDesk Management System API
+    description: >-
+      REST API for the HelpDesk Management System — ticket lifecycle,
+      user/role administration, and reporting for a centralized internal
+      support platform. See docs/01-SRS.md and docs/04-API-Design.md for
+      the full functional and endpoint specification.
+    version: 1.0.0
+    contact:
+      name: HelpDesk Engineering Team
+      email: engineering@helpdesk.internal
+      url: https://internal.example/helpdesk
+    license:
+      name: Proprietary — Internal Use Only
+      url: https://internal.example/helpdesk/license
+    server:
+      # Prod overrides this with a required, no-default API_SERVER_URL —
+      # same "no dev-shaped default allowed to leak into prod" rule as CORS.
+      url: ${API_SERVER_URL:http://localhost:${SERVER_PORT:8080}}
+      description: ${API_SERVER_DESCRIPTION:Local development server}
+
+# Springdoc / Swagger UI (task 3). api-docs/swagger-ui enabled here is the
+# baseline every profile inherits; application-prod.yml is the one
+# deliberate exception (09-Security-Operations.md §17.6: docs are
+# unauthenticated in dev/test, disabled outright in prod).
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    # Display options (task 3) — a search box (useful once there are more
+    # than a handful of endpoints), response timing, and "Try it out"
+    # enabled by default since this is an internal tool's own docs UI,
+    # not a public-facing developer portal.
+    filter: true
+    display-request-duration: true
+    try-it-out-enabled: true
+    # Sorting (task 3) — operations grouped by HTTP method within a tag
+    # (GET/POST/PUT/PATCH/DELETE), tags themselves alphabetical — a
+    # predictable, reviewable order regardless of the order controllers
+    # happen to be declared/scanned in.
+    operations-sorter: method
+    tags-sorter: alpha
+
+logging:
+  level:
+    root: INFO
+    com.helpdesk: INFO

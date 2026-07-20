@@ -109,6 +109,21 @@
                         </exclude>
                     </excludes>
                 </configuration>
+                <executions>
+                    <!-- Generates target/classes/META-INF/build-info.properties, which
+                         Spring Boot auto-configures into a BuildProperties bean - the
+                         health endpoint (Milestone 6) reads the real artifact version
+                         from it instead of a second, hand-maintained copy of the
+                         version string. Only populated by `mvn package`/`verify`/
+                         `install` (bound to prepare-package); HealthServiceImpl treats
+                         its absence (e.g. an IDE "Run" without packaging) as optional,
+                         never a startup failure. -->
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
