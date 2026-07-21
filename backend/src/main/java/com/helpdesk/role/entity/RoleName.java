@@ -1,4 +1,4 @@
-package com.helpdesk.user.entity;
+package com.helpdesk.role.entity;
 
 /**
  * The three fixed roles (01-SRS.md §6, 03-Security.md §8). Identifiers match

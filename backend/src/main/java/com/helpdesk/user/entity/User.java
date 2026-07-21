@@ -1,6 +1,7 @@
 package com.helpdesk.user.entity;
 
 import com.helpdesk.common.entity.AuditableEntity;
+import com.helpdesk.role.entity.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

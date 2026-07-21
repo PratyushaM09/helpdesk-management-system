@@ -2,15 +2,15 @@ package com.helpdesk.user.service.impl;
 
 import com.helpdesk.exception.ConflictException;
 import com.helpdesk.exception.ResourceNotFoundException;
+import com.helpdesk.role.entity.Role;
+import com.helpdesk.role.entity.RoleName;
+import com.helpdesk.role.repository.RoleRepository;
 import com.helpdesk.user.dto.request.CreateUserRequest;
 import com.helpdesk.user.dto.request.UpdateUserRequest;
 import com.helpdesk.user.dto.response.UserResponse;
-import com.helpdesk.user.entity.Role;
-import com.helpdesk.user.entity.RoleName;
 import com.helpdesk.user.entity.User;
 import com.helpdesk.user.entity.UserStatus;
 import com.helpdesk.user.mapper.UserMapper;
-import com.helpdesk.user.repository.RoleRepository;
 import com.helpdesk.user.repository.UserRepository;
 import com.helpdesk.user.service.UserService;
 import com.helpdesk.util.SortValidator;

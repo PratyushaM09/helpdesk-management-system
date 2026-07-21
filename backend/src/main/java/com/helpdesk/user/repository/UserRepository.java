@@ -23,4 +23,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * false-positive a conflict against themselves.
      */
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
+    /**
+     * Whether any user currently references the given role — checked by
+     * {@code RoleServiceImpl.deleteRole} (Phase 2, Milestone 2) before
+     * allowing a delete. Read-only cross-feature query on the User Domain's
+     * own table; consistent with the User Domain already depending directly
+     * on {@code RoleRepository} the other way.
+     */
+    boolean existsByRoleId(Long roleId);
 }

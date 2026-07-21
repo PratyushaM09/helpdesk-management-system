@@ -1,5 +1,6 @@
-package com.helpdesk.user.entity;
+package com.helpdesk.role.entity;
 
+import com.helpdesk.common.entity.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,13 +12,20 @@ import jakarta.persistence.Table;
 
 /**
  * Fixed, seeded reference data (three rows: USER, SUPPORT_ENGINEER, ADMIN) —
- * kept as a table rather than a hardcoded enum column on {@link User} so a
+ * kept as a table rather than a hardcoded enum column on {@code User} so a
  * future role/permission expansion is a data change, not a schema migration
  * touching every foreign key (05-Database.md §3).
+ * <p>
+ * {@code system} is set only by {@code RoleSeeder}, never by a request DTO —
+ * it is what {@code RoleServiceImpl.deleteRole} checks before allowing a
+ * delete (Phase 2, Milestone 2). Every row is {@code true} today since there
+ * is no create-role endpoint, but the guard reads this flag rather than
+ * hardcoding "reject every delete," so it reflects the real invariant, not a
+ * stand-in for it.
  */
 @Entity
 @Table(name = "roles")
-public class Role {
+public class Role extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +39,21 @@ public class Role {
     @Column(name = "description", length = 255)
     private String description;
 
+    @Column(nullable = false)
+    private boolean system = true;
+
     protected Role() {
     }
 
     public Role(RoleName name, String description) {
+        this(name, description, true);
+    }
+
+    /** {@code system} escape hatch for infrastructure/tests; every ordinary caller should use the two-arg constructor. */
+    public Role(RoleName name, String description, boolean system) {
         this.name = name;
         this.description = description;
+        this.system = system;
     }
 
     public Long getId() {
@@ -49,6 +66,14 @@ public class Role {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isSystem() {
+        return system;
     }
 
     @Override

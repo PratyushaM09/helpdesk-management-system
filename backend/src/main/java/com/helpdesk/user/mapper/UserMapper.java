@@ -1,9 +1,9 @@
 package com.helpdesk.user.mapper;
 
+import com.helpdesk.role.entity.Role;
 import com.helpdesk.user.dto.request.CreateUserRequest;
 import com.helpdesk.user.dto.request.UpdateUserRequest;
 import com.helpdesk.user.dto.response.UserResponse;
-import com.helpdesk.user.entity.Role;
 import com.helpdesk.user.entity.User;
 
 /**

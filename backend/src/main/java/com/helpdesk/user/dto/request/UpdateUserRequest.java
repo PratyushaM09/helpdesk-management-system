@@ -1,6 +1,6 @@
 package com.helpdesk.user.dto.request;
 
-import com.helpdesk.user.entity.RoleName;
+import com.helpdesk.role.entity.RoleName;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

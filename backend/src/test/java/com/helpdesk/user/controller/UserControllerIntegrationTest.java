@@ -2,11 +2,11 @@ package com.helpdesk.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.helpdesk.constant.ApiConstants;
-import com.helpdesk.user.entity.Role;
-import com.helpdesk.user.entity.RoleName;
+import com.helpdesk.role.entity.Role;
+import com.helpdesk.role.entity.RoleName;
+import com.helpdesk.role.repository.RoleRepository;
 import com.helpdesk.user.entity.User;
 import com.helpdesk.user.entity.UserStatus;
-import com.helpdesk.user.repository.RoleRepository;
 import com.helpdesk.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

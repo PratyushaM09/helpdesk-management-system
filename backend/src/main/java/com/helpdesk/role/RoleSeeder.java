@@ -1,8 +1,8 @@
-package com.helpdesk.user;
+package com.helpdesk.role;
 
-import com.helpdesk.user.entity.Role;
-import com.helpdesk.user.entity.RoleName;
-import com.helpdesk.user.repository.RoleRepository;
+import com.helpdesk.role.entity.Role;
+import com.helpdesk.role.entity.RoleName;
+import com.helpdesk.role.repository.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
  * on startup, if they don't already exist — idempotent, so restarting the
  * application never creates duplicates. This is what makes
  * {@code UserServiceImpl.resolveRole}'s "the seed data is always present"
- * assumption actually true rather than a runtime gamble.
+ * assumption actually true rather than a runtime gamble. The two-arg
+ * {@code Role} constructor defaults {@code system = true} — the only source
+ * of Role rows until a create-role endpoint exists.
  * <p>
  * Follows the same {@code @EventListener(ApplicationReadyEvent.class)}
  * shape already used by {@code ApplicationStartupListener} — one

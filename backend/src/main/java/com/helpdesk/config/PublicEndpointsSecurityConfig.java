@@ -37,6 +37,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
  *       list the moment the Authentication milestone's real
  *       {@code SecurityFilterChain} exists, at which point every User
  *       endpoint gains its actual auth requirement there instead.</li>
+ *   <li>{@code ApiConstants.API_BASE_PATH + "/roles/**"} — Phase 2
+ *       Milestone 2 (Role Domain), same "no authentication yet" scoping as
+ *       User above, removed on the same trigger.</li>
  * </ul>
  * <p>
  * <b>Two {@code SecurityFilterChain} beans, not one, and not
@@ -68,7 +71,8 @@ public class PublicEndpointsSecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             ApiConstants.API_BASE_PATH + "/health",
-            ApiConstants.API_BASE_PATH + "/users/**"
+            ApiConstants.API_BASE_PATH + "/users/**",
+            ApiConstants.API_BASE_PATH + "/roles/**"
     };
 
     @Bean

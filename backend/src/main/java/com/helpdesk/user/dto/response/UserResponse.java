@@ -1,6 +1,6 @@
 package com.helpdesk.user.dto.response;
 
-import com.helpdesk.user.entity.RoleName;
+import com.helpdesk.role.entity.RoleName;
 import com.helpdesk.user.entity.UserStatus;
 
 import java.time.Instant;
