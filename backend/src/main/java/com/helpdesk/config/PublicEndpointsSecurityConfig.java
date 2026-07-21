@@ -31,6 +31,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
  *       are built on. It exposes no sensitive detail (see
  *       {@code HealthResponse}'s Javadoc), so unauthenticated access
  *       carries no meaningful risk.</li>
+ *   <li>{@code ApiConstants.API_BASE_PATH + "/users/**"} — Phase 2
+ *       Milestone 1 (User Domain), explicitly scoped as "no authentication
+ *       yet." Temporary, same as the rest of this class: removed from this
+ *       list the moment the Authentication milestone's real
+ *       {@code SecurityFilterChain} exists, at which point every User
+ *       endpoint gains its actual auth requirement there instead.</li>
  * </ul>
  * <p>
  * <b>Two {@code SecurityFilterChain} beans, not one, and not
@@ -61,7 +67,8 @@ public class PublicEndpointsSecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            ApiConstants.API_BASE_PATH + "/health"
+            ApiConstants.API_BASE_PATH + "/health",
+            ApiConstants.API_BASE_PATH + "/users/**"
     };
 
     @Bean

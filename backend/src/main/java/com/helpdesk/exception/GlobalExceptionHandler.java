@@ -43,12 +43,14 @@ import java.util.List;
  *       generic, safe message.</li>
  * </ol>
  * <p>
- * <b>Not yet exercised by any real endpoint:</b> no controller exists in
- * this milestone, so none of the four validation handlers above has a
- * current caller — this is deliberate, forward-built infrastructure (task
+ * <b>First exercised by a real endpoint in Phase 2 Milestone 1:</b> this
+ * class was originally built ahead of any controller needing it (task
  * objective: "every future Request DTO should be able to use this
- * validation system without modification"), verified directly by
- * {@code GlobalExceptionHandlerTest} rather than a live HTTP call.
+ * validation system without modification"). {@code UserController}'s
+ * {@code @Valid}-annotated {@code CreateUserRequest}/{@code UpdateUserRequest}
+ * parameters are the first live callers of the
+ * {@link MethodArgumentNotValidException} handler below — proof that
+ * promise held without any change to this handler.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

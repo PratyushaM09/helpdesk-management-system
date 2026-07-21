@@ -45,6 +45,15 @@ spring:
         # this (11-Development-Rules.md §6.2).
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
+  data:
+    web:
+      pageable:
+        # Every list endpoint's cap on client-requested page size
+        # (11-Development-Rules.md §7.5) - a client asking for size=100000
+        # gets silently clamped to this, never an unbounded query.
+        max-page-size: 100
+        default-page-size: 20
+
 server:
   port: ${SERVER_PORT:8080}
   # Stop accepting new requests but let in-flight ones complete, bounded by
