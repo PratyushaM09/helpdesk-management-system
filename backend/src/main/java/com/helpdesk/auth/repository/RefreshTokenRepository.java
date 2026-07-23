@@ -16,14 +16,20 @@ import java.util.Optional;
  * the family, filters to not-yet-revoked members, and revokes each; kept as
  * a plain derived read rather than a bulk {@code @Modifying} update so the
  * revocation decision stays in the Service layer, not the query.
- * {@code deleteByExpiresAtBefore} backs the scheduled cleanup job that
- * purges long-expired rows so this table doesn't grow unbounded.
+ * {@code findByUserId} backs {@code AuthenticationService.revokeAllRefreshTokensForUser}
+ * (Milestone 4, Change 5) the same way: the Service loads every token this
+ * user has ever been issued, filters to not-yet-revoked, and revokes each —
+ * a plain derived read, not a bulk update, for the same reason. {@code
+ * deleteByExpiresAtBefore} backs the scheduled cleanup job that purges
+ * long-expired rows so this table doesn't grow unbounded.
  */
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
     Optional<RefreshToken> findByTokenHash(String tokenHash);
 
     List<RefreshToken> findByFamilyId(String familyId);
+
+    List<RefreshToken> findByUserId(Long userId);
 
     void deleteByExpiresAtBefore(Instant cutoff);
 }

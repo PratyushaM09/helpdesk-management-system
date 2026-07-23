@@ -1,6 +1,7 @@
 package com.helpdesk.auth.service;
 
 import com.helpdesk.auth.dto.request.LoginRequest;
+import com.helpdesk.user.entity.User;
 import org.springframework.http.ResponseCookie;
 
 import java.util.List;
@@ -37,4 +38,19 @@ public interface AuthenticationService {
      * error. Always returns the cleared-cookie set regardless.
      */
     List<ResponseCookie> logout(String rawRefreshToken);
+
+    /**
+     * Revokes every currently-live refresh token issued to {@code user},
+     * across every session/device/family — the "log out everywhere"
+     * primitive security-invalidating events need (password change, password
+     * reset; Milestone 4 design, Change 5). Distinct from {@link #logout},
+     * which only revokes the single presented token, and from the
+     * reuse-detection revoke {@link #refresh} triggers internally, which is
+     * scoped to one token family rather than every token a user has.
+     * <p>
+     * Callers outside this module reach refresh-token revocation only
+     * through this method — {@code RefreshTokenRepository} stays internal to
+     * the auth module, never injected elsewhere.
+     */
+    void revokeAllRefreshTokensForUser(User user);
 }

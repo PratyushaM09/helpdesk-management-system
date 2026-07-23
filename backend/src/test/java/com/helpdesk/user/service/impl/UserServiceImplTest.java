@@ -186,26 +186,6 @@ class UserServiceImplTest {
         verifyNoInteractions(userMapper, roleRepository);
     }
 
-    @Test
-    void deactivateUser_shouldSetStatusToDeactivated_whenUserExists() {
-        User user = aUser(aRole(RoleName.USER));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        userService.deactivateUser(1L);
-
-        assertEquals(UserStatus.DEACTIVATED, user.getStatus());
-        verify(userRepository).save(user);
-    }
-
-    @Test
-    void deactivateUser_shouldThrowNotFound_whenUserDoesNotExist() {
-        when(userRepository.findById(404L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> userService.deactivateUser(404L));
-
-        verify(userRepository, never()).save(any());
-    }
-
     private Role aRole(RoleName name) {
         return new Role(name, name.name());
     }
@@ -216,6 +196,6 @@ class UserServiceImplTest {
 
     private UserResponse aResponse(Long id, RoleName role) {
         Instant now = Instant.now();
-        return new UserResponse(id, "Ada Lovelace", "ada@example.com", role, UserStatus.UNVERIFIED, now, now);
+        return new UserResponse(id, "Ada Lovelace", "ada@example.com", role, UserStatus.ACTIVE, now, now);
     }
 }

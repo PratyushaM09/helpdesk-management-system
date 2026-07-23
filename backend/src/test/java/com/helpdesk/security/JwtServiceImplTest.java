@@ -127,6 +127,6 @@ class JwtServiceImplTest {
     }
 
     private UserPrincipal aPrincipal(Long userId, RoleName role, int tokenVersion) {
-        return new UserPrincipal(userId, "user%d@example.com".formatted(userId), "hashed-password", role, UserStatus.VERIFIED, tokenVersion);
+        return new UserPrincipal(userId, "user%d@example.com".formatted(userId), "hashed-password", role, UserStatus.ACTIVE, tokenVersion);
     }
 }

@@ -9,7 +9,6 @@ import com.helpdesk.user.dto.request.CreateUserRequest;
 import com.helpdesk.user.dto.request.UpdateUserRequest;
 import com.helpdesk.user.dto.response.UserResponse;
 import com.helpdesk.user.entity.User;
-import com.helpdesk.user.entity.UserStatus;
 import com.helpdesk.user.mapper.UserMapper;
 import com.helpdesk.user.repository.UserRepository;
 import com.helpdesk.user.service.UserService;
@@ -89,16 +88,6 @@ public class UserServiceImpl implements UserService {
 
         log.info("User updated: userId={}", id);
         return userMapper.toResponse(saved);
-    }
-
-    @Override
-    @Transactional
-    public void deactivateUser(Long id) {
-        User user = findUserOrThrow(id);
-        user.setStatus(UserStatus.DEACTIVATED);
-        userRepository.save(user);
-
-        log.info("User deactivated: userId={}", id);
     }
 
     private User findUserOrThrow(Long id) {

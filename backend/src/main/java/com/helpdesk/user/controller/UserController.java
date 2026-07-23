@@ -1,5 +1,6 @@
 package com.helpdesk.user.controller;
 
+import com.helpdesk.account.service.AccountService;
 import com.helpdesk.common.ApiResponse;
 import com.helpdesk.common.PageResponse;
 import com.helpdesk.constant.ApiConstants;
@@ -30,10 +31,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 /**
- * User Domain CRUD (Phase 2, Milestone 1) — no authentication/authorization
- * on any of these endpoints yet (deliberately public, see
- * {@code PublicEndpointsSecurityConfig}); every method here only binds,
- * delegates to {@link UserService}, and shapes the response.
+ * User Domain CRUD (Phase 2, Milestone 1); every method only binds,
+ * delegates, and shapes the response. {@code deactivateUser} is the one
+ * exception to "delegates to {@link UserService}" — it delegates to
+ * {@link AccountService} instead (Milestone 4 architectural decision): a
+ * deactivation must bump {@code tokenVersion} and revoke every refresh
+ * token, and {@code AccountService} is the single implementation of that
+ * business rule, also used by the admin {@code deactivateUser}/{@code
+ * activateUser} operations. Keeping a second, weaker deactivation path on
+ * {@code UserService} would let the same real-world action ("deactivate
+ * this user") mean two different things depending which endpoint was
+ * called.
  */
 @Tag(name = "User")
 @RestController
@@ -41,9 +49,11 @@ import java.net.URI;
 public class UserController {
 
     private final UserService userService;
+    private final AccountService accountService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AccountService accountService) {
         this.userService = userService;
+        this.accountService = accountService;
     }
 
     @Operation(summary = "Create a user")
@@ -89,13 +99,13 @@ public class UserController {
     }
 
     @Operation(summary = "Deactivate a user",
-            description = "Soft delete: sets status to DEACTIVATED. The row is never removed.")
+            description = "Soft delete: sets status to DEACTIVATED, revokes every session. The row is never removed.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User deactivated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deactivateUser(
             @Parameter(description = "User identifier", example = "1") @PathVariable Long id) {
-        userService.deactivateUser(id);
+        accountService.deactivateUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(ResponseMessages.DELETED));
     }
 }

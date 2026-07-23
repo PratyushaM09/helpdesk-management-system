@@ -128,6 +128,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return cookieService.clearAllCookies();
     }
 
+    @Override
+    @Transactional
+    public void revokeAllRefreshTokensForUser(User user) {
+        Instant now = Instant.now();
+        List<RefreshToken> tokens = refreshTokenRepository.findByUserId(user.getId());
+        tokens.stream().filter(token -> !token.isRevoked()).forEach(token -> token.revoke(now));
+        refreshTokenRepository.saveAll(tokens);
+        auditLog.info("All refresh tokens revoked for user: userId={}", user.getId());
+    }
+
     // --- login helpers ---
 
     private void rejectIfLocked(User user, String email) {
@@ -138,7 +148,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (user.getStatus() == UserStatus.LOCKED && !user.isLocked(now)) {
             // Window expired - auto-clear the status, but failedAttempts is
             // deliberately left untouched (SDR-005: resets only on success).
-            user.setStatus(UserStatus.VERIFIED);
+            user.setStatus(UserStatus.ACTIVE);
         }
         if (user.isLocked(now)) {
             auditLog.warn("Login rejected - account locked: email={}", email);

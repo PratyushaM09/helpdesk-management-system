@@ -60,7 +60,14 @@ public class SecurityConfig {
             "/swagger-ui.html",
             ApiConstants.API_BASE_PATH + "/health",
             ApiConstants.API_BASE_PATH + "/auth/login",
-            ApiConstants.API_BASE_PATH + "/auth/refresh"
+            ApiConstants.API_BASE_PATH + "/auth/refresh",
+            // Unauthenticated by necessity (Milestone 4): the caller has no
+            // session yet, or is presenting a possessed token instead of one.
+            // resend-verification is deliberately NOT here - it stays
+            // authenticated (AccountService design decision).
+            ApiConstants.API_BASE_PATH + "/account/forgot-password",
+            ApiConstants.API_BASE_PATH + "/account/reset-password",
+            ApiConstants.API_BASE_PATH + "/account/verify-email"
     };
 
     private final JwtService jwtService;
@@ -97,6 +104,15 @@ public class SecurityConfig {
                         .accessDeniedHandler(restAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
+                        // Admin-only account operations (Milestone 4): neither
+                        // /users/** nor /roles/** below covers /account/**, so
+                        // without this, activate/deactivate would fall through
+                        // to the generic "authenticated" rule and be callable
+                        // by any logged-in user, not just an Administrator.
+                        .requestMatchers(
+                                ApiConstants.API_BASE_PATH + "/account/*/activate",
+                                ApiConstants.API_BASE_PATH + "/account/*/deactivate")
+                        .hasRole("ADMIN")
                         .requestMatchers(ApiConstants.API_BASE_PATH + "/users/**").hasRole("ADMIN")
                         .requestMatchers(ApiConstants.API_BASE_PATH + "/roles/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

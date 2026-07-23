@@ -65,10 +65,11 @@ public record UserPrincipal(
     }
 
     /**
-     * {@code UNVERIFIED} is deliberately permitted to log in this milestone
-     * — no email-verification flow exists yet to ever move an account out
-     * of that status, so gating on {@code VERIFIED} alone would make login
-     * untestable. Tightened to {@code VERIFIED}-only once that flow exists.
+     * Gated on {@code status} alone, not email verification — the two are
+     * deliberately separate concerns (Milestone 4 design, Change 3), so an
+     * unverified-but-{@code ACTIVE} account can still log in. Whether an
+     * endpoint additionally requires a verified email is that endpoint's own
+     * decision, not something this principal enforces globally.
      */
     @Override
     public boolean isEnabled() {

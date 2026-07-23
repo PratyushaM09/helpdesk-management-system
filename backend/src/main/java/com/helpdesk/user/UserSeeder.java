@@ -14,6 +14,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 /**
  * Seeds exactly one {@code ADMIN} account on startup, if none exists yet —
  * the answer to "who creates the first Administrator" once
@@ -62,7 +64,10 @@ public class UserSeeder {
         }
 
         User admin = new User("Administrator", properties.email(), passwordEncoder.encode(properties.password()), adminRole);
-        admin.setStatus(UserStatus.VERIFIED);
+        admin.setStatus(UserStatus.ACTIVE);
+        // No email flow exists for the bootstrap account - seeded pre-verified
+        // rather than left permanently unverifiable.
+        admin.markEmailVerified(Instant.now());
         userRepository.save(admin);
         log.warn("Seeded bootstrap admin account: email={} - change its password immediately in any shared environment.",
                 properties.email());

@@ -21,7 +21,4 @@ public interface UserService {
     Page<UserResponse> getUsers(Pageable pageable);
 
     UserResponse updateUser(Long id, UpdateUserRequest request);
-
-    /** Soft delete: sets {@code status = DEACTIVATED}; the row is never removed. */
-    void deactivateUser(Long id);
 }

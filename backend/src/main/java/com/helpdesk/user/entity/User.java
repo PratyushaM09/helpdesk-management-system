@@ -51,7 +51,7 @@ public class User extends AuditableEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private UserStatus status = UserStatus.UNVERIFIED;
+    private UserStatus status = UserStatus.ACTIVE;
 
     /** Consecutive bad-password count since the last successful login (SDR-005); reset on success. */
     @Column(name = "failed_attempts", nullable = false)
@@ -72,6 +72,21 @@ public class User extends AuditableEntity {
      */
     @Column(name = "token_version", nullable = false)
     private int tokenVersion = 0;
+
+    /**
+     * Whether this user has confirmed ownership of {@link #email} (Milestone 4
+     * design, Change 3). Deliberately tracked independently of {@link #status}:
+     * email verification and account lifecycle (active/locked/deactivated) are
+     * separate concerns, so a deactivated account's verification history isn't
+     * lost, and an unverified account isn't forced into a fabricated lifecycle
+     * state just to represent "hasn't verified yet."
+     */
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    /** Non-null once {@link #emailVerified} becomes true; set together, in {@link #markEmailVerified}. */
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
 
     protected User() {
     }
@@ -105,6 +120,19 @@ public class User extends AuditableEntity {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    /**
+     * Replaces the stored hash with an already-encoded value — never a raw
+     * password, the same "Service encodes, entity only stores" division the
+     * constructor already follows. No plain {@code setPasswordHash}: every
+     * password change is a security-relevant event worth a named method,
+     * the same reasoning {@link #incrementTokenVersion()} and
+     * {@link #markEmailVerified(Instant)} follow, unlike the plain
+     * {@link #setName(String)}/{@link #setEmail(String)} CRUD setters.
+     */
+    public void changePasswordHash(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
     }
 
     public Role getRole() {
@@ -185,6 +213,34 @@ public class User extends AuditableEntity {
      */
     public void incrementTokenVersion() {
         this.tokenVersion++;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public Instant getEmailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    /**
+     * Records that this user has confirmed ownership of {@link #email}. The
+     * Service layer is responsible for deciding when this is warranted (a
+     * redeemed {@code EmailVerificationToken}, Milestone 4 design) — this
+     * method only ever records that it happened, the same division of
+     * responsibility {@link #incrementTokenVersion()} follows.
+     * <p>
+     * Guarded, not reapplied: a second call (e.g. a re-submitted or
+     * concurrently-redeemed verification token) is not an error, but it must
+     * not overwrite {@code emailVerifiedAt} with a later time — the field
+     * means "when this first became true," not "when this was last
+     * confirmed."
+     */
+    public void markEmailVerified(Instant now) {
+        if (!emailVerified) {
+            this.emailVerified = true;
+            this.emailVerifiedAt = now;
+        }
     }
 
     @Override

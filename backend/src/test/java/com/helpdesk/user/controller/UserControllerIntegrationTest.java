@@ -85,7 +85,7 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").exists())
                 .andExpect(jsonPath("$.data.email").value("ada@example.com"))
-                .andExpect(jsonPath("$.data.status").value("UNVERIFIED"))
+                .andExpect(jsonPath("$.data.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.data.passwordHash").doesNotExist())
                 .andReturn();
 

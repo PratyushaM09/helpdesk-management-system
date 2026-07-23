@@ -334,7 +334,7 @@ class AuthenticationControllerIntegrationTest {
     private User persistUser(String email, RoleName roleName) {
         Role role = roleRepository.findByName(roleName).orElseThrow();
         User user = new User("Test User", email, passwordEncoder.encode(VALID_PASSWORD), role);
-        user.setStatus(UserStatus.VERIFIED);
+        user.setStatus(UserStatus.ACTIVE);
         return userRepository.save(user);
     }
 
