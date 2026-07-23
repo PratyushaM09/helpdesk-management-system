@@ -31,3 +31,16 @@ spring:
       # here, for the same reason). Never used for dev or prod.
       ddl-auto: create-drop
     show-sql: false
+
+app:
+  jwt:
+    # HS512, same reasoning as application-dev.yml — no network access
+    # allowed in this profile (see file header), so a fixed literal here
+    # (not an env-var-overridable one) keeps the suite fully self-contained.
+    algorithm: HS512
+    secret: test-only-helpdesk-jwt-signing-secret-never-use-outside-the-automated-test-suite
+
+  admin-bootstrap:
+    # Fixed literal, same "fully self-contained, no env access" reasoning.
+    email: admin@test.local
+    password: Test0nly!AdminBootstrapPassword

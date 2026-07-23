@@ -29,6 +29,25 @@ spring:
       hibernate:
         format_sql: true
 
+app:
+  jwt:
+    # HS512 in dev (ADR-0003, 03-Security.md §3) — RS256 is prod-only, no
+    # point managing a keypair locally. The default secret below is a
+    # clearly-labeled, non-sensitive throwaway value (SDR-015): a leak of
+    # this exact string has no real-world consequence, since it only ever
+    # signs tokens against a local dev database. Override with JWT_SECRET
+    # if you want a different one; either way it must be at least 64 bytes
+    # (HS512's minimum key strength) or JwtService refuses to start.
+    algorithm: HS512
+    secret: ${JWT_SECRET:dev-only-helpdesk-jwt-signing-secret-never-use-in-production-please-change-this-value}
+
+  # UserSeeder's bootstrap Administrator (Phase 2 Milestone 3). Same
+  # throwaway-default reasoning as app.jwt.secret above — safe to commit
+  # because it only ever seeds a local dev database.
+  admin-bootstrap:
+    email: ${ADMIN_BOOTSTRAP_EMAIL:admin@helpdesk.local}
+    password: ${ADMIN_BOOTSTRAP_PASSWORD:Dev0nly!AdminBootstrapPassword}
+
 logging:
   level:
     com.helpdesk: DEBUG

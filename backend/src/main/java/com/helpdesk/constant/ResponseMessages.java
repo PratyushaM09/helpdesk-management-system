@@ -34,6 +34,21 @@ public final class ResponseMessages {
      */
     public static final String MALFORMED_REQUEST_BODY = "The request body could not be read. Please check its syntax.";
 
+    /**
+     * For an unauthenticated request to a protected route, written directly
+     * by {@code RestAuthenticationEntryPoint} — the one 401 case
+     * {@code GlobalExceptionHandler} never sees, since it's rejected inside
+     * the security filter chain, before {@code DispatcherServlet} runs.
+     */
+    public static final String AUTHENTICATION_REQUIRED = "Authentication is required to access this resource.";
+
+    /**
+     * For an authenticated-but-wrong-role request, or a CSRF token
+     * mismatch, written by {@code RestAccessDeniedHandler} — same "rejected
+     * inside the filter chain" reasoning as {@link #AUTHENTICATION_REQUIRED}.
+     */
+    public static final String ACCESS_DENIED = "You do not have permission to perform this action.";
+
     private ResponseMessages() {
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,11 +29,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * {@code GlobalExceptionHandler}. {@code @Transactional} rolls back every
  * test method, so the three roles {@code RoleSeeder} seeds at application
  * startup are the only rows any test ever sees change.
+ * <p>
+ * {@code @WithMockUser(roles = "ADMIN")} (Phase 2, Milestone 3): every
+ * {@code /api/v1/roles/**} route is now {@code ADMIN}-only ({@code SecurityConfig}) —
+ * see {@code UserControllerIntegrationTest}'s identical note for why.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@WithMockUser(roles = "ADMIN")
 class RoleControllerIntegrationTest {
 
     private static final String BASE_URL = ApiConstants.API_BASE_PATH + "/roles";

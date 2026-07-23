@@ -3,6 +3,8 @@ package com.helpdesk.user.repository;
 import com.helpdesk.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * {@code findById}/{@code findAll(Pageable)} are used exactly as
  * {@link JpaRepository} already provides them — deliberately no
@@ -16,6 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** Case-insensitive uniqueness check before creating a user (07-Security-Architecture.md §3.1). */
     boolean existsByEmailIgnoreCase(String email);
+
+    /** Login lookup (07-Security-Architecture.md §3.2) — {@code CustomUserDetailsService} resolves by email, case-insensitively, same as the uniqueness check above. */
+    Optional<User> findByEmailIgnoreCase(String email);
 
     /**
      * Same uniqueness check for the update flow, excluding the user's own

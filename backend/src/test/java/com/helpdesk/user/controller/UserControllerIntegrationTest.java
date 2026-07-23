@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,11 +38,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * class's own reasoning note in the conversation for what's deliberately
  * not mocked. {@code @Transactional} rolls back every test method, so each
  * runs against a clean slate without manual cleanup.
+ * <p>
+ * {@code @WithMockUser(roles = "ADMIN")} (Phase 2, Milestone 3): every
+ * {@code /api/v1/users/**} route is now {@code ADMIN}-only
+ * ({@code SecurityConfig}). This simulates an authenticated Administrator
+ * principal via {@code spring-security-test} without needing a real login
+ * flow — {@code AuthenticationController} doesn't exist yet — exactly what
+ * that dependency was added for.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@WithMockUser(roles = "ADMIN")
 class UserControllerIntegrationTest {
 
     private static final String BASE_URL = ApiConstants.API_BASE_PATH + "/users";
@@ -138,12 +147,16 @@ class UserControllerIntegrationTest {
         persistUser("list-one@example.com", RoleName.USER);
         persistUser("list-two@example.com", RoleName.USER);
 
+        // 3, not 2: UserSeeder (Phase 2 Milestone 3) commits one bootstrap
+        // ADMIN row at application startup, outside this test's own
+        // @Transactional rollback boundary - same reason RoleControllerIntegrationTest
+        // asserts against the 3 seeded roles rather than 0.
         mockMvc.perform(get(BASE_URL).param("page", "0").param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content").isArray())
                 .andExpect(jsonPath("$.data.page").value(0))
                 .andExpect(jsonPath("$.data.size").value(10))
-                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
                 .andExpect(jsonPath("$.data.totalPages").value(1));
     }
 

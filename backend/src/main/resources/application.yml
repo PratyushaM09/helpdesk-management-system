@@ -75,6 +75,16 @@ app:
     allow-credentials: true
     max-age: 3600
 
+  # JwtProperties (com.helpdesk.security) binds this block. Only the
+  # profile-agnostic values live here (07-Security-Architecture.md §3/§5.2)
+  # — algorithm and key material are always profile-specific (dev/test use
+  # HS512 + a throwaway secret, prod uses RS256 + real keys) and are never
+  # set here.
+  jwt:
+    access-token-ttl: 15m
+    refresh-token-ttl: 7d
+    issuer: helpdesk-management-system
+
   # OpenAPiConfig binds this block (OpenApiProperties). Contact/license
   # values are clearly-generic placeholders — replace with real
   # organizational details before a production release; nothing in the

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,8 +22,13 @@ import org.springframework.stereotype.Component;
  * Follows the same {@code @EventListener(ApplicationReadyEvent.class)}
  * shape already used by {@code ApplicationStartupListener} — one
  * established pattern for "run once at startup," not a second one.
+ * {@code @Order(1)} guarantees this runs before {@code UserSeeder}
+ * ({@code @Order(2)}), which resolves the {@code ADMIN} role and cannot
+ * function if it isn't seeded yet — multiple {@code @EventListener} methods
+ * for the same event have no guaranteed relative order otherwise.
  */
 @Component
+@Order(1)
 public class RoleSeeder {
 
     private static final Logger log = LoggerFactory.getLogger(RoleSeeder.class);
