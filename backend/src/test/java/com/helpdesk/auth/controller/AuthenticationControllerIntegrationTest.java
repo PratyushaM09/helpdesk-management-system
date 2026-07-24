@@ -329,6 +329,13 @@ class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void rbac_rolesEndpoint_shouldReturn401_whenUnauthenticated() throws Exception {
+        mockMvc.perform(get(ROLES_URL))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"));
+    }
+
     // --- helpers ---
 
     private User persistUser(String email, RoleName roleName) {

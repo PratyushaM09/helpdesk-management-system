@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,11 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Role Domain administration (Phase 2, Milestone 2) — no authentication/
- * authorization on any of these endpoints yet, same deliberately-public
- * stance as {@code UserController} pre-Authentication milestone. No
- * {@code POST}: {@code name} is a closed, seeded enum in this milestone, so
- * there is no create operation.
+ * Role Domain administration (Phase 2, Milestone 2). No {@code POST}:
+ * {@code name} is a closed, seeded enum in this milestone, so there is no
+ * create operation.
+ * <p>
+ * Every endpoint requires {@code ADMIN}, enforced via {@code @PreAuthorize}
+ * on each method (Phase 2, Milestone 5) — same convention
+ * {@code UserController} follows.
  */
 @Tag(name = "Role")
 @RestController
@@ -46,6 +49,7 @@ public class RoleController {
     @Operation(summary = "Get a role by id")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Role found")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Role not found")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RoleResponse>> getRole(
             @Parameter(description = "Role identifier", example = "1") @PathVariable Long id) {
@@ -54,6 +58,7 @@ public class RoleController {
 
     @Operation(summary = "List roles, paginated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Paged role list")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<RoleResponse>>> getRoles(
             @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable) {
@@ -65,6 +70,7 @@ public class RoleController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Role updated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Role not found")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RoleResponse>> updateRole(
             @Parameter(description = "Role identifier", example = "1") @PathVariable Long id,
@@ -78,6 +84,7 @@ public class RoleController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Role deleted")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Role not found")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Role is a system role or is still assigned to users")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteRole(
             @Parameter(description = "Role identifier", example = "1") @PathVariable Long id) {

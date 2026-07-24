@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,6 +27,17 @@ import java.util.List;
  *   <li>{@link ApplicationException} — an expected, already-classified
  *       failure; the exception itself carries the correct HTTP status,
  *       error code, and client-safe message.</li>
+ *   <li>{@link AuthorizationDeniedException} (Phase 2, Milestone 5) — a
+ *       {@code @PreAuthorize} check on a Controller method denied access.
+ *       Unlike the URL-matcher-based checks {@code SecurityConfig} still
+ *       performs for the blanket "must be authenticated" rule, this
+ *       exception is thrown from *inside* {@code DispatcherServlet}'s
+ *       dispatch (the method-security AOP interceptor wraps the actual
+ *       controller method call), so it never reaches
+ *       {@code ExceptionTranslationFilter}/{@code RestAccessDeniedHandler}
+ *       — this handler is the equivalent for that boundary, built to
+ *       return the byte-for-byte identical body so a client can't tell
+ *       which layer rejected the request.</li>
  *   <li>{@link MethodArgumentNotValidException} / {@link BindException} —
  *       Bean Validation failed on a {@code @Valid}-bound request body or
  *       form/query object. {@code MethodArgumentNotValidException} IS a
@@ -66,6 +78,14 @@ public class GlobalExceptionHandler {
         // which a routine 404/400/409 does not (09-Security-Operations.md §16.1).
         log.warn("{} [{}]: {} ({})", ex.getClass().getSimpleName(), ex.getErrorCode(), ex.getMessage(), request.getRequestURI());
         return buildResponse(ex.getHttpStatus(), ex.getErrorCode(), ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex, HttpServletRequest request) {
+        // Expected, client-caused outcome, same as ApplicationException
+        // above - WARN, no stack trace.
+        log.warn("AuthorizationDeniedException [FORBIDDEN]: access denied ({})", request.getRequestURI());
+        return buildResponse(HttpStatus.FORBIDDEN, "FORBIDDEN", ResponseMessages.ACCESS_DENIED, request);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})

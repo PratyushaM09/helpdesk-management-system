@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,36 +39,29 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>
  * Mixed authentication requirement, by necessity rather than convenience:
  * {@code /me}, {@code /profile}, {@code /password}, and
- * {@code /resend-verification} require an existing session — the last of
- * these authenticated (not public-by-email) specifically so it can only
- * ever resend to the caller's own address, never anyone else's.
+ * {@code /resend-verification} require an existing session, enforced via
+ * {@code @PreAuthorize("isAuthenticated()")} (Phase 2, Milestone 5) — the
+ * last of these authenticated (not public-by-email) specifically so it can
+ * only ever resend to the caller's own address, never anyone else's.
  * {@code /forgot-password}, {@code /reset-password}, and
  * {@code /verify-email} run before a session exists (the caller has no
  * session yet, or is presenting a possessed token instead of one) and are
- * listed as public paths in {@code SecurityConfig}. {@code activate}/
- * {@code deactivate} are admin-only, gated by {@code SecurityConfig}
- * matchers on {@code /account/*}{@code /activate}/{@code /account/*}{@code /deactivate}
- * specifically — this class performs no authorization decision itself, the
- * same "Controller never decides, only enforces-by-delegation" split every
- * other endpoint here follows; {@code activateUser}/{@code deactivateUser}
- * don't even receive a principal, only the target {@code userId} from the
- * path, since who's allowed to call them is Spring Security's job, not
- * this class's. {@code forgotPassword} in particular performs no branching
- * in this class — it calls {@code accountService.forgotPassword(request)}
- * and returns the same fixed response unconditionally, because whether the
- * email exists is a fact the Service layer already refuses to expose; a
- * controller-level branch on the outcome would reintroduce the exact leak
- * the Service was written to avoid, even if the branch only ever executed
- * identical-looking code on both paths.
- * <p>
- * <b>SecurityConfig change required this iteration:</b> neither existing
- * admin matcher ({@code /users/**}, {@code /roles/**}) covers
- * {@code /account/**} at all, so without a new rule,
- * {@code /account/{userId}/activate}/{@code .../deactivate} would have
- * fallen through to the generic {@code .anyRequest().authenticated()} —
- * callable by any logged-in user, not just an Administrator. Added two
- * explicit {@code hasRole("ADMIN")} matchers scoped to exactly those two
- * routes, ahead of the generic catch-all.
+ * listed as public paths in {@code SecurityConfig} — no
+ * {@code @PreAuthorize} on those three. {@code activate}/{@code deactivate}
+ * are admin-only, enforced via {@code @PreAuthorize("hasRole('ADMIN')")} on
+ * each method — this class still performs no authorization decision
+ * itself, the same "Controller never decides, only enforces-by-declaration"
+ * split every other endpoint here follows; {@code activateUser}/
+ * {@code deactivateUser} don't even receive a principal, only the target
+ * {@code userId} from the path, since who's allowed to call them is Spring
+ * Security's job, not this class's. {@code forgotPassword} in particular
+ * performs no branching in this class — it calls
+ * {@code accountService.forgotPassword(request)} and returns the same
+ * fixed response unconditionally, because whether the email exists is a
+ * fact the Service layer already refuses to expose; a controller-level
+ * branch on the outcome would reintroduce the exact leak the Service was
+ * written to avoid, even if the branch only ever executed identical-looking
+ * code on both paths.
  * <p>
  * Deliberately carries no {@code @SecurityRequirement} annotation on any
  * endpoint, authenticated or not. The only scheme {@code OpenApiConfig}
@@ -99,6 +93,7 @@ public class AccountController {
     @Operation(summary = "Get the current user's profile")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile retrieved")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Authenticated user no longer exists")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AccountProfileResponse>> getCurrentUserProfile() {
         return ResponseEntity.ok(ApiResponse.success(accountService.getCurrentUserProfile()));
@@ -109,6 +104,7 @@ public class AccountController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Authenticated user no longer exists")
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/profile")
     public ResponseEntity<ApiResponse<AccountProfileResponse>> updateProfile(
             @Valid @RequestBody UpdateProfileRequest request) {
@@ -123,6 +119,7 @@ public class AccountController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
             description = "Validation failed, current password is incorrect, or the new password matches the current one")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Authenticated user no longer exists")
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         accountService.changePassword(request);
@@ -170,6 +167,7 @@ public class AccountController {
             description = "Sends a fresh verification token to the caller's own email. A no-op if already verified.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Request processed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Authenticated user no longer exists")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/resend-verification")
     public ResponseEntity<ApiResponse<Void>> resendVerification() {
         accountService.resendVerification();
@@ -180,6 +178,7 @@ public class AccountController {
             description = "Restores account access by setting status to ACTIVE. A no-op if already ACTIVE.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User activated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{userId}/activate")
     public ResponseEntity<ApiResponse<Void>> activateUser(
             @Parameter(description = "User identifier", example = "1") @PathVariable Long userId) {
@@ -191,6 +190,7 @@ public class AccountController {
             description = "Sets status to DEACTIVATED and revokes every active session. A no-op if already DEACTIVATED.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User deactivated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{userId}/deactivate")
     public ResponseEntity<ApiResponse<Void>> deactivateUser(
             @Parameter(description = "User identifier", example = "1") @PathVariable Long userId) {

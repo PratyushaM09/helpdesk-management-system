@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,12 @@ import java.net.URI;
  * {@code UserService} would let the same real-world action ("deactivate
  * this user") mean two different things depending which endpoint was
  * called.
+ * <p>
+ * Every endpoint requires {@code ADMIN} — enforced via {@code @PreAuthorize}
+ * on each method (Phase 2, Milestone 5) rather than a
+ * {@code SecurityConfig} URL matcher, which this module used before this
+ * milestone. Same requirement, just declared where the endpoint is defined
+ * instead of in a separate file the reader has to cross-reference.
  */
 @Tag(name = "User")
 @RestController
@@ -60,6 +67,7 @@ public class UserController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User created")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Email already registered")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserResponse created = userService.createUser(request);
@@ -70,6 +78,7 @@ public class UserController {
     @Operation(summary = "Get a user by id")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User found")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUser(
             @Parameter(description = "User identifier", example = "1") @PathVariable Long id) {
@@ -78,6 +87,7 @@ public class UserController {
 
     @Operation(summary = "List users, paginated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Paged user list")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUsers(
             @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable) {
@@ -90,6 +100,7 @@ public class UserController {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Email already registered")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Parameter(description = "User identifier", example = "1") @PathVariable Long id,
@@ -102,6 +113,7 @@ public class UserController {
             description = "Soft delete: sets status to DEACTIVATED, revokes every session. The row is never removed.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User deactivated")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deactivateUser(
             @Parameter(description = "User identifier", example = "1") @PathVariable Long id) {

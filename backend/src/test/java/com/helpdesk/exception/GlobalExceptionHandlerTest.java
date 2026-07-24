@@ -11,6 +11,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -93,6 +94,19 @@ class GlobalExceptionHandlerTest {
         ErrorResponse body = handleAndGetBody(handler.handleApplicationException(ex, request), HttpStatus.FORBIDDEN);
 
         assertEquals("FORBIDDEN", body.errorCode());
+    }
+
+    @Test
+    void shouldMapAuthorizationDeniedException_to403() {
+        // Thrown by @PreAuthorize (Phase 2, Milestone 5) - reaches this
+        // class instead of ExceptionTranslationFilter/RestAccessDeniedHandler
+        // because it originates from inside DispatcherServlet's dispatch.
+        var ex = new AuthorizationDeniedException("Access Denied");
+
+        ErrorResponse body = handleAndGetBody(handler.handleAuthorizationDeniedException(ex, request), HttpStatus.FORBIDDEN);
+
+        assertEquals("FORBIDDEN", body.errorCode());
+        assertEquals("You do not have permission to perform this action.", body.message());
     }
 
     @Test

@@ -9,6 +9,7 @@ import com.helpdesk.security.RestAccessDeniedHandler;
 import com.helpdesk.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -44,14 +45,34 @@ import org.springframework.web.cors.CorsConfigurationSource;
  * running Spring's built-in {@code CsrfFilter} alongside it would be two
  * independent, conflicting CSRF mechanisms.
  * <p>
- * <b>No method security (</b>{@code @EnableMethodSecurity}<b>) yet</b> — no
- * {@code @PreAuthorize} annotation exists anywhere in this codebase yet;
- * ADR-0004's fine-grained, ownership-aware layer is explicitly a later,
- * separate Authorization milestone ({@code ForbiddenException}'s own
- * Javadoc), not silently pulled forward here.
+ * <b>Method security (</b>{@code @EnableMethodSecurity}<b>) enabled</b>
+ * (Phase 2, Milestone 5) — role authorization is now decided at the
+ * Controller-method level via {@code @PreAuthorize}
+ * ({@code UserController}/{@code RoleController}/{@code AccountController}),
+ * not by URL pattern here. This class therefore only distinguishes "public"
+ * from "must be authenticated"; which *role* an authenticated caller needs
+ * is each method's own declared requirement, not a fact this filter chain
+ * tracks.
+ * <p>
+ * The blanket {@code .anyRequest().authenticated()} below is still load-
+ * bearing, not a leftover: it's what still rejects a genuinely
+ * unauthenticated caller with 401 before the request ever reaches a
+ * {@code @PreAuthorize}-guarded method. A {@code @PreAuthorize} denial
+ * itself is a different mechanism entirely from the URL-matcher denials
+ * this class used to produce — it throws
+ * {@code org.springframework.security.authorization.AuthorizationDeniedException}
+ * from *inside* {@code DispatcherServlet}'s dispatch (the method-security
+ * AOP interceptor wraps the controller method call itself), so it never
+ * reaches {@code ExceptionTranslationFilter}/{@link #restAccessDeniedHandler}
+ * the way a request-matcher denial does. {@code GlobalExceptionHandler}
+ * has its own handler for that exact exception type, built to return the
+ * byte-for-byte identical 403 body {@link #restAccessDeniedHandler} would
+ * — so the two mechanisms remain indistinguishable to a client, but they
+ * are genuinely two separate code paths, not one.
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
@@ -64,7 +85,8 @@ public class SecurityConfig {
             // Unauthenticated by necessity (Milestone 4): the caller has no
             // session yet, or is presenting a possessed token instead of one.
             // resend-verification is deliberately NOT here - it stays
-            // authenticated (AccountService design decision).
+            // authenticated (@PreAuthorize("isAuthenticated()") on
+            // AccountController.resendVerification).
             ApiConstants.API_BASE_PATH + "/account/forgot-password",
             ApiConstants.API_BASE_PATH + "/account/reset-password",
             ApiConstants.API_BASE_PATH + "/account/verify-email"
@@ -104,17 +126,6 @@ public class SecurityConfig {
                         .accessDeniedHandler(restAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
-                        // Admin-only account operations (Milestone 4): neither
-                        // /users/** nor /roles/** below covers /account/**, so
-                        // without this, activate/deactivate would fall through
-                        // to the generic "authenticated" rule and be callable
-                        // by any logged-in user, not just an Administrator.
-                        .requestMatchers(
-                                ApiConstants.API_BASE_PATH + "/account/*/activate",
-                                ApiConstants.API_BASE_PATH + "/account/*/deactivate")
-                        .hasRole("ADMIN")
-                        .requestMatchers(ApiConstants.API_BASE_PATH + "/users/**").hasRole("ADMIN")
-                        .requestMatchers(ApiConstants.API_BASE_PATH + "/roles/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(csrfValidationFilter, JwtAuthenticationFilter.class);
