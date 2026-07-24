@@ -14,6 +14,14 @@ import java.util.regex.Pattern;
 public class StrongPasswordValidator implements ConstraintValidator<StrongPassword, String> {
 
     private static final int MIN_LENGTH = 10;
+    // OWASP ASVS 2.1.2-shaped ceiling (Milestone 6 hardening): a raw
+    // password this long has no legitimate strength benefit over one at
+    // the ceiling, and accepting it unbounded is a cheap denial-of-service
+    // vector — BCrypt's own per-hash cost is roughly linear in input
+    // length below its 72-byte truncation point, so a client can force
+    // disproportionate server-side work with an arbitrarily large payload
+    // otherwise.
+    private static final int MAX_LENGTH = 128;
     private static final Pattern UPPERCASE = Pattern.compile("[A-Z]");
     private static final Pattern LOWERCASE = Pattern.compile("[a-z]");
     private static final Pattern DIGIT = Pattern.compile("[0-9]");
@@ -27,6 +35,7 @@ public class StrongPasswordValidator implements ConstraintValidator<StrongPasswo
             return true;
         }
         return value.length() >= MIN_LENGTH
+                && value.length() <= MAX_LENGTH
                 && UPPERCASE.matcher(value).find()
                 && LOWERCASE.matcher(value).find()
                 && DIGIT.matcher(value).find()

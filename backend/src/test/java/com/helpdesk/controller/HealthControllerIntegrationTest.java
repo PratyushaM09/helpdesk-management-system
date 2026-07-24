@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Real embedded server, real unauthenticated HTTP call against the
  * "test" profile's H2 database (per task 6, "actually execute... do not
  * assume success") — proves the whole chain end-to-end:
- * {@link PublicEndpointsSecurityConfig}'s permitted path,
+ * {@code SecurityConfig}'s permitted path,
  * {@link com.helpdesk.service.impl.HealthServiceImpl}'s live database
  * check, and {@link com.helpdesk.common.ApiResponse}'s envelope, all
  * wired together correctly. Uses H2, not the real dev MySQL database, so

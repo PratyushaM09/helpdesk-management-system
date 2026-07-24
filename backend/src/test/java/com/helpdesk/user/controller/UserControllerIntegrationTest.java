@@ -39,12 +39,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * not mocked. {@code @Transactional} rolls back every test method, so each
  * runs against a clean slate without manual cleanup.
  * <p>
- * {@code @WithMockUser(roles = "ADMIN")} (Phase 2, Milestone 3): every
- * {@code /api/v1/users/**} route is now {@code ADMIN}-only
- * ({@code SecurityConfig}). This simulates an authenticated Administrator
- * principal via {@code spring-security-test} without needing a real login
- * flow — {@code AuthenticationController} doesn't exist yet — exactly what
- * that dependency was added for.
+ * {@code @WithMockUser(roles = "ADMIN")}: every {@code UserController}
+ * method requires {@code ADMIN} via its own {@code @PreAuthorize} (Phase 2,
+ * Milestone 5). This simulates an authenticated Administrator principal via
+ * {@code spring-security-test} rather than a real login flow, since these
+ * tests exercise {@code UserController}'s own behavior, not authentication
+ * itself — {@code AuthenticationControllerIntegrationTest} is the class
+ * that authenticates through the real {@code /auth/login} endpoint
+ * end-to-end.
  */
 @SpringBootTest
 @AutoConfigureMockMvc

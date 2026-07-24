@@ -11,6 +11,7 @@ import com.helpdesk.exception.UnauthorizedException;
 import com.helpdesk.security.CookieService;
 import com.helpdesk.security.SecurityConstants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +47,9 @@ public class AuthenticationController {
     }
 
     @Operation(summary = "Log in", description = "Issues access_token, refresh_token, and csrf_token cookies on success.")
+    // See HealthController.health()'s comment on why this is
+    // @SecurityRequirements, not @Operation(security = {}).
+    @SecurityRequirements
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login succeeded")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid email or password")
@@ -59,6 +63,7 @@ public class AuthenticationController {
 
     @Operation(summary = "Refresh the access/refresh token pair",
             description = "Rotates the refresh token presented via cookie (SDR-003); reuse of an already-rotated token revokes its entire session family.")
+    @SecurityRequirements
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tokens refreshed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid, expired, or reused refresh token")
     @PostMapping("/refresh")

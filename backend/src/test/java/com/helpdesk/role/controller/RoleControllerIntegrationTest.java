@@ -30,9 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * test method, so the three roles {@code RoleSeeder} seeds at application
  * startup are the only rows any test ever sees change.
  * <p>
- * {@code @WithMockUser(roles = "ADMIN")} (Phase 2, Milestone 3): every
- * {@code /api/v1/roles/**} route is now {@code ADMIN}-only ({@code SecurityConfig}) —
- * see {@code UserControllerIntegrationTest}'s identical note for why.
+ * {@code @WithMockUser(roles = "ADMIN")}: every {@code RoleController}
+ * method requires {@code ADMIN} via its own {@code @PreAuthorize} (Phase 2,
+ * Milestone 5) — see {@code UserControllerIntegrationTest}'s identical note
+ * for why a simulated principal is used here instead of a real login flow.
  */
 @SpringBootTest
 @AutoConfigureMockMvc

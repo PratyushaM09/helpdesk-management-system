@@ -195,12 +195,13 @@ public class User extends AuditableEntity {
      * Every event that should invalidate all issued access tokens calls it,
      * specifically:
      * <ul>
-     *   <li><b>Password change</b> (deferred to a future milestone) — an
-     *       unexpected password change is itself a signal worth forcing
-     *       re-authentication everywhere (07-Security-Architecture.md §3.6).</li>
-     *   <li><b>Password reset</b> (deferred to a future milestone) — a
-     *       compromised-password scenario must not leave old sessions alive
-     *       anywhere (07-Security-Architecture.md §3.5).</li>
+     *   <li><b>Password change</b> ({@code AccountServiceImpl.changePassword},
+     *       Milestone 4) — an unexpected password change is itself a signal
+     *       worth forcing re-authentication everywhere
+     *       (07-Security-Architecture.md §3.6).</li>
+     *   <li><b>Password reset</b> ({@code AccountServiceImpl.resetPassword},
+     *       Milestone 4) — a compromised-password scenario must not leave
+     *       old sessions alive anywhere (07-Security-Architecture.md §3.5).</li>
      *   <li><b>Forced logout</b> — an explicit "log out this session
      *       everywhere" action, distinct from the single-session revocation
      *       {@code POST /auth/logout} performs.</li>

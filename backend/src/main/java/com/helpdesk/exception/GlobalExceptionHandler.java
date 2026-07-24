@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,8 +29,14 @@ import java.util.List;
  *   <li>{@link ApplicationException} — an expected, already-classified
  *       failure; the exception itself carries the correct HTTP status,
  *       error code, and client-safe message.</li>
- *   <li>{@link AuthorizationDeniedException} (Phase 2, Milestone 5) — a
- *       {@code @PreAuthorize} check on a Controller method denied access.
+ *   <li>{@link AccessDeniedException} (Phase 2, Milestone 5/6) — a
+ *       {@code @PreAuthorize} check on a Controller method denied access,
+ *       almost always its {@link AuthorizationDeniedException} subtype
+ *       specifically. Handled by the superclass, not the subtype, so any
+ *       future method-security annotation that throws a differently-typed
+ *       {@code AccessDeniedException} (e.g. a hypothetical {@code
+ *       @PostAuthorize}/{@code @PreFilter} adoption) is covered by
+ *       construction rather than needing its own handler added later.
  *       Unlike the URL-matcher-based checks {@code SecurityConfig} still
  *       performs for the blanket "must be authenticated" rule, this
  *       exception is thrown from *inside* {@code DispatcherServlet}'s
@@ -38,6 +46,17 @@ import java.util.List;
  *       — this handler is the equivalent for that boundary, built to
  *       return the byte-for-byte identical body so a client can't tell
  *       which layer rejected the request.</li>
+ *   <li>{@link AuthenticationException} (Phase 2, Milestone 6, defensive) —
+ *       no currently-reachable code path throws this from inside
+ *       {@code DispatcherServlet}'s dispatch (anonymous authentication is
+ *       always populated by the filter chain, so a {@code @PreAuthorize}
+ *       SpEL check always has a non-null, if anonymous, principal to
+ *       evaluate against). Handled anyway, at the same tier as {@link
+ *       AccessDeniedException}, for the same reason: a future
+ *       authentication-adjacent check thrown from inside dispatch should
+ *       already have a home here rather than falling through to the
+ *       generic 500 handler the way {@code AuthorizationDeniedException}
+ *       originally did before this milestone.</li>
  *   <li>{@link MethodArgumentNotValidException} / {@link BindException} —
  *       Bean Validation failed on a {@code @Valid}-bound request body or
  *       form/query object. {@code MethodArgumentNotValidException} IS a
@@ -80,12 +99,21 @@ public class GlobalExceptionHandler {
         return buildResponse(ex.getHttpStatus(), ex.getErrorCode(), ex.getMessage(), request);
     }
 
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex, HttpServletRequest request) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
         // Expected, client-caused outcome, same as ApplicationException
         // above - WARN, no stack trace.
-        log.warn("AuthorizationDeniedException [FORBIDDEN]: access denied ({})", request.getRequestURI());
+        log.warn("{} [FORBIDDEN]: access denied ({})", ex.getClass().getSimpleName(), request.getRequestURI());
         return buildResponse(HttpStatus.FORBIDDEN, "FORBIDDEN", ResponseMessages.ACCESS_DENIED, request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+        // Same "expected, client-caused" reasoning as handleAccessDeniedException -
+        // see this class's Javadoc for why no currently-reachable path throws
+        // this specific type here today.
+        log.warn("{} [UNAUTHORIZED]: authentication required ({})", ex.getClass().getSimpleName(), request.getRequestURI());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ResponseMessages.AUTHENTICATION_REQUIRED, request);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})

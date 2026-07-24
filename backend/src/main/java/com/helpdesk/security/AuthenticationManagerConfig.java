@@ -10,14 +10,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Exposes the one {@link AuthenticationManager} bean {@code AuthenticationServiceImpl}
- * needs to verify credentials — carved out narrowly from the still-deferred
- * full {@code SecurityConfig}. No {@code SecurityFilterChain}, no route
- * rules, no filters, no entry point/access-denied handler live here; those
- * land in a later step.
+ * needs to verify credentials — carved out narrowly from
+ * {@code SecurityConfig}'s own bean set. No {@code SecurityFilterChain}, no
+ * route rules, no filters, no entry point/access-denied handler live here;
+ * those are {@code SecurityConfig}'s.
  * <p>
- * Necessary, not optional: {@code PublicEndpointsSecurityConfig} (Phase 2
- * Milestone 1) already defines its own {@code SecurityFilterChain} beans,
- * which — per that class's own Javadoc — makes Spring Boot's
+ * Necessary, not optional: {@code SecurityConfig} defines the application's
+ * one {@code SecurityFilterChain} bean, which makes Spring Boot's
  * {@code @ConditionalOnDefaultWebSecurity} auto-configuration (the thing
  * that would otherwise wire an {@code AuthenticationManager} for free) back
  * off entirely. Without this class, {@code AuthenticationServiceImpl}

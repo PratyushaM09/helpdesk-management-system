@@ -3,12 +3,15 @@ package com.helpdesk.exception;
 import org.springframework.http.HttpStatus;
 
 /**
- * Placeholder for the future Authentication milestone
- * (07-Security-Architecture.md §3, ADR-0003). Not thrown anywhere in this
- * codebase yet — no authentication mechanism exists. Included now so the
- * exception hierarchy and {@link GlobalExceptionHandler} are already
- * complete and require no changes when JWT authentication is introduced;
- * only the code that verifies credentials needs to start throwing it.
+ * An unauthenticated or invalid-credential outcome the Service layer itself
+ * detects (07-Security-Architecture.md §3, ADR-0003) — invalid email/
+ * password at login, or a missing/invalid/expired/reused refresh token
+ * (thrown by {@code AuthenticationServiceImpl}/{@code AuthenticationController}).
+ * Distinct from an unauthenticated request to an already-protected route,
+ * which never reaches application code at all: that's rejected by
+ * {@code RestAuthenticationEntryPoint} inside the security filter chain,
+ * using the same {@link ErrorResponse} shape this exception produces via
+ * {@link GlobalExceptionHandler}.
  */
 public class UnauthorizedException extends ApplicationException {
 

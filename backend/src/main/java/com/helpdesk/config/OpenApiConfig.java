@@ -1,11 +1,13 @@
 package com.helpdesk.config;
 
 import com.helpdesk.constant.ApiConstants;
+import com.helpdesk.security.SecurityConstants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -21,17 +23,24 @@ import java.util.List;
  * here — Springdoc discovers annotated request mappings automatically at
  * startup; this class only supplies the document-level metadata (title,
  * contact, servers, ...) and the reusable building blocks (the {@code v1}
- * group, the bearer auth scheme) future controllers opt into.
+ * group, the cookie auth scheme) future controllers opt into.
  */
 @Configuration
 @EnableConfigurationProperties(OpenApiProperties.class)
 public class OpenApiConfig {
 
     /**
-     * Name future {@code @SecurityRequirement(name = BEARER_AUTH_SCHEME)}
-     * annotations reference once JWT authentication exists (task 4).
+     * Name every generated operation's security requirement references,
+     * directly or by inheriting the document-level default this class
+     * applies below. This describes the application's actual
+     * authentication mechanism (Phase 2, Milestone 6) — an HttpOnly,
+     * Secure {@code access_token} cookie issued by {@code POST /auth/login}
+     * and read by {@code JwtAuthenticationFilter} — replacing an earlier,
+     * unused {@code bearerAuth} scheme that documented a classic
+     * {@code Authorization: Bearer} header this application has never
+     * actually accepted.
      */
-    public static final String BEARER_AUTH_SCHEME_NAME = "bearerAuth";
+    public static final String COOKIE_AUTH_SCHEME_NAME = "cookieAuth";
 
     @Bean
     public OpenAPI customOpenAPI(OpenApiProperties properties) {
@@ -39,8 +48,17 @@ public class OpenApiConfig {
                 .info(buildInfo(properties))
                 .servers(List.of(buildServer(properties.server())))
                 .components(new Components()
-                        .addSecuritySchemes(BEARER_AUTH_SCHEME_NAME, buildBearerAuthScheme()));
-        // Deliberately no .addSecurityItem(...) here - see buildBearerAuthScheme() Javadoc.
+                        .addSecuritySchemes(COOKIE_AUTH_SCHEME_NAME, buildCookieAuthScheme()))
+                // A document-level default, not a per-operation opt-in
+                // (Phase 2, Milestone 6): most operations require
+                // authentication, so every operation inherits this
+                // requirement unless it explicitly opts out with
+                // @Operation(security = {}) - the handful of genuinely
+                // public endpoints (health, login, refresh,
+                // forgot/reset-password, verify-email). A new authenticated
+                // endpoint therefore documents itself correctly with zero
+                // extra annotation; only a new *public* one needs one.
+                .addSecurityItem(new SecurityRequirement().addList(COOKIE_AUTH_SCHEME_NAME));
     }
 
     /**
@@ -89,24 +107,27 @@ public class OpenApiConfig {
     }
 
     /**
-     * Task 4: prepares — does not implement — JWT Bearer authentication.
-     * Registering the scheme makes Swagger UI's "Authorize" button appear
-     * and lets a future controller declare
-     * {@code @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH_SCHEME_NAME)}
-     * on its own operations with no change here. A global
-     * {@code OpenAPI.addSecurityItem(...)} is deliberately NOT added: that
-     * would mark every current and future operation as requiring auth by
-     * default, which is a real authentication-shaped decision this
-     * milestone is explicitly not authorized to make
-     * (07-Security-Architecture.md §3 owns that decision). Defining the
-     * scheme is additive infrastructure; applying it globally is not.
+     * {@code apiKey}/{@code cookie} is the correct OpenAPI 3 shape for
+     * "the value is a bearer credential, but transported as a cookie
+     * rather than a header" — there is no dedicated {@code SecurityScheme.Type}
+     * for JWT-in-cookie specifically, so {@code APIKEY}+{@code COOKIE} (naming
+     * the actual cookie) plus a description spelling out that the value is
+     * a JWT is the accurate representation, matching how
+     * {@code JwtAuthenticationFilter} actually reads the credential.
+     * Swagger UI's "Authorize" button lets a caller paste a raw JWT value
+     * here for its own "Try it out" requests, but cannot itself perform a
+     * real login — the caller still needs to authenticate via
+     * {@code POST /auth/login} in a real browser/client first and copy the
+     * resulting cookie value, same limitation any cookie-based scheme has
+     * in Swagger UI.
      */
-    private SecurityScheme buildBearerAuthScheme() {
+    private SecurityScheme buildCookieAuthScheme() {
         return new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-                .description("JWT Bearer token, once authentication is implemented (07-Security-Architecture.md §3). "
-                        + "Not enforced on any operation yet.");
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.COOKIE)
+                .name(SecurityConstants.ACCESS_TOKEN_COOKIE)
+                .description("JWT access token, issued as an HttpOnly, Secure cookie by POST " + ApiConstants.API_BASE_PATH
+                        + "/auth/login (07-Security-Architecture.md §3/§5.8). Not a header credential: this "
+                        + "application never accepts an Authorization: Bearer header.");
     }
 }

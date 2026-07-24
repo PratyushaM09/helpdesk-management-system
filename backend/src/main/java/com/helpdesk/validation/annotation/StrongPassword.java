@@ -12,9 +12,12 @@ import java.lang.annotation.Target;
 
 /**
  * Enforces the password strength policy already fixed in
- * 07-Security-Architecture.md §6 / SDR-001: minimum 10 characters, at
+ * 07-Security-Architecture.md §6 / SDR-001: 10-128 characters, at
  * least one uppercase letter, one lowercase letter, one digit, and one
- * symbol. This is the one concrete constraint that policy names
+ * symbol. (The 128-character ceiling is a Milestone 6 addition — see
+ * {@link com.helpdesk.validation.validator.StrongPasswordValidator}'s own
+ * Javadoc for why an unbounded maximum is itself a weakness.) This is the
+ * one concrete constraint that policy names
  * ("07-Security-Architecture.md §3.1: enforced by a custom @StrongPassword
  * Bean Validation constraint") — implemented now, under that exact name,
  * as this milestone's demonstration custom validator rather than inventing

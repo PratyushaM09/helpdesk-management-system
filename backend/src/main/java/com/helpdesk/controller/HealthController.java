@@ -5,6 +5,7 @@ import com.helpdesk.constant.ApiConstants;
 import com.helpdesk.dto.response.HealthResponse;
 import com.helpdesk.service.HealthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
  * operational status check — "is the application up, and can it reach its
  * database" — for local verification, load balancers, and manual
  * diagnosis. It is intentionally not a business endpoint and carries no
- * authentication requirement (permitted unauthenticated in
- * {@code PublicEndpointsSecurityConfig}, alongside the Swagger/OpenAPI
- * docs paths) — the same reasoning Kubernetes liveness/readiness probes
- * and Spring Boot Actuator's own {@code /actuator/health} are built on.
+ * authentication requirement (listed in {@code SecurityConfig}'s
+ * {@code PUBLIC_PATHS}, alongside the Swagger/OpenAPI docs paths) — the
+ * same reasoning Kubernetes liveness/readiness probes and Spring Boot
+ * Actuator's own {@code /actuator/health} are built on.
  * <p>
  * Expected response (200, database reachable):
  * <pre>{@code
@@ -65,6 +66,13 @@ public class HealthController {
                     + "version, and database connectivity. Never exposes connection strings, credentials, or "
                     + "other configuration detail."
     )
+    // Overrides OpenApiConfig's document-level default security requirement
+    // for this public endpoint (Phase 2, Milestone 6). Deliberately
+    // @SecurityRequirements (empty), not @Operation(security = {}): the
+    // latter's attribute default is also {}, so swagger-core can't tell
+    // "explicitly cleared" from "left unset" and silently ignores it,
+    // leaving the operation incorrectly documented as requiring auth.
+    @SecurityRequirements
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Application and database are both reachable")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "503", description = "Application is running but the database is not reachable")
     @GetMapping

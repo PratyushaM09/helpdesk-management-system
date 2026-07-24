@@ -12,6 +12,7 @@ import com.helpdesk.constant.ApiConstants;
 import com.helpdesk.constant.ResponseMessages;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -63,21 +64,17 @@ import org.springframework.web.bind.annotation.RestController;
  * written to avoid, even if the branch only ever executed identical-looking
  * code on both paths.
  * <p>
- * Deliberately carries no {@code @SecurityRequirement} annotation on any
- * endpoint, authenticated or not. The only scheme {@code OpenApiConfig}
- * currently defines ({@code bearerAuth}) documents a classic
- * {@code Authorization: Bearer} header, but this application actually
- * authenticates via an HttpOnly access-token cookie
- * ({@code JwtAuthenticationFilter}) — applying that scheme would make the
- * generated Swagger doc actively wrong, not just incomplete. No controller
- * in this codebase uses {@code @SecurityRequirement} yet for the same
- * reason.
- * <p>
- * TODO(Milestone 6 — Security Hardening): define a cookie-based OpenAPI
- * security scheme that accurately models this application's actual
- * authentication mechanism, then apply {@code @SecurityRequirement} to
- * {@code /me}, {@code /profile}, and {@code /password} (never to the three
- * public endpoints below).
+ * OpenAPI security (Phase 2, Milestone 6): {@code OpenApiConfig} applies
+ * {@code cookieAuth} — a scheme that accurately models this application's
+ * actual HttpOnly-cookie authentication — as a document-level default, so
+ * {@code /me}, {@code /profile}, {@code /password}, {@code
+ * /resend-verification}, {@code activate}, and {@code deactivate} document
+ * themselves as requiring authentication with no annotation of their own.
+ * {@code forgotPassword}/{@code resetPassword}/{@code verifyEmail} are the
+ * ones that need an explicit {@code @SecurityRequirements} (empty) to opt
+ * back out, matching their public {@code SecurityConfig} status —
+ * deliberately not {@code @Operation(security = {})}, which swagger-core
+ * can't distinguish from the attribute simply being left unset.
  */
 @Tag(name = "Account")
 @RestController
@@ -129,6 +126,9 @@ public class AccountController {
     @Operation(summary = "Request a password reset",
             description = "Always returns the same response, whether or not the email belongs to an account - "
                     + "that fact is never revealed. If it does, a single-use, time-limited reset link is sent.")
+    // See HealthController.health()'s comment on why this is
+    // @SecurityRequirements, not @Operation(security = {}).
+    @SecurityRequirements
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Request accepted")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @PostMapping("/forgot-password")
@@ -140,6 +140,7 @@ public class AccountController {
 
     @Operation(summary = "Redeem a password reset token",
             description = "No new session is issued - the account is logged out of every device and must authenticate again.")
+    @SecurityRequirements
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password reset")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
             description = "Validation failed, or the new password matches the current one")
@@ -153,6 +154,7 @@ public class AccountController {
 
     @Operation(summary = "Redeem an email verification token",
             description = "Idempotent: redeeming a token for an already-verified account is not an error.")
+    @SecurityRequirements
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Email verified")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",

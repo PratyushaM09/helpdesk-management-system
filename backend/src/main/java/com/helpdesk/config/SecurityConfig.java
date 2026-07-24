@@ -9,6 +9,7 @@ import com.helpdesk.security.RestAccessDeniedHandler;
 import com.helpdesk.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,7 +17,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.time.Duration;
 
 /**
  * The real, JWT-based {@code SecurityFilterChain} (07-Security-Architecture.md
@@ -69,11 +74,61 @@ import org.springframework.web.cors.CorsConfigurationSource;
  * byte-for-byte identical 403 body {@link #restAccessDeniedHandler} would
  * — so the two mechanisms remain indistinguishable to a client, but they
  * are genuinely two separate code paths, not one.
+ * <p>
+ * <b>Security headers</b> (Phase 2, Milestone 6): {@code X-Content-Type-Options},
+ * {@code X-Frame-Options: DENY}, {@code Referrer-Policy},
+ * {@code Permissions-Policy}, {@code Content-Security-Policy}, and
+ * {@code Strict-Transport-Security} are all configured explicitly below
+ * rather than left to Spring Security's (partial, version-dependent)
+ * defaults — production-quality intent should be visible in code, not
+ * inferred from what a framework happens to default to. The CSP is
+ * deliberately permissive enough for Springdoc's bundled Swagger UI to
+ * keep working (see {@link #CONTENT_SECURITY_POLICY}'s own Javadoc); HSTS
+ * is safe to configure unconditionally because its header writer only
+ * ever emits the header on an already-HTTPS request.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    /** 1 year — a conventional, widely-used HSTS max-age (e.g. the value the HSTS preload list requires). */
+    private static final long HSTS_MAX_AGE_SECONDS = Duration.ofDays(365).toSeconds();
+
+    /**
+     * A REST API serves no HTML of its own, so {@code default-src 'self'}
+     * is safe everywhere except the one page this filter chain also
+     * serves: Springdoc's bundled Swagger UI, whose stock
+     * {@code swagger-ui.html} relies on an inline initializer
+     * {@code <script>} and inline {@code <style>} — hence
+     * {@code 'unsafe-inline'} on {@code script-src}/{@code style-src}
+     * rather than a stricter nonce-based policy (which would require
+     * customizing Springdoc's template, out of scope for this milestone).
+     * {@code frame-ancestors 'none'} is the CSP-level equivalent of
+     * {@code X-Frame-Options: DENY} below — kept as a explicit belt-and-
+     * braces pair since browser support for the two headers doesn't fully
+     * overlap.
+     */
+    private static final String CONTENT_SECURITY_POLICY =
+            "default-src 'self'; "
+                    + "script-src 'self' 'unsafe-inline'; "
+                    + "style-src 'self' 'unsafe-inline'; "
+                    + "img-src 'self' data:; "
+                    + "font-src 'self' data:; "
+                    + "connect-src 'self'; "
+                    + "frame-ancestors 'none'";
+
+    /**
+     * No {@code HeadersConfigurer.permissionsPolicy(...)} DSL method exists
+     * usably here — it was deprecated for removal in Spring Security 6.4,
+     * the version this project is already on, and its replacement doesn't
+     * chain back to {@code HeadersConfigurer} the way every other header
+     * customizer does. {@code addHeaderWriter(new StaticHeadersWriter(...))}
+     * is the stable, general-purpose escape hatch for exactly this case —
+     * a header Spring Security's typed DSL doesn't (yet, cleanly) cover.
+     */
+    private static final StaticHeadersWriter PERMISSIONS_POLICY_HEADER_WRITER = new StaticHeadersWriter(
+            "Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=()");
 
     private static final String[] PUBLIC_PATHS = {
             "/v3/api-docs/**",
@@ -127,6 +182,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
                         .anyRequest().authenticated())
+                .headers(headers -> headers
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .frameOptions(frameOptions -> frameOptions.deny())
+                        .referrerPolicy(referrer -> referrer
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .addHeaderWriter(PERMISSIONS_POLICY_HEADER_WRITER)
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY))
+                        // HttpStrictTransportSecurityHeaderWriter only ever writes this
+                        // header on an already-HTTPS request (checks request.isSecure()
+                        // internally) - configuring it here is safe under plain HTTP
+                        // local/dev traffic; it simply never emits the header there.
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(HSTS_MAX_AGE_SECONDS)))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(csrfValidationFilter, JwtAuthenticationFilter.class);
 
