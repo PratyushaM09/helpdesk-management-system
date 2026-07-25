@@ -656,3 +656,200 @@ a.btn--ghost:hover {
 .empty-state--card .empty-state__description {
   margin-bottom: var(--space-2);
 }
+
+/* ================= Page header ================= */
+/* Title + actions bar reused at the top of every authenticated page's
+   main content, not just the dashboard. */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.page-header__title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-1);
+}
+
+.page-header__subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    flex-direction: column;
+  }
+}
+
+/* ================= Stat card ================= */
+.stat-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5) var(--space-6);
+}
+
+.stat-card__icon {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+}
+
+.stat-card__icon--brand {
+  background-color: var(--color-brand-100);
+  color: var(--color-brand-800);
+}
+
+.stat-card__icon--signal {
+  background-color: var(--color-signal-100);
+  color: var(--color-signal-700);
+}
+
+.stat-card__icon--success {
+  background-color: var(--color-success-100);
+  color: var(--color-success-700);
+}
+
+.stat-card__icon--info {
+  background-color: var(--color-info-100);
+  color: var(--color-info-600);
+}
+
+.stat-card__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.stat-card__value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+/* ================= Avatar ================= */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-brand-100);
+  color: var(--color-brand-800);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.avatar--sm {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: var(--font-size-xs);
+}
+
+/* ================= Dropdown menu ================= */
+/* Generic popup menu — position it by giving its parent `position:
+   relative` (the topbar's user menu does this in shell.css); reused by
+   any future row/context menu, not just the topbar. */
+.dropdown-menu {
+  position: absolute;
+  min-width: 13rem;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2);
+  z-index: var(--z-dropdown);
+}
+
+.dropdown-menu[hidden] {
+  display: none;
+}
+
+.dropdown-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background-color var(--transition-fast) var(--ease-standard);
+}
+
+.dropdown-menu__item:hover,
+.dropdown-menu__item:focus-visible {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.dropdown-menu__divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-2) 0;
+}
+
+/* ================= Activity list ================= */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.activity-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.activity-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.activity-item__text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.activity-item__time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}

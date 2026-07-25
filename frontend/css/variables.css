@@ -152,6 +152,11 @@
   --z-toast: 1400;
   --z-tooltip: 1500;
 
+  /* ---------- App shell (sidebar + topbar) ---------- */
+  --sidebar-width: 16.25rem;      /* 260px, desktop */
+  --sidebar-width-collapsed: 4.5rem; /* 72px, icon-only tablet rail */
+  --topbar-height: 4rem;          /* 64px */
+
   /* ---------- Container widths ---------- */
   --container-sm: 640px;
   --container-md: 768px;

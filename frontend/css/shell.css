@@ -1,0 +1,360 @@
+/* Visual skin for the reusable authenticated app shell (sidebar + topbar).
+   Loaded by every authenticated page (dashboard.html now; tickets/profile/
+   admin pages later) — the structural grid these sit inside lives in
+   layout.css's .app-shell rules, kept separate the same way auth.css only
+   ever adds visual treatment on top of layout.css's primitives. */
+
+/* ---------- Skip link ---------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background-color: var(--color-brand-700);
+  color: var(--color-neutral-0);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  z-index: var(--z-tooltip);
+}
+
+.skip-link:focus {
+  left: var(--space-4);
+  top: var(--space-4);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-neutral-950);
+  border-right: 1px solid rgba(247, 249, 249, 0.08);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  height: var(--topbar-height);
+  padding-inline: var(--space-5);
+  border-bottom: 1px solid rgba(247, 249, 249, 0.08);
+  color: var(--color-neutral-0);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sidebar__brand i {
+  color: var(--color-signal-400);
+  font-size: var(--font-size-xl);
+}
+
+.sidebar__nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+.sidebar__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-neutral-300);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast) var(--ease-standard),
+    color var(--transition-fast) var(--ease-standard);
+}
+
+.sidebar__link i {
+  flex-shrink: 0;
+  width: 1.25rem;
+  font-size: var(--font-size-base);
+  text-align: center;
+  color: var(--color-neutral-400);
+  transition: color var(--transition-fast) var(--ease-standard);
+}
+
+.sidebar__link:hover {
+  background-color: rgba(247, 249, 249, 0.08);
+  color: var(--color-neutral-0);
+}
+
+.sidebar__link:hover i {
+  color: var(--color-neutral-0);
+}
+
+.sidebar__link.is-active {
+  background-color: var(--color-brand-700);
+  color: var(--color-neutral-0);
+}
+
+.sidebar__link.is-active i {
+  color: var(--color-signal-400);
+}
+
+.sidebar__link.is-active:hover {
+  background-color: var(--color-brand-700);
+  color: var(--color-neutral-0);
+}
+
+/* Anchors styled as sidebar links need the same hover/underline guard as
+   a.btn in components.css — base.css's global `a:hover` otherwise wins. */
+a.sidebar__link,
+a.sidebar__link:hover,
+a.sidebar__link:focus {
+  text-decoration: none;
+}
+
+.sidebar__divider {
+  height: 1px;
+  margin: var(--space-4);
+  background-color: rgba(247, 249, 249, 0.08);
+}
+
+.sidebar__section-label {
+  padding-inline: var(--space-4);
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-neutral-500);
+}
+
+.sidebar__footer {
+  flex-shrink: 0;
+  padding: var(--space-3);
+  border-top: 1px solid rgba(247, 249, 249, 0.08);
+}
+
+/* Tablet: permanent icon-only rail (see layout.css's matching grid-column
+   change at the same breakpoint) — no toggle, every item stays reachable. */
+@media (max-width: 1024px) {
+  .sidebar__brand-text,
+  .sidebar__link span,
+  .sidebar__section-label {
+    display: none;
+  }
+
+  .sidebar__link {
+    justify-content: center;
+  }
+
+  .sidebar__divider {
+    margin-inline: var(--space-2);
+  }
+}
+
+/* Mobile: the sidebar is off-canvas (layout.css), so when shell.js opens
+   it, it's a full-width drawer again — restore labels. */
+@media (max-width: 768px) {
+  .sidebar__brand-text,
+  .sidebar__link span,
+  .sidebar__section-label {
+    display: inline;
+  }
+
+  .sidebar__link {
+    justify-content: flex-start;
+  }
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--topbar-height);
+  padding-inline: var(--space-6);
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topbar__menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+}
+
+.topbar__menu-toggle:hover {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+  .topbar__menu-toggle {
+    display: inline-flex;
+  }
+}
+
+.topbar__title {
+  flex-shrink: 0;
+  margin-right: var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.topbar__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  max-width: 28rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-sunken);
+  transition: background-color var(--transition-fast) var(--ease-standard),
+    border-color var(--transition-fast) var(--ease-standard),
+    box-shadow var(--transition-fast) var(--ease-standard);
+}
+
+.topbar__search i {
+  color: var(--color-text-muted);
+}
+
+.topbar__search-input {
+  width: 100%;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.topbar__search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Search focus animation — a single, purposeful nudge (background lifts to
+   the page surface, border/shadow pick up the brand color) rather than a
+   decorative effect; shell.js toggles this class on focusin/focusout. */
+.topbar__search.is-focused {
+  background-color: var(--color-bg-surface);
+  border-color: var(--color-brand-500);
+  box-shadow: var(--shadow-focus);
+}
+
+@media (max-width: 768px) {
+  .topbar__search {
+    display: none;
+  }
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.topbar__icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+}
+
+.topbar__icon-btn:hover {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-primary);
+}
+
+.topbar__badge {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border: 2px solid var(--color-bg-surface);
+  border-radius: var(--radius-full);
+  background-color: var(--color-signal-500);
+  color: var(--color-neutral-0);
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.topbar__user {
+  position: relative;
+}
+
+.topbar__user-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+}
+
+.topbar__user-trigger:hover {
+  background-color: var(--color-bg-sunken);
+}
+
+.topbar__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+}
+
+.topbar__user-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.topbar__user-trigger .bi-chevron-down {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast) var(--ease-standard);
+}
+
+.topbar__user-trigger[aria-expanded="true"] .bi-chevron-down {
+  transform: rotate(180deg);
+}
+
+.topbar__user .dropdown-menu {
+  top: calc(100% + var(--space-2));
+  right: 0;
+}
+
+@media (max-width: 768px) {
+  .topbar__user-info {
+    display: none;
+  }
+}
