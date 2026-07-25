@@ -170,6 +170,21 @@ export function getCookie(name) {
 }
 
 /**
+ * Wires every element carrying a `data-placeholder-action` attribute to
+ * show that exact string as an info toast on click — the one mechanism
+ * behind every "not wired to the backend yet" button across the app
+ * (logout, notifications, edit ticket, download/delete attachment, ...),
+ * so each page only has to declare the message, not a handler.
+ */
+export function bindPlaceholderActions() {
+  document.querySelectorAll("[data-placeholder-action]").forEach((element) => {
+    element.addEventListener("click", () => {
+      showToast(element.dataset.placeholderAction || "This isn't connected to the backend yet.", "info");
+    });
+  });
+}
+
+/**
  * Sets or clears a field-level validation error: toggles the input's
  * `aria-invalid`, and shows/hides the associated error element (expected to
  * already be wired via that input's `aria-describedby`).

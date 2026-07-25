@@ -145,38 +145,6 @@
   color: var(--color-text-secondary);
 }
 
-.input-affix {
-  position: relative;
-}
-
-.input-affix .form-control {
-  padding-left: var(--space-10);
-}
-
-.input-affix__icon {
-  position: absolute;
-  left: var(--space-3);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-muted);
-  pointer-events: none;
-}
-
-.input-affix__toggle {
-  position: absolute;
-  right: var(--space-1);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-muted);
-  padding: var(--space-2);
-  border-radius: var(--radius-sm);
-}
-
-.input-affix__toggle:hover {
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-sunken);
-}
-
 @keyframes auth-rise {
   from {
     opacity: 0;

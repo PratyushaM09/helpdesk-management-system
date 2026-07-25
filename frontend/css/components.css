@@ -202,6 +202,11 @@ a.btn--ghost:hover {
     box-shadow var(--transition-fast) var(--ease-standard);
 }
 
+textarea.form-control {
+  min-height: 6rem;
+  resize: vertical;
+}
+
 .form-control::placeholder {
   color: var(--color-text-muted);
 }
@@ -247,6 +252,41 @@ a.btn--ghost:hover {
 .form-check label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+/* ================= Input affix (icon and/or trailing toggle) ================= */
+/* Originally auth-only; moved here once the tickets search box needed it
+   too — a plain input decoration, not something specific to auth forms. */
+.input-affix {
+  position: relative;
+}
+
+.input-affix .form-control {
+  padding-left: var(--space-10);
+}
+
+.input-affix__icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.input-affix__toggle {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.input-affix__toggle:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-sunken);
 }
 
 /* ================= Password strength & requirements ================= */
@@ -380,6 +420,233 @@ a.btn--ghost:hover {
   background-color: var(--color-bg-sunken);
 }
 
+.table--clickable tbody tr {
+  cursor: pointer;
+}
+
+/* Responsive: below 768px each row becomes its own stacked card and every
+   cell grows a label (from its header's text, via a data attribute) —
+   the standard "responsive table" pattern for data that doesn't fit a
+   narrow viewport as columns. Opt-in per table with .table--stack. */
+@media (max-width: 768px) {
+  .table--stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .table--stack,
+  .table--stack tbody,
+  .table--stack tr,
+  .table--stack td {
+    display: block;
+    width: 100%;
+  }
+
+  .table--stack tr {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table--stack td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+    border-top: none;
+    text-align: right;
+  }
+
+  .table--stack td[data-label]::before {
+    content: attr(data-label);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: left;
+  }
+}
+
+/* ================= Filter bar ================= */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.filter-bar__search {
+  flex: 1 1 16rem;
+  max-width: 24rem;
+}
+
+/* ================= Filter dropdown ================= */
+/* A single-select dropdown filter (Status/Priority/Category/Sort) — the
+   open/close/outside-click/Escape mechanics come from core/dropdown.js,
+   shared with the topbar user menu; this is only the visual trigger and
+   the "which option is selected" indicator. */
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-dropdown__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.filter-dropdown__trigger:hover {
+  background-color: var(--color-bg-sunken);
+}
+
+.filter-dropdown__trigger i {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast) var(--ease-standard);
+}
+
+.filter-dropdown__trigger[aria-expanded="true"] i {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown .dropdown-menu {
+  top: calc(100% + var(--space-2));
+  left: 0;
+  min-width: max(100%, 13rem);
+}
+
+.dropdown-menu__item .bi-check2 {
+  margin-left: auto;
+  visibility: hidden;
+  color: var(--color-brand-600);
+}
+
+.dropdown-menu__item.is-selected {
+  color: var(--color-brand-700);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dropdown-menu__item.is-selected .bi-check2 {
+  visibility: visible;
+}
+
+/* ================= Pagination ================= */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+}
+
+.pagination__summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-surface);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pagination__button:hover:not(:disabled) {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-primary);
+}
+
+.pagination__button.is-active {
+  background-color: var(--color-brand-600);
+  border-color: var(--color-brand-600);
+  color: var(--color-text-on-brand);
+}
+
+.pagination__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ================= Loading skeleton ================= */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-sunken) 25%,
+    var(--color-neutral-200) 37%,
+    var(--color-bg-sunken) 63%
+  );
+  background-size: 400% 100%;
+  border-radius: var(--radius-sm);
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.skeleton-table__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.skeleton-table__row:first-child {
+  border-top: none;
+}
+
+.skeleton-table__cell {
+  height: 1rem;
+}
+
+.skeleton-table__cell--sm {
+  width: 4.5rem;
+}
+
+.skeleton-table__cell--md {
+  width: 8rem;
+}
+
+.skeleton-table__cell--lg {
+  width: 13rem;
+}
+
+.skeleton-table__cell--fill {
+  flex: 1 1 auto;
+}
+
 /* ================= Badges ================= */
 .badge {
   display: inline-flex;
@@ -421,6 +688,14 @@ a.btn--ghost:hover {
 .badge--info {
   background-color: var(--color-info-100);
   color: var(--color-info-600);
+}
+
+/* Solid-fill, one severity step above .badge--danger — reserved for
+   Priority: Urgent, so it reads as more alarming than High at a glance
+   without introducing a new hue. */
+.badge--urgent {
+  background-color: var(--color-danger-600);
+  color: var(--color-text-on-brand);
 }
 
 /* ================= Alerts ================= */
@@ -852,4 +1127,415 @@ a.btn--ghost:hover {
 .activity-item__time {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
+}
+
+/* ================= Timeline ================= */
+/* Two uses on ticket-details.html: a compact status-milestone strip and a
+   detailed change-history log — same component, different item counts. */
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline__item {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.timeline__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.timeline__marker {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-neutral-0);
+  box-shadow: 0 0 0 2px var(--color-border-strong);
+}
+
+.timeline__item.is-complete .timeline__marker {
+  box-shadow: 0 0 0 2px var(--color-brand-600);
+  background-color: var(--color-brand-600);
+}
+
+.timeline__item.is-current .timeline__marker {
+  box-shadow: 0 0 0 2px var(--color-signal-400);
+  background-color: var(--color-signal-400);
+}
+
+.timeline__line {
+  flex: 1 1 auto;
+  width: 2px;
+  min-height: var(--space-4);
+  margin-top: var(--space-1);
+  background-color: var(--color-border);
+}
+
+.timeline__item:last-child .timeline__line {
+  display: none;
+}
+
+.timeline__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-bottom: var(--space-6);
+}
+
+.timeline__item:last-child .timeline__content {
+  padding-bottom: 0;
+}
+
+.timeline__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.timeline__item:not(.is-complete):not(.is-current) .timeline__title {
+  color: var(--color-text-muted);
+}
+
+.timeline__meta {
+  margin-top: 0.125rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ================= Comment ================= */
+.comment {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comment:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.comment__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.comment__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.comment__author {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.comment__time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.comment__collapse {
+  margin-left: auto;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+}
+
+.comment__collapse:hover {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-primary);
+}
+
+.comment__collapse i {
+  transition: transform var(--transition-fast) var(--ease-standard);
+}
+
+.comment__collapse[aria-expanded="false"] i {
+  transform: rotate(-90deg);
+}
+
+.comment__body {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+}
+
+.comment__preview {
+  display: none;
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comment.is-collapsed .comment__body {
+  display: none;
+}
+
+.comment.is-collapsed .comment__preview {
+  display: block;
+}
+
+/* Internal notes get a distinct tinted box, not just a color swap on the
+   same layout — staff scanning a thread should never mistake one for the
+   other. The "Internal" badge in the header carries the same meaning in
+   text, so it doesn't rely on color alone. */
+.comment--internal {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-signal-200);
+  border-radius: var(--radius-md);
+  background-color: var(--color-signal-50);
+}
+
+.comment--internal:last-child {
+  margin-bottom: 0;
+}
+
+/* ================= Comment editor ================= */
+.comment-editor {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.comment-editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+/* ================= Segmented control ================= */
+.segmented-control {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-sunken);
+}
+
+.segmented-control__option {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.segmented-control__option.is-active {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ================= Choice chip group ================= */
+/* Generic single-select chip group. Priority coloring is opt-in via
+   [data-priority] so the base component stays reusable for any future
+   small enumerated choice (it isn't priority-specific itself). */
+.choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.choice-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-surface);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-fast) var(--ease-standard),
+    color var(--transition-fast) var(--ease-standard),
+    border-color var(--transition-fast) var(--ease-standard);
+}
+
+.choice-chip:hover {
+  background-color: var(--color-bg-sunken);
+}
+
+.choice-chip.is-selected {
+  background-color: var(--color-brand-600);
+  border-color: var(--color-brand-600);
+  color: var(--color-text-on-brand);
+}
+
+.choice-chip[data-priority="LOW"].is-selected {
+  background-color: var(--color-neutral-600);
+  border-color: var(--color-neutral-600);
+}
+
+.choice-chip[data-priority="MEDIUM"].is-selected {
+  background-color: var(--color-signal-500);
+  border-color: var(--color-signal-500);
+}
+
+.choice-chip[data-priority="HIGH"].is-selected {
+  background-color: var(--color-danger-600);
+  border-color: var(--color-danger-600);
+}
+
+.choice-chip[data-priority="URGENT"].is-selected {
+  background-color: var(--color-danger-700);
+  border-color: var(--color-danger-700);
+}
+
+/* ================= Attachment row ================= */
+.attachment-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.attachment-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.attachment-row__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+}
+
+.attachment-row__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.attachment-row__name {
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-row__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.attachment-row__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.attachment-row__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+}
+
+.attachment-row__action:hover {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-primary);
+}
+
+.attachment-row__action--danger:hover {
+  color: var(--color-danger-600);
+}
+
+.attachment-row--pending {
+  opacity: 0.85;
+}
+
+.attachment-row--pending .attachment-row__icon {
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-600);
+}
+
+/* ================= Upload area ================= */
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-6);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  text-align: center;
+  transition: border-color var(--transition-fast) var(--ease-standard),
+    background-color var(--transition-fast) var(--ease-standard);
+}
+
+.upload-area i {
+  font-size: var(--font-size-3xl);
+  color: var(--color-text-muted);
+}
+
+.upload-area strong {
+  color: var(--color-text-primary);
+}
+
+.upload-area.is-dragover {
+  border-color: var(--color-brand-500);
+  background-color: var(--color-brand-50);
+}
+
+/* ================= Meta list ================= */
+/* Label/value pairs — the ticket-details sidebar summary now, reusable for
+   any future detail page's "key facts" panel (profile, user details, ...). */
+.meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.meta-list__item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-list__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.meta-list__value {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
 }

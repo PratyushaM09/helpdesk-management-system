@@ -6,14 +6,15 @@
  * module follows.
  */
 
-import { showToast } from "./utils.js";
+import { bindPlaceholderActions } from "./utils.js";
+import { initDropdown } from "./dropdown.js";
 
 export function initShell() {
   initSidebarToggle();
   initNavHighlighting();
   initUserMenu();
   initSearchFocusAnimation();
-  initPlaceholderActions();
+  bindPlaceholderActions();
 }
 
 function initSidebarToggle() {
@@ -57,12 +58,17 @@ function initSidebarToggle() {
   });
 }
 
-/** Marks the sidebar link whose `data-nav` matches the current page as active. */
+/**
+ * Marks the sidebar link whose `data-nav` matches the current page as
+ * active. A page that isn't itself a nav destination (ticket-details.html,
+ * reached only via a ticket row, not the sidebar) can declare which nav
+ * item it belongs to instead via `<body data-active-nav="tickets.html">`.
+ */
 function initNavHighlighting() {
-  const currentPage = window.location.pathname.split("/").pop() || "index.html";
+  const activeNav = document.body.dataset.activeNav || window.location.pathname.split("/").pop() || "index.html";
 
   document.querySelectorAll("[data-nav]").forEach((link) => {
-    const isActive = link.dataset.nav === currentPage;
+    const isActive = link.dataset.nav === activeNav;
     link.classList.toggle("is-active", isActive);
     if (isActive) {
       link.setAttribute("aria-current", "page");
@@ -79,41 +85,11 @@ function initUserMenu() {
     return;
   }
 
-  const openMenu = () => {
-    menu.hidden = false;
-    trigger.setAttribute("aria-expanded", "true");
-  };
-
-  const closeMenu = () => {
-    menu.hidden = true;
-    trigger.setAttribute("aria-expanded", "false");
-  };
-
-  trigger.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (menu.hidden) {
-      openMenu();
-    } else {
-      closeMenu();
-    }
-  });
+  const dropdown = initDropdown({ trigger, menu });
 
   menu.addEventListener("click", (event) => {
     if (event.target.closest(".dropdown-menu__item")) {
-      closeMenu();
-    }
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!menu.hidden && event.target !== trigger && !menu.contains(event.target) && !trigger.contains(event.target)) {
-      closeMenu();
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !menu.hidden) {
-      closeMenu();
-      trigger.focus();
+      dropdown.close();
     }
   });
 }
@@ -128,17 +104,4 @@ function initSearchFocusAnimation() {
 
   input.addEventListener("focus", () => wrapper.classList.add("is-focused"));
   input.addEventListener("blur", () => wrapper.classList.remove("is-focused"));
-}
-
-/** Every action in the shell that has no backend yet surfaces the same kind of toast. */
-function initPlaceholderActions() {
-  document.getElementById("notification-button")?.addEventListener("click", () => {
-    showToast("Notifications aren't wired up yet.", "info");
-  });
-
-  document.querySelectorAll("[data-logout-trigger]").forEach((element) => {
-    element.addEventListener("click", () => {
-      showToast("Sign-out isn't connected yet — this is the Milestone 3 UI shell.", "info");
-    });
-  });
 }

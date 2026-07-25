@@ -115,6 +115,15 @@
 .mb-2 { margin-bottom: var(--space-2); }
 .mb-4 { margin-bottom: var(--space-4); }
 .mb-6 { margin-bottom: var(--space-6); }
+.ml-auto { margin-left: auto; }
+
+/* Technical/code-like data (device info, error codes) — reaches for the
+   mono half of the type pairing that base.css otherwise never uses. */
+.text-mono {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
 
 /* ---------- App shell skeleton ---------- */
 /* The structural grid every authenticated page (dashboard, tickets,
@@ -192,6 +201,33 @@
 
 .app-shell__overlay[hidden] {
   display: none;
+}
+
+/* ---------- Detail-page layout (main content + a narrower sidebar) ---------- */
+/* For any page pairing primary content with a "key facts" side panel —
+   ticket-details.html now, a future profile/user-details page later.
+   Deliberately not a 50/50 .grid-cols-2: the sidebar is a summary, not a
+   peer column. */
+.grid-detail {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.grid-detail__sidebar {
+  position: sticky;
+  top: calc(var(--topbar-height) + var(--space-6));
+}
+
+@media (max-width: 1024px) {
+  .grid-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-detail__sidebar {
+    position: static;
+  }
 }
 
 /* ---------- Full-viewport centering (used by the auth screens) ---------- */

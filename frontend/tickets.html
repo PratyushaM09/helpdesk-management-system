@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tickets · HelpDesk</title>
+  <meta name="description" content="Browse and manage HelpDesk support tickets." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/shell.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="app-shell" id="app-shell">
+    <aside class="app-shell__sidebar sidebar" id="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <i class="bi bi-headset" aria-hidden="true"></i>
+        <span class="sidebar__brand-text">HelpDesk</span>
+      </div>
+
+      <nav class="sidebar__nav" aria-label="Main navigation">
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="dashboard.html" data-nav="dashboard.html">
+              <i class="bi bi-speedometer2" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="tickets.html" data-nav="tickets.html">
+              <i class="bi bi-ticket-detailed" aria-hidden="true"></i>
+              <span>Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="my-tickets.html" data-nav="my-tickets.html">
+              <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+              <span>My Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="create-ticket.html" data-nav="create-ticket.html">
+              <i class="bi bi-plus-circle" aria-hidden="true"></i>
+              <span>Create Ticket</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="profile.html" data-nav="profile.html">
+              <i class="bi bi-person-circle" aria-hidden="true"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar__divider" role="separator"></div>
+        <p class="sidebar__section-label">Administration</p>
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="users.html" data-nav="users.html">
+              <i class="bi bi-people" aria-hidden="true"></i>
+              <span>Users</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="roles.html" data-nav="roles.html">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+              <span>Roles</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__footer">
+        <button
+          type="button"
+          class="sidebar__link"
+          data-placeholder-action="Sign-out isn't connected to the backend yet."
+        >
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-shell__overlay" id="shell-overlay" hidden></div>
+
+    <header class="app-shell__topbar topbar">
+      <button
+        type="button"
+        class="topbar__menu-toggle"
+        id="sidebar-toggle"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="sidebar"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <p class="topbar__title" aria-hidden="true">Tickets</p>
+
+      <div class="topbar__search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input
+          type="search"
+          class="topbar__search-input"
+          placeholder="Search tickets…"
+          aria-label="Search tickets"
+        />
+      </div>
+
+      <div class="topbar__actions">
+        <button
+          type="button"
+          class="topbar__icon-btn"
+          aria-label="Notifications, 3 unread"
+          data-placeholder-action="Notifications aren't wired up yet."
+        >
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="topbar__badge" aria-hidden="true">3</span>
+        </button>
+
+        <div class="topbar__user">
+          <button
+            type="button"
+            class="topbar__user-trigger"
+            id="user-menu-trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="user-menu"
+          >
+            <span class="avatar" aria-hidden="true">JD</span>
+            <span class="topbar__user-info">
+              <span class="topbar__user-name">Jordan Diaz</span>
+              <span class="badge badge--brand">Admin</span>
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="dropdown-menu" id="user-menu" role="menu" aria-label="User menu" hidden>
+            <a class="dropdown-menu__item" role="menuitem" href="profile.html">
+              <i class="bi bi-person" aria-hidden="true"></i>
+              Profile
+            </a>
+            <div class="dropdown-menu__divider" role="separator"></div>
+            <button
+              type="button"
+              class="dropdown-menu__item"
+              role="menuitem"
+              data-placeholder-action="Sign-out isn't connected to the backend yet."
+            >
+              <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell__main" id="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-header__title">Tickets</h1>
+          <p class="page-header__subtitle">Browse, filter, and manage every support request.</p>
+        </div>
+        <div class="page-header__actions">
+          <a href="create-ticket.html" class="btn btn--primary">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            Create Ticket
+          </a>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="input-affix filter-bar__search">
+          <i class="bi bi-search input-affix__icon" aria-hidden="true"></i>
+          <input
+            type="search"
+            class="form-control"
+            id="ticket-search"
+            placeholder="Search by number, title, or requester…"
+            aria-label="Search tickets by number, title, or requester"
+          />
+        </div>
+
+        <div class="filter-dropdown" data-filter="status" data-label-prefix="Status">
+          <button
+            type="button"
+            class="filter-dropdown__trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="status-filter-menu"
+          >
+            <span class="filter-dropdown__label">Status: All</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown-menu" id="status-filter-menu" role="menu" hidden>
+            <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="">
+              All statuses <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="OPEN">
+              Open <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="ASSIGNED">
+              Assigned <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="IN_PROGRESS">
+              In Progress <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="WAITING_FOR_CUSTOMER">
+              Waiting for Customer <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="RESOLVED">
+              Resolved <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="CLOSED">
+              Closed <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-dropdown" data-filter="priority" data-label-prefix="Priority">
+          <button
+            type="button"
+            class="filter-dropdown__trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="priority-filter-menu"
+          >
+            <span class="filter-dropdown__label">Priority: All</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown-menu" id="priority-filter-menu" role="menu" hidden>
+            <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="">
+              All priorities <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="LOW">
+              Low <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="MEDIUM">
+              Medium <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="HIGH">
+              High <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="URGENT">
+              Urgent <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-dropdown" data-filter="category" data-label-prefix="Category">
+          <button
+            type="button"
+            class="filter-dropdown__trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="category-filter-menu"
+          >
+            <span class="filter-dropdown__label">Category: All</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown-menu" id="category-filter-menu" role="menu" hidden>
+            <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="">
+              All categories <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Software">
+              Software <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Hardware">
+              Hardware <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Network">
+              Network <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Email">
+              Email <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Accounts">
+              Accounts <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Security">
+              Security <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Infrastructure">
+              Infrastructure <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Other">
+              Other <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-dropdown ml-auto" data-filter="sort" data-label-prefix="Sort">
+          <button
+            type="button"
+            class="filter-dropdown__trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="sort-filter-menu"
+          >
+            <span class="filter-dropdown__label">Sort: Newest first</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown-menu" id="sort-filter-menu" role="menu" hidden>
+            <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="newest">
+              Newest first <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="oldest">
+              Oldest first <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="priority">
+              Priority (high to low) <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__body">
+          <div class="skeleton-table" id="tickets-skeleton" aria-hidden="true">
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+          </div>
+
+          <div class="table-wrapper" id="tickets-table-wrapper" hidden>
+            <table class="table table--hover table--clickable table--stack" id="tickets-table">
+              <thead>
+                <tr>
+                  <th scope="col">Ticket Number</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Priority</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Assigned To</th>
+                  <th scope="col">Updated</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-table-body">
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000042"
+                  data-status="OPEN"
+                  data-priority="HIGH"
+                  data-category="Network"
+                  data-updated="2026-07-25T08:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000042</span></td>
+                  <td data-label="Title">Cannot connect to VPN</td>
+                  <td data-label="Category">Network</td>
+                  <td data-label="Priority"><span class="badge badge--danger">High</span></td>
+                  <td data-label="Status"><span class="badge badge--info">Open</span></td>
+                  <td data-label="Assigned To">Unassigned</td>
+                  <td data-label="Updated">2 hours ago</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000042" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000041"
+                  data-status="IN_PROGRESS"
+                  data-priority="MEDIUM"
+                  data-category="Hardware"
+                  data-updated="2026-07-25T07:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000041</span></td>
+                  <td data-label="Title">Monitor flickering on startup</td>
+                  <td data-label="Category">Hardware</td>
+                  <td data-label="Priority"><span class="badge badge--signal">Medium</span></td>
+                  <td data-label="Status"><span class="badge badge--signal">In Progress</span></td>
+                  <td data-label="Assigned To">Sam Okafor</td>
+                  <td data-label="Updated">3 hours ago</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000041" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000039"
+                  data-status="WAITING_FOR_CUSTOMER"
+                  data-priority="LOW"
+                  data-category="Accounts"
+                  data-updated="2026-07-25T05:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000039</span></td>
+                  <td data-label="Title">Request access to shared drive</td>
+                  <td data-label="Category">Accounts</td>
+                  <td data-label="Priority"><span class="badge badge--neutral">Low</span></td>
+                  <td data-label="Status"><span class="badge badge--neutral">Waiting for Customer</span></td>
+                  <td data-label="Assigned To">Priya Sharma</td>
+                  <td data-label="Updated">5 hours ago</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000039" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000037"
+                  data-status="RESOLVED"
+                  data-priority="MEDIUM"
+                  data-category="Hardware"
+                  data-updated="2026-07-25T09:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000037</span></td>
+                  <td data-label="Title">Printer offline on 3rd floor</td>
+                  <td data-label="Category">Hardware</td>
+                  <td data-label="Priority"><span class="badge badge--signal">Medium</span></td>
+                  <td data-label="Status"><span class="badge badge--success">Resolved</span></td>
+                  <td data-label="Assigned To">Alex Chen</td>
+                  <td data-label="Updated">1 hour ago</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000037" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000035"
+                  data-status="CLOSED"
+                  data-priority="LOW"
+                  data-category="Infrastructure"
+                  data-updated="2026-07-24T10:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000035</span></td>
+                  <td data-label="Title">Onboarding laptop setup</td>
+                  <td data-label="Category">Infrastructure</td>
+                  <td data-label="Priority"><span class="badge badge--neutral">Low</span></td>
+                  <td data-label="Status"><span class="badge badge--neutral">Closed</span></td>
+                  <td data-label="Assigned To">IT Support</td>
+                  <td data-label="Updated">Yesterday</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000035" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000033"
+                  data-status="ASSIGNED"
+                  data-priority="URGENT"
+                  data-category="Email"
+                  data-updated="2026-07-24T14:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000033</span></td>
+                  <td data-label="Title">Email delivery delayed</td>
+                  <td data-label="Category">Email</td>
+                  <td data-label="Priority"><span class="badge badge--urgent">Urgent</span></td>
+                  <td data-label="Status"><span class="badge badge--brand">Assigned</span></td>
+                  <td data-label="Assigned To">Priya Sharma</td>
+                  <td data-label="Updated">Yesterday</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000033" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000030"
+                  data-status="OPEN"
+                  data-priority="HIGH"
+                  data-category="Accounts"
+                  data-updated="2026-07-23T10:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000030</span></td>
+                  <td data-label="Title">Password reset not working</td>
+                  <td data-label="Category">Accounts</td>
+                  <td data-label="Priority"><span class="badge badge--danger">High</span></td>
+                  <td data-label="Status"><span class="badge badge--info">Open</span></td>
+                  <td data-label="Assigned To">Unassigned</td>
+                  <td data-label="Updated">2 days ago</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000030" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  data-href="ticket-details.html?ticket=HD-2026-000028"
+                  data-status="IN_PROGRESS"
+                  data-priority="URGENT"
+                  data-category="Security"
+                  data-updated="2026-07-22T10:00:00"
+                >
+                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000028</span></td>
+                  <td data-label="Title">VPN certificate expired</td>
+                  <td data-label="Category">Security</td>
+                  <td data-label="Priority"><span class="badge badge--urgent">Urgent</span></td>
+                  <td data-label="Status"><span class="badge badge--signal">In Progress</span></td>
+                  <td data-label="Assigned To">Alex Chen</td>
+                  <td data-label="Updated">3 days ago</td>
+                  <td data-label="Actions">
+                    <a href="ticket-details.html?ticket=HD-2026-000028" class="btn btn--ghost btn--sm">
+                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" id="tickets-empty-state" hidden>
+            <i class="bi bi-inbox empty-state__icon" aria-hidden="true"></i>
+            <h2 class="empty-state__title">No tickets match your filters</h2>
+            <p class="empty-state__description">Try adjusting or clearing your filters to see more results.</p>
+            <button type="button" class="btn btn--secondary" id="clear-filters-button">
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+              Clear filters
+            </button>
+          </div>
+
+          <nav class="pagination" aria-label="Ticket list pages">
+            <p class="pagination__summary" id="pagination-summary">Showing 1-8 of 8 tickets</p>
+            <div class="pagination__controls">
+              <button type="button" class="pagination__button" id="pagination-prev" aria-label="Previous page" disabled>
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="pagination__button is-active" aria-current="page" data-page="1">1</button>
+              <button
+                type="button"
+                class="pagination__button"
+                data-page="2"
+                data-placeholder-action="This placeholder demo only has one page of tickets."
+              >2</button>
+              <button
+                type="button"
+                class="pagination__button"
+                data-page="3"
+                data-placeholder-action="This placeholder demo only has one page of tickets."
+              >3</button>
+              <button
+                type="button"
+                class="pagination__button"
+                id="pagination-next"
+                aria-label="Next page"
+                data-placeholder-action="This placeholder demo only has one page of tickets."
+              >
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/pages/tickets.js"></script>
+</body>
+</html>
