@@ -168,3 +168,50 @@ export function getCookie(name) {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return match ? decodeURIComponent(match[1]) : null;
 }
+
+/**
+ * Sets or clears a field-level validation error: toggles the input's
+ * `aria-invalid`, and shows/hides the associated error element (expected to
+ * already be wired via that input's `aria-describedby`).
+ * @param {HTMLElement} input
+ * @param {HTMLElement} errorElement
+ * @param {string} [message] omit or pass "" to clear the error
+ */
+export function setFieldError(input, errorElement, message = "") {
+  const hasError = message.length > 0;
+  input?.setAttribute("aria-invalid", String(hasError));
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.hidden = !hasError;
+  }
+}
+
+/**
+ * Toggles a button between its normal label and a spinner + loading label,
+ * disabling it either way so it can't be double-submitted. Restores the
+ * exact original markup (icons included) when turned back off.
+ * @param {HTMLButtonElement} button
+ * @param {boolean} isLoading
+ * @param {string} [loadingLabel="Please wait…"]
+ */
+export function setButtonLoading(button, isLoading, loadingLabel = "Please wait…") {
+  if (!button) {
+    return;
+  }
+
+  if (isLoading) {
+    if (button.dataset.originalHtml === undefined) {
+      button.dataset.originalHtml = button.innerHTML;
+    }
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    button.innerHTML = `<span class="btn__spinner" aria-hidden="true"></span>${escapeHtml(loadingLabel)}`;
+    return;
+  }
+
+  button.disabled = false;
+  button.removeAttribute("aria-busy");
+  if (button.dataset.originalHtml !== undefined) {
+    button.innerHTML = button.dataset.originalHtml;
+  }
+}

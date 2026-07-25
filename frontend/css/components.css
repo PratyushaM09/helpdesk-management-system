@@ -95,6 +95,46 @@
   background-color: var(--color-danger-700);
 }
 
+/* A .btn is often an <a> (e.g. "Back to sign in"), and base.css's global
+   `a:hover` rule (color + underline) outranks a plain `.btn--variant`
+   color declaration on specificity — without this, an anchor button's
+   text would flip to the link-hover color and underline on hover. */
+a.btn,
+a.btn:hover,
+a.btn:focus {
+  text-decoration: none;
+}
+
+a.btn--primary:hover,
+a.btn--danger:hover {
+  color: var(--color-text-on-brand);
+}
+
+a.btn--secondary:hover {
+  color: var(--color-text-primary);
+}
+
+a.btn--outline:hover {
+  color: var(--color-brand-700);
+}
+
+a.btn--ghost:hover {
+  color: var(--color-text-primary);
+}
+
+/* Injected by utils.js's setButtonLoading() in place of the button's icon
+   while a (simulated or real) request is in flight. Uses currentColor so
+   it automatically matches whichever button variant it's placed in. */
+.btn__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  opacity: 0.85;
+  animation: spin 700ms linear infinite;
+}
+
 /* ================= Cards ================= */
 .card {
   background-color: var(--color-bg-surface);
@@ -207,6 +247,90 @@
 .form-check label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+/* ================= Password strength & requirements ================= */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.password-strength__bar {
+  flex: 1 1 0%;
+  height: 0.375rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-sunken);
+  overflow: hidden;
+}
+
+.password-strength__fill {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-strong);
+  transition: width var(--transition-base) var(--ease-standard),
+    background-color var(--transition-base) var(--ease-standard);
+}
+
+.password-strength--very-weak .password-strength__fill {
+  background-color: var(--color-danger-500);
+}
+
+.password-strength--weak .password-strength__fill {
+  background-color: var(--color-danger-500);
+}
+
+.password-strength--fair .password-strength__fill {
+  background-color: var(--color-signal-400);
+}
+
+.password-strength--good .password-strength__fill {
+  background-color: var(--color-info-500);
+}
+
+.password-strength--strong .password-strength__fill {
+  background-color: var(--color-success-500);
+}
+
+.password-strength__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  min-width: 5.5rem;
+  text-align: right;
+}
+
+.password-requirements {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .password-requirements {
+    grid-template-columns: 1fr;
+  }
+}
+
+.password-requirements__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast) var(--ease-standard);
+}
+
+.password-requirements__item i {
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.password-requirements__item.is-met {
+  color: var(--color-success-700);
 }
 
 /* ================= Tables ================= */
@@ -522,4 +646,13 @@
 .empty-state__description {
   max-width: 28rem;
   margin-bottom: var(--space-6);
+}
+
+/* Sized down for use inside an auth-card rather than a full page region. */
+.empty-state--card {
+  padding: var(--space-4) 0 var(--space-2);
+}
+
+.empty-state--card .empty-state__description {
+  margin-bottom: var(--space-2);
 }
