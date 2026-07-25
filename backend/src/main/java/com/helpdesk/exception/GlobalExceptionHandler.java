@@ -17,6 +17,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.List;
 
@@ -69,6 +72,26 @@ import java.util.List;
  *   <li>{@link HttpMessageNotReadableException} — the request body couldn't
  *       even be parsed, so there is no bound object to report field errors
  *       against; a fixed, safe message only.</li>
+ *   <li>{@link MethodArgumentTypeMismatchException} — a path/query value
+ *       couldn't be converted to the controller method's declared parameter
+ *       type (e.g. a non-numeric id). A {@code RuntimeException}, so without
+ *       an explicit handler it fell through to the generic 500 tier despite
+ *       being exactly as client-caused as a Bean Validation failure - mapped
+ *       to the same {@code ValidationError} shape as {@link BindException}
+ *       above for a consistent client-facing contract.</li>
+ *   <li>{@link MissingServletRequestPartException} — a multipart request is
+ *       missing a required part (e.g. no {@code file} field at all, as
+ *       opposed to an oversized one). Same "argument-resolution-time,
+ *       checked {@code ServletException}" reasoning as
+ *       {@link MaxUploadSizeExceededException} below.</li>
+ *   <li>{@link MaxUploadSizeExceededException} — a multipart upload
+ *       exceeded {@code spring.servlet.multipart.max-file-size}/
+ *       {@code max-request-size}. Thrown while Spring MVC resolves the
+ *       {@code MultipartFile} controller-method argument, so — like
+ *       {@link AccessDeniedException} above — it never reaches the
+ *       controller body itself. It is a checked {@code ServletException},
+ *       not a {@code RuntimeException}, so without an explicit handler
+ *       here it would fall through to the generic 500 tier below.</li>
  *   <li>{@link RuntimeException} / {@link Exception} — an unanticipated
  *       failure. Logged with full detail server-side; the client gets a
  *       generic, safe message.</li>
@@ -141,6 +164,45 @@ public class GlobalExceptionHandler {
         // internal-detail leak (09-Security-Operations.md §18.1).
         log.warn("Malformed request body at {}", request.getRequestURI());
         return buildResponse(HttpStatus.BAD_REQUEST, MALFORMED_REQUEST_ERROR_CODE, ResponseMessages.MALFORMED_REQUEST_BODY, request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        // A path/query value that couldn't be converted to the controller
+        // method's declared parameter type (e.g. "/tickets/not-a-number" -
+        // Long expected). Thrown while Spring MVC resolves the method's
+        // arguments, before the controller body runs, so - like
+        // MaxUploadSizeExceededException below - it never reaches the
+        // Service layer's own validation. A RuntimeException, so without
+        // this handler it fell through to the generic 500 tier, even though
+        // it's exactly as client-caused as a Bean Validation failure.
+        String field = ex.getName();
+        ValidationError error = new ValidationError(field, RejectedValueSanitizer.sanitize(field, ex.getValue()), "must be a valid value");
+        log.warn("Type mismatch at {}: parameter '{}'", request.getRequestURI(), field);
+        return buildValidationResponse(HttpStatus.BAD_REQUEST, VALIDATION_ERROR_CODE, ResponseMessages.VALIDATION_FAILED, request, List.of(error));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestPartException(MissingServletRequestPartException ex, HttpServletRequest request) {
+        // A multipart request missing a @RequestParam("file") MultipartFile
+        // part entirely (as opposed to an oversized one, which
+        // MaxUploadSizeExceededException below already covers). Same
+        // "thrown during argument resolution, checked ServletException,
+        // falls through to 500 without this handler" reasoning.
+        log.warn("{} at {}: missing part '{}'", ex.getClass().getSimpleName(), request.getRequestURI(), ex.getRequestPartName());
+        return buildResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST",
+                "Required part '%s' is missing.".formatted(ex.getRequestPartName()), request);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        // Thrown while Spring MVC resolves the MultipartFile argument, before
+        // the controller method runs — an expected, client-caused outcome
+        // like ApplicationException above, not an unanticipated failure.
+        // It extends ServletException (checked), not RuntimeException, so
+        // without this handler it fell through to the generic 500 tier.
+        log.warn("{} at {}", ex.getClass().getSimpleName(), request.getRequestURI());
+        return buildResponse(HttpStatus.PAYLOAD_TOO_LARGE, "FILE_TOO_LARGE", ResponseMessages.FILE_TOO_LARGE, request);
     }
 
     @ExceptionHandler(RuntimeException.class)

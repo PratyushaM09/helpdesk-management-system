@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -140,12 +141,29 @@ class AuthenticationControllerIntegrationTest {
     @Test
     void login_shouldReturn423_whenAccountLockedAfterFiveFailedAttempts() throws Exception {
         User user = persistUser("lockout@example.com", RoleName.USER);
+        // AuthSecurityEventRecorder.recordFailedAttempt runs in its own
+        // REQUIRES_NEW transaction (see its Javadoc) - a genuinely separate
+        // connection that can't see this row until it's actually committed,
+        // not just written-and-still-open in this @Transactional test's
+        // outer transaction.
+        commitAndStartNewTransaction();
 
         for (int i = 0; i < 5; i++) {
             mockMvc.perform(post(AUTH_URL + "/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(loginJson(user.getEmail(), "WrongPassword1!")))
                     .andExpect(status().isUnauthorized());
+            // login() is @Transactional too and joins this same ambient
+            // transaction; throwing UnauthorizedException marks it
+            // rollback-only (Spring's default rule applies to a joined
+            // transaction exactly as it does to a new one - see
+            // AuthSecurityEventRecorder's Javadoc for why the real
+            // persistence had to move out from under that). A rollback-only
+            // transaction can still be rolled back, just never committed, so
+            // this discards it and starts clean before the next iteration
+            // - and, same as the final refresh below, gets a fresh
+            // persistence context instead of a stale cached `user`.
+            startFreshTransaction();
         }
 
         mockMvc.perform(post(AUTH_URL + "/login")
@@ -211,6 +229,11 @@ class AuthenticationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         Cookie rotatedRefreshCookie = firstRefresh.getResponse().getCookie(SecurityConstants.REFRESH_TOKEN_COOKIE);
+        // AuthSecurityEventRecorder.revokeFamily runs in its own REQUIRES_NEW
+        // transaction (see its Javadoc) - it can't see either refresh token
+        // row until they're actually committed. Same reasoning as
+        // login_shouldReturn423_whenAccountLockedAfterFiveFailedAttempts.
+        commitAndStartNewTransaction();
 
         mockMvc.perform(post(AUTH_URL + "/refresh").cookie(originalRefreshCookie))
                 .andExpect(status().isUnauthorized());
@@ -343,6 +366,36 @@ class AuthenticationControllerIntegrationTest {
         User user = new User("Test User", email, passwordEncoder.encode(VALID_PASSWORD), role);
         user.setStatus(UserStatus.ACTIVE);
         return userRepository.save(user);
+    }
+
+    /**
+     * Commits the current test transaction for real and opens a fresh one,
+     * so a REQUIRES_NEW transaction elsewhere (see
+     * {@code AuthSecurityEventRecorder}) can see rows written so far - by
+     * default this class's {@code @Transactional} would otherwise keep them
+     * uncommitted-and-invisible-to-other-connections until the whole test
+     * method rolls back at the end. Test isolation is unaffected: everything
+     * written after this call still rolls back normally: only rows written
+     * before it become permanent, which is exactly the setup data the
+     * REQUIRES_NEW path under test needs to find.
+     */
+    private void commitAndStartNewTransaction() {
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+    }
+
+    /**
+     * Rolls back (never commits) and starts a fresh transaction/persistence
+     * context - safe to call even when the current transaction has already
+     * been marked rollback-only (an attempted commit there would throw
+     * {@code UnexpectedRollbackException}; a rollback never does). Use this
+     * between repeated calls that each throw from inside a {@code @Transactional}
+     * method, and anywhere a stale first-level-cached entity needs discarding.
+     */
+    private void startFreshTransaction() {
+        TestTransaction.end();
+        TestTransaction.start();
     }
 
     private MvcResult login(String email) throws Exception {

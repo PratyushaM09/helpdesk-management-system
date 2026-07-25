@@ -34,6 +34,9 @@ public final class ResponseMessages {
      */
     public static final String MALFORMED_REQUEST_BODY = "The request body could not be read. Please check its syntax.";
 
+    /** For MaxUploadSizeExceededException — an uploaded file (or the overall multipart request) exceeded the configured size limit. */
+    public static final String FILE_TOO_LARGE = "The uploaded file exceeds the maximum allowed size.";
+
     /**
      * For an unauthenticated request to a protected route, written directly
      * by {@code RestAuthenticationEntryPoint} — the one 401 case

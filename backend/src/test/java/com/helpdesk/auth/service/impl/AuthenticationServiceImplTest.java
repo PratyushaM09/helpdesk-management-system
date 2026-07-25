@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,11 +50,15 @@ import static org.mockito.Mockito.when;
  */
 class AuthenticationServiceImplTest {
 
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final Duration LOCKOUT_DURATION = Duration.ofMinutes(15);
+
     private UserRepository userRepository;
     private RefreshTokenRepository refreshTokenRepository;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
     private CookieService cookieService;
+    private AuthSecurityEventRecorder securityEventRecorder;
     private AuthenticationServiceImpl authenticationService;
 
     @BeforeEach
@@ -65,10 +68,12 @@ class AuthenticationServiceImplTest {
         authenticationManager = mock(AuthenticationManager.class);
         jwtService = mock(JwtService.class);
         cookieService = mock(CookieService.class);
+        securityEventRecorder = mock(AuthSecurityEventRecorder.class);
         JwtProperties jwtProperties = new JwtProperties("HS512", "irrelevant-for-this-test", null, null,
                 Duration.ofMinutes(15), Duration.ofDays(7), "test-issuer");
         authenticationService = new AuthenticationServiceImpl(
-                userRepository, refreshTokenRepository, authenticationManager, jwtService, cookieService, jwtProperties);
+                userRepository, refreshTokenRepository, authenticationManager, jwtService, cookieService, jwtProperties,
+                securityEventRecorder);
     }
 
     // --- login ---
@@ -112,8 +117,16 @@ class AuthenticationServiceImplTest {
         verifyNoInteractions(refreshTokenRepository, jwtService, cookieService);
     }
 
+    /**
+     * Whether this specific attempt crosses the lockout threshold is
+     * {@link AuthSecurityEventRecorder}'s decision, not this class's - see
+     * {@code AuthSecurityEventRecorderTest} for that behavior. This class's
+     * own contract is just "delegate to it, in its own transaction, with the
+     * right arguments" - {@link AuthSecurityEventRecorder}'s Javadoc explains
+     * why that delegation (rather than persisting here directly) is required.
+     */
     @Test
-    void login_shouldIncrementFailedAttemptsAndThrowUnauthorized_whenPasswordWrong() {
+    void login_shouldDelegateFailedAttemptRecording_andThrowUnauthorized_whenPasswordWrong() {
         User user = aUser(RoleName.USER);
         LoginRequest request = new LoginRequest("ada@example.com", "wrong-password");
         when(userRepository.findByEmailIgnoreCase("ada@example.com")).thenReturn(Optional.of(user));
@@ -121,28 +134,9 @@ class AuthenticationServiceImplTest {
 
         assertThrows(UnauthorizedException.class, () -> authenticationService.login(request));
 
-        assertEquals(1, user.getFailedAttempts());
-        assertNotEquals(UserStatus.LOCKED, user.getStatus());
-        verify(userRepository).save(user);
+        verify(securityEventRecorder).recordFailedAttempt(user.getId(), MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION);
+        verify(userRepository, never()).save(any());
         verifyNoInteractions(refreshTokenRepository, jwtService, cookieService);
-    }
-
-    @Test
-    void login_shouldLockAccount_whenFifthConsecutiveFailureOccurs() {
-        User user = aUser(RoleName.USER);
-        for (int i = 0; i < 4; i++) {
-            user.recordFailedLoginAttempt();
-        }
-        LoginRequest request = new LoginRequest("ada@example.com", "wrong-password");
-        when(userRepository.findByEmailIgnoreCase("ada@example.com")).thenReturn(Optional.of(user));
-        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
-
-        assertThrows(UnauthorizedException.class, () -> authenticationService.login(request));
-
-        assertEquals(5, user.getFailedAttempts());
-        assertEquals(UserStatus.LOCKED, user.getStatus());
-        assertTrue(user.isLocked(Instant.now()));
-        assertTrue(user.getLockedUntil().isAfter(Instant.now().plus(Duration.ofMinutes(14))));
     }
 
     @Test
@@ -159,7 +153,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void login_shouldAutoClearExpiredLockStatus_butNeverResetFailedAttempts_whenWindowExpiredAndLoginStillFails() {
+    void login_shouldAutoClearExpiredLockStatus_andStillDelegateFailedAttemptRecording_whenWindowExpiredAndLoginStillFails() {
         User user = aUser(RoleName.USER);
         for (int i = 0; i < 5; i++) {
             user.recordFailedLoginAttempt();
@@ -172,8 +166,8 @@ class AuthenticationServiceImplTest {
 
         assertThrows(UnauthorizedException.class, () -> authenticationService.login(request));
 
-        assertEquals(6, user.getFailedAttempts());
         verify(authenticationManager).authenticate(any());
+        verify(securityEventRecorder).recordFailedAttempt(user.getId(), MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION);
     }
 
     // --- refresh ---
@@ -235,23 +229,24 @@ class AuthenticationServiceImplTest {
         verify(refreshTokenRepository, never()).save(any());
     }
 
+    /**
+     * The actual family-wide revocation is {@link AuthSecurityEventRecorder}'s
+     * job now (its own transaction, for the reason its Javadoc explains) -
+     * this class's contract is just delegating the family id. See
+     * {@code AuthSecurityEventRecorderTest} for the revocation behavior itself.
+     */
     @Test
-    void refresh_shouldRevokeEntireFamilyAndThrowUnauthorized_whenTokenAlreadyReplaced() {
+    void refresh_shouldDelegateFamilyRevocationAndThrowUnauthorized_whenTokenAlreadyReplaced() {
         User user = aUser(RoleName.USER);
         RefreshToken replayed = new RefreshToken(user, "hash-a", Instant.now().plus(Duration.ofDays(1)), "family-1");
         RefreshToken successor = new RefreshToken(user, "hash-b", Instant.now().plus(Duration.ofDays(1)), "family-1");
         replayed.markReplacedBy(successor);
-        RefreshToken alreadyRevokedSibling = new RefreshToken(user, "hash-c", Instant.now().plus(Duration.ofDays(1)), "family-1");
-        alreadyRevokedSibling.revoke(Instant.now().minus(Duration.ofMinutes(5)));
-
         when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(replayed));
-        when(refreshTokenRepository.findByFamilyId("family-1")).thenReturn(List.of(replayed, successor, alreadyRevokedSibling));
 
         assertThrows(UnauthorizedException.class, () -> authenticationService.refresh("raw"));
 
-        assertTrue(replayed.isRevoked());
-        assertTrue(successor.isRevoked());
-        verify(refreshTokenRepository).saveAll(anyList());
+        verify(securityEventRecorder).revokeFamily("family-1");
+        verify(refreshTokenRepository, never()).saveAll(anyList());
         verifyNoInteractions(jwtService, cookieService);
     }
 

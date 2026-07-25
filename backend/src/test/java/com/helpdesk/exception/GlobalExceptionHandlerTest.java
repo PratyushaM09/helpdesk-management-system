@@ -17,6 +17,9 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -205,6 +208,39 @@ class GlobalExceptionHandlerTest {
         assertEquals("MALFORMED_REQUEST_BODY", body.errorCode());
         assertEquals("The request body could not be read. Please check its syntax.", body.message());
         assertTrue(body.validationErrors() == null || body.validationErrors().isEmpty());
+    }
+
+    @Test
+    void shouldMapMethodArgumentTypeMismatchException_to400WithFieldLevelError() throws NoSuchMethodException {
+        Method dummyMethod = GlobalExceptionHandlerTest.class.getDeclaredMethod("dummyControllerMethod", String.class);
+        var ex = new MethodArgumentTypeMismatchException("not-a-number", Long.class, "id",
+                new MethodParameter(dummyMethod, 0), new NumberFormatException("For input string: \"not-a-number\""));
+
+        ErrorResponse body = handleAndGetBody(handler.handleMethodArgumentTypeMismatchException(ex, request), HttpStatus.BAD_REQUEST);
+
+        assertEquals("VALIDATION_FAILED", body.errorCode());
+        assertEquals("id", body.validationErrors().get(0).field());
+        assertEquals("not-a-number", body.validationErrors().get(0).rejectedValue());
+    }
+
+    @Test
+    void shouldMapMissingServletRequestPartException_to400WithoutLeakingInternalDetail() {
+        var ex = new MissingServletRequestPartException("file");
+
+        ErrorResponse body = handleAndGetBody(handler.handleMissingServletRequestPartException(ex, request), HttpStatus.BAD_REQUEST);
+
+        assertEquals("BAD_REQUEST", body.errorCode());
+        assertEquals("Required part 'file' is missing.", body.message());
+    }
+
+    @Test
+    void shouldMapMaxUploadSizeExceededException_to413() {
+        var ex = new MaxUploadSizeExceededException(10L * 1024 * 1024);
+
+        ErrorResponse body = handleAndGetBody(handler.handleMaxUploadSizeExceededException(ex, request), HttpStatus.PAYLOAD_TOO_LARGE);
+
+        assertEquals("FILE_TOO_LARGE", body.errorCode());
+        assertEquals("The uploaded file exceeds the maximum allowed size.", body.message());
     }
 
     private static ValidationError findByField(List<ValidationError> errors, String field) {

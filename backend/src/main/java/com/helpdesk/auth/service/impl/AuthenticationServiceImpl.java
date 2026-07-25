@@ -61,19 +61,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final CookieService cookieService;
     private final JwtProperties jwtProperties;
+    private final AuthSecurityEventRecorder securityEventRecorder;
 
     public AuthenticationServiceImpl(UserRepository userRepository,
                                       RefreshTokenRepository refreshTokenRepository,
                                       AuthenticationManager authenticationManager,
                                       JwtService jwtService,
                                       CookieService cookieService,
-                                      JwtProperties jwtProperties) {
+                                      JwtProperties jwtProperties,
+                                      AuthSecurityEventRecorder securityEventRecorder) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.cookieService = cookieService;
         this.jwtProperties = jwtProperties;
+        this.securityEventRecorder = securityEventRecorder;
     }
 
     @Override
@@ -165,19 +168,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    /** No-op for a nonexistent account — nothing to persist, and no side effect that could reveal its non-existence. */
+    /**
+     * No-op for a nonexistent account — nothing to persist, and no side
+     * effect that could reveal its non-existence. Delegates the actual
+     * persistence to {@link AuthSecurityEventRecorder}, which runs in its
+     * own transaction — {@code login()} always ends this path by throwing
+     * {@link UnauthorizedException}, and since that's an unchecked exception,
+     * Spring's default rollback rule would otherwise undo this write along
+     * with the rest of {@code login()}'s transaction, silently disabling
+     * account lockout. See that class's Javadoc for the full explanation.
+     */
     private void recordFailedAttempt(User user, String email) {
         auditLog.warn("Login failed: email={}", email);
         if (user == null) {
             return;
         }
-        user.recordFailedLoginAttempt();
-        if (user.getFailedAttempts() >= MAX_FAILED_ATTEMPTS) {
-            user.lockUntil(Instant.now().plus(LOCKOUT_DURATION));
-            user.setStatus(UserStatus.LOCKED);
+        boolean locked = securityEventRecorder.recordFailedAttempt(user.getId(), MAX_FAILED_ATTEMPTS, LOCKOUT_DURATION);
+        if (locked) {
             auditLog.warn("Account locked after {} failed attempts: userId={}", MAX_FAILED_ATTEMPTS, user.getId());
         }
-        userRepository.save(user);
     }
 
     // --- refresh helpers ---
@@ -187,11 +196,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow(() -> new UnauthorizedException("Invalid refresh token."));
     }
 
+    /**
+     * Same REQUIRES_NEW reasoning as {@link #recordFailedAttempt} — {@code
+     * refresh()} always ends this path by throwing {@link UnauthorizedException},
+     * which would otherwise roll this revocation back along with everything
+     * else, silently disabling the stolen-refresh-token defense this method
+     * exists to provide. See {@link AuthSecurityEventRecorder}'s Javadoc.
+     */
     private void revokeEntireFamily(RefreshToken replayedToken) {
-        Instant now = Instant.now();
-        List<RefreshToken> family = refreshTokenRepository.findByFamilyId(replayedToken.getFamilyId());
-        family.stream().filter(token -> !token.isRevoked()).forEach(token -> token.revoke(now));
-        refreshTokenRepository.saveAll(family);
+        securityEventRecorder.revokeFamily(replayedToken.getFamilyId());
         auditLog.warn("Refresh token reuse detected - entire token family revoked: userId={}, familyId={}",
                 replayedToken.getUser().getId(), replayedToken.getFamilyId());
     }
