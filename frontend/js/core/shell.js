@@ -1,20 +1,103 @@
 /**
  * Reusable behavior for the authenticated app shell (sidebar + topbar).
- * Every future authenticated page (tickets, profile, admin, ...) copies the
- * same shell markup and calls `initShell()` once — no page-specific logic
- * lives here, matching the shared vs. page-script split every other core
- * module follows.
+ * Every authenticated page copies the same shell markup and calls
+ * `initShell()` once — including the session guard, since "this chrome only
+ * makes sense for a logged-in user" is itself a shell-level concern: every
+ * page that has a sidebar/topbar must be guarded and show the real signed-in
+ * user, so centralizing it here (rather than repeating a guard call in
+ * every page script) is the single-implementation, not premature coupling.
+ * Page-specific data (dashboard summary, ticket lists, ...) stays out of
+ * this file — only "who is signed in" belongs here.
  */
 
 import { bindPlaceholderActions } from "./utils.js";
 import { initDropdown } from "./dropdown.js";
+import { requireAuth } from "./session.js";
+import { logout } from "./auth.js";
 
-export function initShell() {
+const ROLE_LABELS = {
+  ADMIN: { text: "Admin", badgeClass: "badge--brand" },
+  SUPPORT_ENGINEER: { text: "Support Engineer", badgeClass: "badge--info" },
+  USER: { text: "User", badgeClass: "badge--neutral" },
+};
+
+/**
+ * @returns {Promise<object|null>} the signed-in user, or null if the guard
+ *   already redirected to login.html (callers should stop rendering
+ *   page-specific logic in that case).
+ */
+export async function initShell() {
+  let user;
+  try {
+    user = await requireAuth();
+  } catch {
+    // Couldn't reach the server to verify the session — leave the static
+    // shell markup as-is rather than bouncing an already-logged-in user to
+    // the login screen over a connectivity blip. The page's own script can
+    // still show a more specific error if it also needs the user.
+    initSidebarToggle();
+    initNavHighlighting();
+    initUserMenu();
+    initSearchFocusAnimation();
+    bindPlaceholderActions();
+    return null;
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  applyUserToTopbar(user);
   initSidebarToggle();
   initNavHighlighting();
   initUserMenu();
   initSearchFocusAnimation();
+  initLogout();
   bindPlaceholderActions();
+  return user;
+}
+
+function applyUserToTopbar(user) {
+  const nameEl = document.querySelector(".topbar__user-name");
+  const avatarEl = document.querySelector(".topbar__user-trigger .avatar");
+  const roleEl = document.querySelector(".topbar__user-trigger .badge");
+  const role = ROLE_LABELS[user.role] ?? { text: user.role, badgeClass: "badge--neutral" };
+
+  if (nameEl) {
+    nameEl.textContent = user.name;
+  }
+  if (avatarEl) {
+    avatarEl.textContent = getInitials(user.name);
+  }
+  if (roleEl) {
+    roleEl.textContent = role.text;
+    roleEl.className = `badge ${role.badgeClass}`;
+  }
+}
+
+function getInitials(name) {
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0];
+  return initials.toUpperCase();
+}
+
+/** Wires every real logout trigger (sidebar link + user-menu item) to the actual backend call. */
+function initLogout() {
+  document.querySelectorAll("[data-logout-action]").forEach((element) => {
+    element.addEventListener("click", async () => {
+      element.disabled = true;
+      try {
+        await logout();
+      } catch {
+        // Clearing client state and redirecting still happens below —
+        // logout() already clears its own cache regardless of outcome, and
+        // an expired access token making the logout call itself 401 doesn't
+        // change the fact that the user is leaving this session either way.
+      } finally {
+        window.location.href = "login.html";
+      }
+    });
+  });
 }
 
 function initSidebarToggle() {

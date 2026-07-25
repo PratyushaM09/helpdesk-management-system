@@ -1,4 +1,4 @@
-# HelpDesk Frontend — Foundation, Auth UI, App Shell, Tickets & Admin (Phase 4, Milestones 1-5)
+# HelpDesk Frontend — Foundation, Auth UI, App Shell, Tickets, Admin & Backend Integration (Phase 4, Milestones 1-6)
 
 Vanilla HTML5/CSS3/ES6 frontend for the HelpDesk Management System. No
 framework, no build step — every file is served as-is.
@@ -8,7 +8,7 @@ framework, no build step — every file is served as-is.
 ```
 frontend/
   index.html               Entry point; redirects to login.html (no dashboard yet)
-  login.html                Sign-in screen (UI only, not wired to the backend)
+  login.html                Sign-in screen — real POST /auth/login (Milestone 6)
   forgot-password.html       Request a reset link (email only, simulated send)
   reset-password.html         New password + confirm, reads ?token= from the URL
   verification-pending.html    "Check your email" holding page after account creation
@@ -42,11 +42,16 @@ frontend/
       utils.js              showToast, showLoading/hideLoading, setButtonLoading,
                               setFieldError, bindPlaceholderActions, debounce, formatDate,
                               escapeHtml, getCookie
-      auth.js                login/logout/refreshToken/getCurrentUser — stubs, not implemented yet
+      auth.js                Real login/logout/refreshToken/getCurrentUser — POST /auth/login,
+                               /auth/refresh, /auth/logout, GET /account/me — plus the in-memory
+                               (never persisted) current-user cache
+      session.js               bootstrapSession/requireAuth/redirectIfAuthenticated — session
+                                 restoration and page-guarding built on top of auth.js
       validation.js           isValidEmail, password requirement/strength rules, match check
-      shell.js                Sidebar toggle, nav active-highlighting, user dropdown, search
-                                focus animation — the one module every authenticated page's
-                                script calls into
+      shell.js                Session guard (redirects guests to login.html) + real topbar user
+                                display + real logout, then sidebar toggle, nav active-highlighting,
+                                user dropdown, search focus animation — the one module every
+                                authenticated page's script calls into
       dropdown.js              Generic trigger+menu open/close/outside-click/Escape controller
       filter-dropdown.js       Wires every [data-filter] dropdown into a single-select filter
       table-filter.js          Filters a static table's rows against [data-filter] dropdowns,
@@ -55,12 +60,15 @@ frontend/
       password-strength-ui.js  Wires a password input to the requirements checklist + strength
                                  meter markup, shared by reset-password.js and profile.js
     pages/
-      login.js                     Password toggle, client-side validation, simulated submit
+      login.js                     Real POST /auth/login, backend ErrorResponse messages
+                                     surfaced verbatim, redirect based on email-verification status
       forgot-password.js            Email validation, simulated send, success-state swap
       reset-password.js              Token check, live requirements/strength, simulated submit
       verification-pending.js        Resend button placeholder with cooldown timer
-      dashboard.js                    Just calls core/shell.js's initShell() — no
-                                        dashboard-specific behavior in this milestone
+      dashboard.js                    Real current-user greeting + email-verification banner on
+                                        top of core/shell.js's initShell(); summary/activity/table
+                                        stay static (no backend endpoint exists for them — see
+                                        Backend Integration below)
       tickets.js                      Skeleton→table swap, filter/sort of static rows,
                                         row-click navigation, empty-state toggling
       ticket-details.js                Comment collapse, visibility segmented control,
@@ -170,10 +178,25 @@ without ever crowding `core/`). A page's script only ever imports from
   element to show its own message as a toast — the one mechanism behind
   every "not wired to the backend yet" button across the whole app), debounce,
   date formatting, HTML escaping, cookie reading.
-- `auth.js` — stubs only so far. Documents the exact backend contract
-  (`/auth/login`, `/auth/refresh`, `/auth/logout`, cookie-based sessions,
-  no client-stored tokens) each function will fulfil once implemented, so
-  wiring it up later is filling in a body, not designing an API.
+- `auth.js` — imports `api.js`. Real implementations of `login`,
+  `logout`, `refreshToken`, `getCurrentUser` (`GET /account/me`, the only
+  endpoint carrying `status`/`emailVerified` — login/refresh responses omit
+  both), plus `getCachedUser`/`getCurrentRole` for synchronous access. The
+  *only* client-side session state is an in-memory `cachedUser` variable —
+  deliberately never `localStorage`/`sessionStorage`, since the backend's
+  actual session lives entirely in httpOnly cookies the frontend never
+  touches directly. A hard refresh always re-derives it via
+  `getCurrentUser({ forceRefetch: true })`.
+- `session.js` — imports `api.js` (for `ApiError`) and `auth.js`.
+  `bootstrapSession()` resolves the current session, transparently
+  recovering an expired access token with exactly one silent
+  `POST /auth/refresh` before giving up; `requireAuth()` wraps that for
+  page-guarding (redirects to `login.html` if there's no recoverable
+  session); `redirectIfAuthenticated()` is `login.html`'s mirror image
+  (redirects to `dashboard.html` if a session already exists). Network/
+  unexpected errors during bootstrap propagate rather than being treated
+  as "not logged in," so a connectivity blip doesn't bounce an
+  already-signed-in user to the login screen.
 - `validation.js` — no imports. Pure functions only, no DOM access:
   `isValidEmail`, the five `PASSWORD_RULES` (mirrors the backend's real
   `StrongPasswordValidator` — 10-128 chars, upper/lower/digit/symbol) plus
@@ -181,15 +204,23 @@ without ever crowding `core/`). A page's script only ever imports from
   `getPasswordStrength` (a 5-level score derived from how many rules
   pass), and `passwordsMatch`. Every page that touches a password imports
   this rather than re-deriving the rules.
-- `shell.js` — imports `utils.js` (for `bindPlaceholderActions`) and
-  `dropdown.js` (for the user menu). `initShell()` is the single entry
-  point every authenticated page's script calls: it wires the mobile
-  sidebar toggle + overlay backdrop + Escape-to-close, marks the sidebar
-  link whose `data-nav` matches the current page (or `<body
-  data-active-nav="...">`'s override, for a page like ticket-details.html
-  that isn't itself a nav destination) as active, the topbar user dropdown,
-  the search box's focus animation, and every placeholder action on the
-  page. Contains zero page-specific content.
+- `shell.js` — imports `utils.js`, `dropdown.js`, `session.js` (for
+  `requireAuth`), and `auth.js` (for `logout`). `initShell()` is the single
+  entry point every authenticated page's script calls, and is now
+  `async`: it first awaits `requireAuth()` — redirecting to `login.html`
+  if there's no session — then populates the topbar (`.topbar__user-name`,
+  the avatar's initials, the role badge) with the *real* signed-in user,
+  wires every `[data-logout-action]` element to a real `POST /auth/logout`
+  + redirect, and only then wires the mobile sidebar toggle, nav
+  active-highlighting, the user dropdown, the search focus animation, and
+  every remaining `[data-placeholder-action]`. Returns the resolved user
+  (or `null` after a redirect) so a page script that needs it — currently
+  just `dashboard.js` — doesn't have to re-fetch it. A network failure
+  while checking the session leaves the static shell markup alone instead
+  of redirecting (see `session.js`'s `requireAuth` doc). This makes
+  session-awareness a shell-level concern applied uniformly to every
+  authenticated page, rather than seven separate page scripts each
+  repeating the same guard.
 - `dropdown.js` — no imports. `initDropdown({ trigger, menu })` is the
   single open/close/outside-click/Escape controller behind three different
   UIs: the topbar user menu (`shell.js`), the tickets page's filter
@@ -229,9 +260,18 @@ without ever crowding `core/`). A page's script only ever imports from
 `pages/` — one script per HTML page, imported by that page only, and
 importing only from `core/` (never from another file in `pages/`):
 
-- `login.js` — password visibility toggle (via `core/utils.js`'s
-  `setupPasswordToggle`), required/format validation, simulated submit
-  with a loading state.
+- `login.js` — calls `redirectIfAuthenticated()` on load. Password
+  visibility toggle, required/format validation, then a real
+  `POST /auth/login`: on success, fetches the full profile (`GET
+  /account/me`, forced fresh) and redirects to `dashboard.html` or
+  `verification-pending.html` depending on `emailVerified` (the backend
+  lets an unverified-but-active account log in fine — "handling" that
+  case means routing it somewhere sensible after success, not blocking
+  sign-in). On failure, backend `ErrorResponse.message` is shown verbatim
+  in a form-level alert (covers wrong credentials, a locked account, and
+  network/timeout errors alike — the message text is the only thing that
+  differs) or mapped onto specific fields when the backend responds with
+  `validationErrors`.
 - `forgot-password.js` — email validation, simulated send, then swaps the
   card's content to the success state (focus moves to its heading).
 - `reset-password.js` — reads `?token=` from the URL and shows an
@@ -242,10 +282,12 @@ importing only from `core/` (never from another file in `pages/`):
 - `verification-pending.js` — resend button: simulated send +
   success toast + a 30-second disabled cooldown with a live countdown
   label.
-- `dashboard.js` — imports and calls `core/shell.js`'s `initShell()` and
-  nothing else. Every summary card, activity item, and table row on
-  `dashboard.html` is static placeholder markup, so there's no
-  dashboard-specific behavior to add yet.
+- `dashboard.js` — awaits `core/shell.js`'s `initShell()` for the real
+  user, then personalizes the subtitle ("Welcome back, {first name}...")
+  and reveals an email-verification reminder banner if
+  `user.emailVerified === false`. Every summary card, activity item, and
+  table row stays static placeholder markup — no backend endpoint exists
+  for dashboard summary or activity data (see Backend Integration below).
 - `tickets.js` — delegates filtering/skeleton/empty-state/pagination-summary
   to `core/table-filter.js` (Status/Priority/Category), and separately
   handles Sort (newest/oldest/priority — reorders rows directly, since
@@ -277,6 +319,56 @@ Future pages follow the same pattern: `pages/my-tickets.js`, etc. — each
 one copies the same shell markup as `dashboard.html` and calls
 `initShell()` too.
 
+## Backend integration (Milestone 6)
+
+The first milestone where the frontend actually calls the backend. Scope
+was deliberately narrow — auth + session + the parts of the dashboard a
+session can drive — confirmed with the user before writing code once it
+became clear the backend has no dashboard-summary or activity-feed
+endpoint at all (verified by reading every controller in the backend
+tree, not assumed).
+
+**Endpoints connected:**
+
+| Endpoint | Used by | Notes |
+|---|---|---|
+| `POST /auth/login` | `auth.js`'s `login()` | Body `{email,password}`; response is `{id,name,email,role}` only — no `status`/`emailVerified` |
+| `GET /account/me` | `auth.js`'s `getCurrentUser()` | The only endpoint with `status`/`emailVerified`; used by session bootstrap and login's post-success redirect decision |
+| `POST /auth/refresh` | `auth.js`'s `refreshToken()` | No body — reads the `refresh_token` cookie automatically (its `Path` is scoped to exactly this endpoint) |
+| `POST /auth/logout` | `auth.js`'s `logout()`, wired to every `[data-logout-action]` element by `shell.js` | Requires a currently-valid access token; the in-memory user cache is cleared regardless of whether the call itself succeeds |
+
+**Session architecture:** `core/auth.js` (raw API calls + an in-memory-only
+`cachedUser` — never `localStorage`, matching the backend's httpOnly-cookie
+design exactly) → `core/session.js` (`bootstrapSession`/`requireAuth`/
+`redirectIfAuthenticated`, the recovery/guard logic) → `core/shell.js`
+(`initShell()` calls `requireAuth()` first, so every authenticated page is
+guarded and topbar-personalized for free, with zero changes needed in six
+of the seven page scripts) → `login.js` (calls `redirectIfAuthenticated()`
+directly, since it has no shell).
+
+**Error handling:** `api.js` (unchanged from Milestone 1 — reused exactly
+as instructed) already turns every non-2xx response into an `ApiError`
+carrying the backend's real `status`/`errorCode`/`message`/
+`validationErrors`. `login.js` shows `error.message` verbatim in every
+failure case (401 invalid credentials, 423 locked account, a network/
+timeout error from `api.js` itself) since the backend's message text is
+already the right thing to show a user, and maps `validationErrors` onto
+specific fields when present. `session.js`'s `bootstrapSession` treats a
+401 from `GET /account/me` as "try a silent refresh," and anything else
+(network failure) as "can't tell if there's a session" — propagated to
+the caller instead of being swallowed as "logged out," so a connectivity
+blip never incorrectly bounces a signed-in user to `login.html`.
+
+**What's still static, and why:** dashboard summary cards, recent
+activity, and the recent-tickets table. The backend has no
+`dashboard`/`summary`/`stats` controller or global activity-feed endpoint
+of any kind (confirmed by reading the full backend controller tree) — the
+only way to populate them would be calling the ticket-list endpoint and
+computing counts client-side, which this milestone explicitly excludes
+("Do NOT implement Tickets"). Confirmed with the user before proceeding;
+revisit once either a real summary endpoint exists or ticket integration
+is in scope.
+
 ## Naming conventions
 
 - **Files**: kebab-case (`login.js`, `auth.css`).
@@ -294,10 +386,12 @@ one copies the same shell markup as `dashboard.html` and calls
   `data-nav="dashboard.html"` (nav active-highlighting; value is the
   target page's filename), `data-active-nav` on `<body>` (a page that isn't
   itself a nav destination, like ticket-details.html, declares which
-  sidebar item should stay highlighted), `data-placeholder-action="..."`
-  (the element's own message, shown as a toast on click — logout,
-  notifications, edit ticket, download/delete attachment, extra pagination
-  pages, all use this one mechanism), `data-filter`/`data-label-prefix`/
+  sidebar item should stay highlighted), `data-logout-action` (marks the
+  real logout triggers `shell.js` wires to `POST /auth/logout` — as of
+  Milestone 6, the one action that's no longer a placeholder),
+  `data-placeholder-action="..."` (the element's own message, shown as a
+  toast on click — notifications, edit ticket, download/delete attachment,
+  extra pagination pages, all still placeholders), `data-filter`/`data-label-prefix`/
   `data-value` (the tickets page's filter dropdowns), and
   `data-status`/`data-priority`/`data-category`/`data-updated`/`data-href`
   (per-row values `tickets.js` filters, sorts, and navigates by).
@@ -384,10 +478,13 @@ animation/transition globally from `base.css`.
   are hardcoded placeholder markup, not generated from any data structure
   — there is nothing here for a future data-loading pass to "hook into"
   beyond replacing the static rows/values directly.
-- Logout (both the sidebar link and the user-menu item) and the
-  notification bell use the same placeholder toast pattern as everywhere
-  else, via `data-placeholder-action` (see Milestone 4 note below — this
-  replaced the earlier Milestone 3 `data-logout-trigger` attribute).
+- The notification bell (and every other non-auth action across the app)
+  still uses the placeholder toast pattern via `data-placeholder-action`.
+  Logout (both the sidebar link and the user-menu item) is real as of
+  Milestone 6 — see Backend Integration above — via the new
+  `data-logout-action` attribute, which replaced Milestone 4's
+  `data-placeholder-action="Sign-out isn't connected..."` on those same
+  two elements across all seven shell pages.
 - **Milestone 4 refactor of Milestone 3's `shell.js`**: consolidated the
   bespoke logout/notification toast wiring into the new generic
   `bindPlaceholderActions()` (now living in `utils.js`), and the hand-rolled
@@ -460,3 +557,16 @@ animation/transition globally from `base.css`.
   to the backend's real distinct actions (`UserController`'s update,
   `AccountController`'s activate/deactivate) even though none of them do
   anything yet.
+- **Milestone 6**: the login form's "Remember me" checkbox is still
+  visual-only — `LoginRequest` has no such field on the backend, so
+  there's nothing to send even now that login is real. `dashboard.js` and
+  `login.js` use top-level `await` (native to ES modules in every current
+  browser) rather than an async-IIFE wrapper, consistent with this
+  project's "modern vanilla JS" stack. Verified end-to-end against a real
+  running instance of the backend (Spring Boot + in-memory H2, started
+  locally for this session only) rather than static assertions alone —
+  see the milestone report for the exact requests/responses checked
+  (login success/failure/lockout, `/account/me`, refresh with and without
+  the CSRF header, logout clearing the session). No backend file was
+  modified to make this possible — H2 was substituted for MySQL purely
+  via Spring profile/property overrides at the command line.
