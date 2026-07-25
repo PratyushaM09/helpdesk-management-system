@@ -4,7 +4,7 @@
  * authentication is wired in the milestone that implements auth.js.
  */
 
-import { showToast, setFieldError, setButtonLoading } from "../core/utils.js";
+import { showToast, setFieldError, setButtonLoading, setupPasswordToggle } from "../core/utils.js";
 import { isValidEmail } from "../core/validation.js";
 
 const loginForm = document.getElementById("login-form");
@@ -15,14 +15,7 @@ const passwordError = document.getElementById("password-error");
 const toggleButton = document.getElementById("toggle-password");
 const submitButton = document.getElementById("login-submit");
 
-toggleButton?.addEventListener("click", () => {
-  const isCurrentlyHidden = passwordInput.type === "password";
-  passwordInput.type = isCurrentlyHidden ? "text" : "password";
-
-  const icon = toggleButton.querySelector("i");
-  icon.className = isCurrentlyHidden ? "bi bi-eye-slash" : "bi bi-eye";
-  toggleButton.setAttribute("aria-label", isCurrentlyHidden ? "Hide password" : "Show password");
-});
+setupPasswordToggle(toggleButton, passwordInput);
 
 function validate() {
   let firstInvalid = null;

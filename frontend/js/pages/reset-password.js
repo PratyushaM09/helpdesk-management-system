@@ -7,13 +7,9 @@
  * it was either).
  */
 
-import { setFieldError, setButtonLoading } from "../core/utils.js";
-import {
-  getPasswordRequirementResults,
-  getPasswordStrength,
-  meetsAllPasswordRequirements,
-  passwordsMatch,
-} from "../core/validation.js";
+import { setFieldError, setButtonLoading, setupPasswordToggle } from "../core/utils.js";
+import { meetsAllPasswordRequirements, passwordsMatch } from "../core/validation.js";
+import { initPasswordStrengthUI } from "../core/password-strength-ui.js";
 
 const resetView = document.getElementById("reset-view");
 const invalidView = document.getElementById("invalid-view");
@@ -28,17 +24,6 @@ if (!token) {
   initResetForm();
 }
 
-function setupPasswordToggle(buttonId, input) {
-  const button = document.getElementById(buttonId);
-  button?.addEventListener("click", () => {
-    const isCurrentlyHidden = input.type === "password";
-    input.type = isCurrentlyHidden ? "text" : "password";
-    const icon = button.querySelector("i");
-    icon.className = isCurrentlyHidden ? "bi bi-eye-slash" : "bi bi-eye";
-    button.setAttribute("aria-label", isCurrentlyHidden ? "Hide password" : "Show password");
-  });
-}
-
 function initResetForm() {
   const form = document.getElementById("reset-password-form");
   const newPasswordInput = document.getElementById("new-password");
@@ -50,33 +35,18 @@ function initResetForm() {
   const requirementItems = new Map(
     Array.from(document.querySelectorAll("[data-requirement]")).map((el) => [el.dataset.requirement, el])
   );
-  const strengthWrapper = document.getElementById("password-strength");
-  const strengthBar = document.getElementById("password-strength-bar");
-  const strengthFill = document.getElementById("password-strength-fill");
-  const strengthLabel = document.getElementById("password-strength-label");
 
-  setupPasswordToggle("toggle-new-password", newPasswordInput);
-  setupPasswordToggle("toggle-confirm-password", confirmPasswordInput);
+  setupPasswordToggle(document.getElementById("toggle-new-password"), newPasswordInput);
+  setupPasswordToggle(document.getElementById("toggle-confirm-password"), confirmPasswordInput);
 
-  function updateRequirements() {
-    getPasswordRequirementResults(newPasswordInput.value).forEach((result) => {
-      const item = requirementItems.get(result.id);
-      if (!item) {
-        return;
-      }
-      item.classList.toggle("is-met", result.met);
-      item.querySelector("i").className = result.met ? "bi bi-check-circle-fill" : "bi bi-circle";
-    });
-  }
-
-  function updateStrength() {
-    const strength = getPasswordStrength(newPasswordInput.value);
-    strengthWrapper.className = `password-strength ${strength.className}`.trim();
-    strengthFill.style.width = `${strength.percent}%`;
-    strengthLabel.textContent = strength.label;
-    strengthBar.setAttribute("aria-valuenow", String(Math.round(strength.percent)));
-    strengthBar.setAttribute("aria-label", strength.label ? `Password strength: ${strength.label}` : "Password strength");
-  }
+  initPasswordStrengthUI({
+    passwordInput: newPasswordInput,
+    strengthWrapper: document.getElementById("password-strength"),
+    strengthBar: document.getElementById("password-strength-bar"),
+    strengthFill: document.getElementById("password-strength-fill"),
+    strengthLabel: document.getElementById("password-strength-label"),
+    requirementItems,
+  });
 
   function updateMatch() {
     if (!confirmPasswordInput.value) {
@@ -91,8 +61,6 @@ function initResetForm() {
   }
 
   newPasswordInput.addEventListener("input", () => {
-    updateRequirements();
-    updateStrength();
     if (confirmPasswordInput.value) {
       updateMatch();
     }

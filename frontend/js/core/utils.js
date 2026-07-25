@@ -185,6 +185,30 @@ export function bindPlaceholderActions() {
 }
 
 /**
+ * Wires a show/hide toggle button for a password input — used on every
+ * page with a password field (login, reset-password, profile) so the
+ * toggle behavior (and its icon/aria-label swap) is defined exactly once.
+ * @param {HTMLButtonElement} toggleButton
+ * @param {HTMLInputElement} input
+ */
+export function setupPasswordToggle(toggleButton, input) {
+  if (!toggleButton || !input) {
+    return;
+  }
+
+  toggleButton.addEventListener("click", () => {
+    const isCurrentlyHidden = input.type === "password";
+    input.type = isCurrentlyHidden ? "text" : "password";
+
+    const icon = toggleButton.querySelector("i");
+    if (icon) {
+      icon.className = isCurrentlyHidden ? "bi bi-eye-slash" : "bi bi-eye";
+    }
+    toggleButton.setAttribute("aria-label", isCurrentlyHidden ? "Hide password" : "Show password");
+  });
+}
+
+/**
  * Sets or clears a field-level validation error: toggles the input's
  * `aria-invalid`, and shows/hides the associated error element (expected to
  * already be wired via that input's `aria-describedby`).

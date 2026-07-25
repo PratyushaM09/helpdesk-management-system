@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile · HelpDesk</title>
+  <meta name="description" content="Manage your HelpDesk profile and account security." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/shell.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="app-shell" id="app-shell">
+    <aside class="app-shell__sidebar sidebar" id="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <i class="bi bi-headset" aria-hidden="true"></i>
+        <span class="sidebar__brand-text">HelpDesk</span>
+      </div>
+
+      <nav class="sidebar__nav" aria-label="Main navigation">
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="dashboard.html" data-nav="dashboard.html">
+              <i class="bi bi-speedometer2" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="tickets.html" data-nav="tickets.html">
+              <i class="bi bi-ticket-detailed" aria-hidden="true"></i>
+              <span>Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="my-tickets.html" data-nav="my-tickets.html">
+              <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+              <span>My Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="create-ticket.html" data-nav="create-ticket.html">
+              <i class="bi bi-plus-circle" aria-hidden="true"></i>
+              <span>Create Ticket</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="profile.html" data-nav="profile.html">
+              <i class="bi bi-person-circle" aria-hidden="true"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar__divider" role="separator"></div>
+        <p class="sidebar__section-label">Administration</p>
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="users.html" data-nav="users.html">
+              <i class="bi bi-people" aria-hidden="true"></i>
+              <span>Users</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="roles.html" data-nav="roles.html">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+              <span>Roles</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__footer">
+        <button
+          type="button"
+          class="sidebar__link"
+          data-placeholder-action="Sign-out isn't connected to the backend yet."
+        >
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-shell__overlay" id="shell-overlay" hidden></div>
+
+    <header class="app-shell__topbar topbar">
+      <button
+        type="button"
+        class="topbar__menu-toggle"
+        id="sidebar-toggle"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="sidebar"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <p class="topbar__title" aria-hidden="true">Profile</p>
+
+      <div class="topbar__search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input
+          type="search"
+          class="topbar__search-input"
+          placeholder="Search tickets…"
+          aria-label="Search tickets"
+        />
+      </div>
+
+      <div class="topbar__actions">
+        <button
+          type="button"
+          class="topbar__icon-btn"
+          aria-label="Notifications, 3 unread"
+          data-placeholder-action="Notifications aren't wired up yet."
+        >
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="topbar__badge" aria-hidden="true">3</span>
+        </button>
+
+        <div class="topbar__user">
+          <button
+            type="button"
+            class="topbar__user-trigger"
+            id="user-menu-trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="user-menu"
+          >
+            <span class="avatar" aria-hidden="true">JD</span>
+            <span class="topbar__user-info">
+              <span class="topbar__user-name">Jordan Diaz</span>
+              <span class="badge badge--brand">Admin</span>
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="dropdown-menu" id="user-menu" role="menu" aria-label="User menu" hidden>
+            <a class="dropdown-menu__item" role="menuitem" href="profile.html">
+              <i class="bi bi-person" aria-hidden="true"></i>
+              Profile
+            </a>
+            <div class="dropdown-menu__divider" role="separator"></div>
+            <button
+              type="button"
+              class="dropdown-menu__item"
+              role="menuitem"
+              data-placeholder-action="Sign-out isn't connected to the backend yet."
+            >
+              <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell__main" id="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-header__title">Profile</h1>
+          <p class="page-header__subtitle">Manage your personal information and account security.</p>
+        </div>
+      </div>
+
+      <div class="grid-detail">
+        <div>
+          <div class="card mb-6">
+            <div class="card__header">
+              <h2>Personal Information</h2>
+            </div>
+            <div class="card__body">
+              <form id="profile-form" novalidate>
+                <div class="form-group">
+                  <label class="form-label form-label--required" for="name-input">Full name</label>
+                  <input
+                    class="form-control"
+                    type="text"
+                    id="name-input"
+                    name="name"
+                    maxlength="100"
+                    value="Jordan Diaz"
+                    aria-describedby="name-error"
+                    required
+                  />
+                  <p class="form-error" id="name-error" role="alert" hidden></p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="email-input">Work email</label>
+                  <input
+                    class="form-control"
+                    type="email"
+                    id="email-input"
+                    name="email"
+                    value="jordan.diaz@company.com"
+                    aria-describedby="email-hint"
+                    disabled
+                  />
+                  <p class="form-hint" id="email-hint">
+                    Your email can't be changed here — contact an administrator.
+                  </p>
+                </div>
+
+                <button type="submit" id="profile-submit" class="btn btn--primary">
+                  <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  Save Changes
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card mb-6">
+            <div class="card__header">
+              <h2>Change Password</h2>
+            </div>
+            <div class="card__body">
+              <form id="password-form" novalidate>
+                <div class="form-group">
+                  <label class="form-label form-label--required" for="current-password-input">Current password</label>
+                  <div class="input-affix">
+                    <i class="bi bi-lock input-affix__icon" aria-hidden="true"></i>
+                    <input
+                      class="form-control"
+                      type="password"
+                      id="current-password-input"
+                      name="currentPassword"
+                      autocomplete="current-password"
+                      aria-describedby="current-password-error"
+                      required
+                    />
+                    <button type="button" id="toggle-current-password" class="input-affix__toggle" aria-label="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <p class="form-error" id="current-password-error" role="alert" hidden></p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label form-label--required" for="new-password-input">New password</label>
+                  <div class="input-affix">
+                    <i class="bi bi-lock input-affix__icon" aria-hidden="true"></i>
+                    <input
+                      class="form-control"
+                      type="password"
+                      id="new-password-input"
+                      name="newPassword"
+                      autocomplete="new-password"
+                      aria-describedby="new-password-error password-requirements-list"
+                      required
+                    />
+                    <button type="button" id="toggle-new-password" class="input-affix__toggle" aria-label="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <p class="form-error" id="new-password-error" role="alert" hidden></p>
+
+                  <div class="password-strength" id="password-strength">
+                    <div
+                      class="password-strength__bar"
+                      id="password-strength-bar"
+                      role="progressbar"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      aria-valuenow="0"
+                      aria-label="Password strength"
+                    >
+                      <div class="password-strength__fill" id="password-strength-fill"></div>
+                    </div>
+                    <span class="password-strength__label" id="password-strength-label"></span>
+                  </div>
+
+                  <ul class="password-requirements" id="password-requirements-list" aria-label="Password requirements">
+                    <li class="password-requirements__item" data-requirement="length">
+                      <i class="bi bi-circle" aria-hidden="true"></i> 10-128 characters
+                    </li>
+                    <li class="password-requirements__item" data-requirement="uppercase">
+                      <i class="bi bi-circle" aria-hidden="true"></i> One uppercase letter
+                    </li>
+                    <li class="password-requirements__item" data-requirement="lowercase">
+                      <i class="bi bi-circle" aria-hidden="true"></i> One lowercase letter
+                    </li>
+                    <li class="password-requirements__item" data-requirement="digit">
+                      <i class="bi bi-circle" aria-hidden="true"></i> One number
+                    </li>
+                    <li class="password-requirements__item" data-requirement="special">
+                      <i class="bi bi-circle" aria-hidden="true"></i> One special character
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label form-label--required" for="confirm-password-input">Confirm new password</label>
+                  <div class="input-affix">
+                    <i class="bi bi-lock input-affix__icon" aria-hidden="true"></i>
+                    <input
+                      class="form-control"
+                      type="password"
+                      id="confirm-password-input"
+                      name="confirmPassword"
+                      autocomplete="new-password"
+                      aria-describedby="confirm-password-error"
+                      required
+                    />
+                    <button type="button" id="toggle-confirm-password" class="input-affix__toggle" aria-label="Show password">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <p class="form-error" id="confirm-password-error" role="alert" hidden></p>
+                </div>
+
+                <button type="submit" id="password-submit" class="btn btn--primary">
+                  <i class="bi bi-shield-lock" aria-hidden="true"></i>
+                  Update Password
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h2>Recent Account Activity</h2>
+            </div>
+            <div class="card__body">
+              <ul class="activity-list">
+                <li class="activity-item">
+                  <span class="activity-item__icon"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i></span>
+                  <div>
+                    <p class="activity-item__text">Signed in from a new device</p>
+                    <p class="activity-item__time">2 hours ago</p>
+                  </div>
+                </li>
+                <li class="activity-item">
+                  <span class="activity-item__icon"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+                  <div>
+                    <p class="activity-item__text">Changed account password</p>
+                    <p class="activity-item__time">3 days ago</p>
+                  </div>
+                </li>
+                <li class="activity-item">
+                  <span class="activity-item__icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span>
+                  <div>
+                    <p class="activity-item__text">Updated profile information</p>
+                    <p class="activity-item__time">1 week ago</p>
+                  </div>
+                </li>
+                <li class="activity-item">
+                  <span class="activity-item__icon"><i class="bi bi-patch-check" aria-hidden="true"></i></span>
+                  <div>
+                    <p class="activity-item__text">Verified email address</p>
+                    <p class="activity-item__time">2 weeks ago</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card grid-detail__sidebar">
+          <div class="card__header">
+            <h2>Account Summary</h2>
+          </div>
+          <div class="card__body">
+            <ul class="meta-list">
+              <li class="meta-list__item">
+                <span class="meta-list__label">Role</span>
+                <span class="meta-list__value"><span class="badge badge--brand">Admin</span></span>
+              </li>
+              <li class="meta-list__item">
+                <span class="meta-list__label">Status</span>
+                <span class="meta-list__value"><span class="badge badge--success">Active</span></span>
+              </li>
+              <li class="meta-list__item">
+                <span class="meta-list__label">Email Verification</span>
+                <span class="meta-list__value">
+                  <span class="badge badge--success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verified</span>
+                </span>
+              </li>
+              <li class="meta-list__item">
+                <span class="meta-list__label">Member Since</span>
+                <span class="meta-list__value">Jan 10, 2026</span>
+              </li>
+              <li class="meta-list__item">
+                <span class="meta-list__label">Last Updated</span>
+                <span class="meta-list__value">3 days ago</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/pages/profile.js"></script>
+</body>
+</html>

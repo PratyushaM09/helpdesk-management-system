@@ -1453,7 +1453,11 @@ textarea.form-control {
   gap: var(--space-1);
 }
 
-.attachment-row__action {
+/* Small square icon-only button — attachment download/delete originally,
+   now also the Users table's row actions. Generic on purpose: reach for
+   this instead of a one-off button style wherever a row/card needs a
+   compact icon action. */
+.icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1463,12 +1467,12 @@ textarea.form-control {
   color: var(--color-text-muted);
 }
 
-.attachment-row__action:hover {
+.icon-btn:hover {
   background-color: var(--color-bg-sunken);
   color: var(--color-text-primary);
 }
 
-.attachment-row__action--danger:hover {
+.icon-btn--danger:hover {
   color: var(--color-danger-600);
 }
 

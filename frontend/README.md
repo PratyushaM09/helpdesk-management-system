@@ -1,4 +1,4 @@
-# HelpDesk Frontend — Foundation, Auth UI, App Shell & Tickets (Phase 4, Milestones 1-4)
+# HelpDesk Frontend — Foundation, Auth UI, App Shell, Tickets & Admin (Phase 4, Milestones 1-5)
 
 Vanilla HTML5/CSS3/ES6 frontend for the HelpDesk Management System. No
 framework, no build step — every file is served as-is.
@@ -16,6 +16,9 @@ frontend/
   tickets.html                   Ticket list: filters, sortable/filterable table, pagination chrome
   ticket-details.html             Full ticket view: description, timeline, comments, attachments, history
   create-ticket.html               New-ticket form: title/description/category/priority/attachments
+  profile.html                      Personal info, password change, account summary, recent activity
+  users.html                         Admin user list: search/role/status filters, responsive table
+  roles.html                         Read-only role cards: description, example permissions, user count
   css/
     variables.css      Design tokens — the only file allowed to contain a hex color
     base.css            Reset, root typography, focus/accessibility defaults
@@ -46,7 +49,11 @@ frontend/
                                 script calls into
       dropdown.js              Generic trigger+menu open/close/outside-click/Escape controller
       filter-dropdown.js       Wires every [data-filter] dropdown into a single-select filter
+      table-filter.js          Filters a static table's rows against [data-filter] dropdowns,
+                                 shared by tickets.js and users.js
       attachment-preview.js    Fake (never-uploaded) attachment preview, shared by 2 pages
+      password-strength-ui.js  Wires a password input to the requirements checklist + strength
+                                 meter markup, shared by reset-password.js and profile.js
     pages/
       login.js                     Password toggle, client-side validation, simulated submit
       forgot-password.js            Email validation, simulated send, success-state swap
@@ -60,6 +67,12 @@ frontend/
                                         attachment upload preview
       create-ticket.js                 Priority chips, character counter, validation,
                                         simulated submit/reset, attachment upload preview
+      profile.js                        Password toggles, live strength/requirements, two
+                                          independent validated forms, both simulated submits
+      users.js                          Role/status filtering of static rows (via
+                                          core/table-filter.js) — no row navigation, no sort
+      roles.js                          Just calls core/shell.js's initShell() — the page is
+                                          fully static/read-only
   assets/
     images/
     icons/
@@ -98,18 +111,22 @@ for the sign-in/recovery flow, `shell.css` for anything behind the sidebar):
    treatment.
 6. **shell.css** — shared by every authenticated-family screen
    (`dashboard.html`, `tickets.html`, `ticket-details.html`,
-   `create-ticket.html` now; profile/admin pages later): the sidebar's dark
-   visual skin (brand row, nav links, active-state, tablet icon-rail
-   label-hiding), and the topbar's contents (search box + its focus
-   animation, notification badge, user menu trigger). A future
-   non-auth/non-shell page family gets its own equivalent file rather than
-   growing `components.css` with one-off rules.
+   `create-ticket.html`, `profile.html`, `users.html`, `roles.html` — every
+   page behind the sidebar now): the sidebar's dark visual skin (brand row,
+   nav links, active-state, tablet icon-rail label-hiding), and the
+   topbar's contents (search box + its focus animation, notification
+   badge, user menu trigger). A future non-auth/non-shell page family gets
+   its own equivalent file rather than growing `components.css` with
+   one-off rules.
 
-Notably, **no `tickets.css`/`ticket-details.css` exists** — everything
-those three pages needed turned out to be either a genuinely reusable
-component (→ `components.css`) or a generic layout primitive (→
-`layout.css`), never something specific to "being a ticket page." That's
-evidence the split is working as intended rather than a gap.
+Notably, **no `tickets.css`, `profile.css`, or `users.css` exists** —
+every page built across Milestones 4-5 needed only genuinely reusable
+components (→ `components.css`) or generic layout primitives (→
+`layout.css`), never something specific to "being a ticket page" or
+"being the users page." `roles.html` in particular needed *zero* new
+CSS at all — its three role cards are 100% existing `.card`/`.badge`/
+`.flex` utilities. That's evidence the split is working as intended
+rather than a gap.
 
 **Visual identity** ("Signal & Slate"): a cool slate-teal neutral scale, a
 deep teal brand color for primary actions, and an amber "signal" accent
@@ -147,7 +164,9 @@ without ever crowding `core/`). A page's script only ever imports from
   with no domain knowledge: toasts, loading indicators, `setButtonLoading`
   (spinner + disable a button during an in-flight or simulated request),
   `setFieldError` (toggle a field's `aria-invalid` + its error text
-  together), `bindPlaceholderActions` (wires every `[data-placeholder-action]`
+  together), `setupPasswordToggle` (show/hide a password field — used by
+  login.js, reset-password.js, and profile.js instead of three copies),
+  `bindPlaceholderActions` (wires every `[data-placeholder-action]`
   element to show its own message as a toast — the one mechanism behind
   every "not wired to the backend yet" button across the whole app), debounce,
   date formatting, HTML escaping, cookie reading.
@@ -186,20 +205,39 @@ without ever crowding `core/`). A page's script only ever imports from
   `initAttachmentUpload({ uploadArea, fileInput, list })` wires a
   drag-and-drop + click-to-browse upload zone that appends a preview row
   per selected `File` (real name/size/icon, via the browser's File API) to
-  a list, with a Remove button per row. Nothing is ever sent anywhere —
-  shared verbatim by ticket-details.html (adding to an existing ticket)
-  and create-ticket.html (attaching while filing a new one).
+  a list, with a Remove button per row (`.icon-btn`/`.icon-btn--danger` —
+  a generic small icon-button class also used by the Users table's row
+  actions, not an attachment-specific one despite the module's name).
+  Nothing is ever sent anywhere — shared verbatim by ticket-details.html
+  and create-ticket.html.
+- `table-filter.js` — no imports. `initTableFilter({ tableBody,
+  tableWrapper, emptyState, paginationSummary, skeleton, filterKeys, noun })`
+  owns exactly "which static rows are currently visible": it listens for
+  `filterchange` events matching `filterKeys`, toggles row `hidden`,
+  and keeps the empty-state/pagination-summary/skeleton-reveal in sync.
+  Sorting and row-click navigation are page-specific and stay in
+  `tickets.js`, built on top of this module's returned `getRows()`.
+- `password-strength-ui.js` — imports `validation.js`.
+  `initPasswordStrengthUI({ passwordInput, strengthWrapper, strengthBar,
+  strengthFill, strengthLabel, requirementItems })` wires a password
+  input's `input` event to update both the requirements checklist and the
+  strength meter, returning an `update()` the caller can also invoke
+  manually (`profile.js` calls it after a simulated successful password
+  change to reset the meter). Used by `reset-password.js` and `profile.js`
+  instead of two copies of the same DOM-wiring logic.
 
 `pages/` — one script per HTML page, imported by that page only, and
 importing only from `core/` (never from another file in `pages/`):
 
-- `login.js` — password visibility toggle, required/format validation,
-  simulated submit with a loading state.
+- `login.js` — password visibility toggle (via `core/utils.js`'s
+  `setupPasswordToggle`), required/format validation, simulated submit
+  with a loading state.
 - `forgot-password.js` — email validation, simulated send, then swaps the
   card's content to the success state (focus moves to its heading).
 - `reset-password.js` — reads `?token=` from the URL and shows an
-  invalid-link state if it's missing; otherwise wires live password
-  requirement/strength feedback, a live confirm-password match check,
+  invalid-link state if it's missing; otherwise wires password show/hide
+  (`setupPasswordToggle`) and live requirement/strength feedback
+  (`core/password-strength-ui.js`), a live confirm-password match check,
   submit validation, and a simulated success swap.
 - `verification-pending.js` — resend button: simulated send +
   success toast + a 30-second disabled cooldown with a live countdown
@@ -208,13 +246,12 @@ importing only from `core/` (never from another file in `pages/`):
   nothing else. Every summary card, activity item, and table row on
   `dashboard.html` is static placeholder markup, so there's no
   dashboard-specific behavior to add yet.
-- `tickets.js` — after a simulated ~600ms load (the one place the loading
-  skeleton is actually seen, since the table itself is static), listens for
-  `filterchange` events to hide/show rows (Status/Priority/Category) or
-  reorder them (Sort: newest/oldest/priority), updates the pagination
-  summary and empty-state visibility, and turns a click anywhere on a row
-  (that isn't already a link/button) into navigation to that row's "View"
-  link destination.
+- `tickets.js` — delegates filtering/skeleton/empty-state/pagination-summary
+  to `core/table-filter.js` (Status/Priority/Category), and separately
+  handles Sort (newest/oldest/priority — reorders rows directly, since
+  sorting isn't part of what `table-filter.js` owns) and turns a click
+  anywhere on a row (that isn't already a link/button) into navigation to
+  that row's "View" link destination.
 - `ticket-details.js` — wires each comment's collapse/expand toggle, the
   comment editor's Public/Internal segmented control, and the attachment
   upload preview (via `core/attachment-preview.js`).
@@ -224,10 +261,21 @@ importing only from `core/` (never from another file in `pages/`):
   a simulated submit, and a `reset` handler that also clears the chips,
   attachment previews, and validation state the native form reset doesn't
   know about.
+- `profile.js` — two independent forms, each with its own validation and
+  simulated submit: personal info (name required; email is `disabled` in
+  the markup, so there's nothing to validate there) and change-password
+  (current password required, new password via the same
+  `password-strength-ui.js` + `validation.js` combo as reset-password.html,
+  confirm-match check). All three password fields get `setupPasswordToggle`.
+- `users.js` — delegates entirely to `core/table-filter.js` (Role/Status);
+  no sort, no row-click navigation — there's no user-details page yet, so
+  every row action is a `data-placeholder-action` toast.
+- `roles.js` — the page is fully static/read-only (no CRUD, no filtering),
+  so this only calls `initShell()`.
 
-Future pages follow the same pattern: `pages/profile.js`,
-`pages/admin-users.js`, `pages/admin-roles.js`, etc. — each one copies the
-same shell markup as `dashboard.html` and calls `initShell()` too.
+Future pages follow the same pattern: `pages/my-tickets.js`, etc. — each
+one copies the same shell markup as `dashboard.html` and calls
+`initShell()` too.
 
 ## Naming conventions
 
@@ -275,15 +323,17 @@ conditions, so `variables.css` documents them for reference):
 - `480px` — fine-tuning for dense components (password requirements
   checklist drops to one column; the page header stacks vertically).
 
-The ticket table (`.table--stack`, opt-in per table) additionally
-restructures itself below 768px: the header row is visually hidden (but
+The ticket and users tables (`.table--stack`, opt-in per table) additionally
+restructure themselves below 768px: the header row is visually hidden (but
 stays in the accessibility tree), and each row becomes a stacked card
 where every cell grows a bold label — generated from its own
 `data-label` attribute via CSS `content: attr(data-label)`, not
 duplicated markup — instead of losing columns to horizontal scrolling.
-`ticket-details.html`'s `.grid-detail` (content + sidebar summary) drops
-its sidebar below the main content at 1024px, same breakpoint as the app
-shell's sidebar-to-rail collapse.
+`ticket-details.html` and `profile.html` both use `.grid-detail` (content
++ sidebar summary), dropping the sidebar below the main content at
+1024px, same breakpoint as the app shell's sidebar-to-rail collapse.
+`roles.html`'s `.grid-cols-3` role cards follow the existing utility's own
+collapse (2 columns at ≤1024px, 1 at ≤768px) with no page-specific work.
 
 All interactive elements meet WCAG AA contrast and expose a visible
 `:focus-visible` ring; `prefers-reduced-motion: reduce` disables every
@@ -371,3 +421,42 @@ animation/transition globally from `base.css`.
   post-filter row counts, but pages 2/3 and "Next" are wired to the same
   placeholder-toast pattern as everything else not yet connected to a
   backend.
+- **Milestone 5 refactor**: extracted `setupPasswordToggle` (from three
+  near-identical copies in `login.js`/`reset-password.js`/the new
+  `profile.js`) and `password-strength-ui.js` (from `reset-password.js`,
+  now shared with `profile.js`) into `core/`; extracted `table-filter.js`
+  from `tickets.js`'s filter/skeleton/empty-state logic once `users.js`
+  needed the identical shape. Also renamed the attachment row's icon
+  button class from `.attachment-row__action` to the generic `.icon-btn`
+  once the Users table needed the same small icon-button style for
+  Edit/Activate/Deactivate — it was never really attachment-specific.
+  `ticket-details.html`/`create-ticket.html`'s markup and
+  `attachment-preview.js`'s generated markup were updated to match; no
+  visual or behavioral change to Milestone 4's pages.
+- User/Role domain facts were read from backend source (no backend files
+  changed): `User` has a single `name` field (not first/last), `email`,
+  `role`, `status` (`UserStatus`: `ACTIVE`/`LOCKED`/`DEACTIVATED`), and
+  `emailVerified` — no avatar/phone/department fields exist, so
+  `profile.html` doesn't invent any. Self-service profile update
+  (`UpdateProfileRequest`) only carries `name` — email is *not*
+  self-service-editable, hence `email-input` is `disabled` with an
+  explanatory hint rather than a real editable field. `RoleName` is
+  `USER`/`SUPPORT_ENGINEER`/`ADMIN`; `Role` is a real entity (not just the
+  enum) with a seeded `description` per role (`RoleSeeder`) — the exact
+  text `roles.html` uses. All three seeded roles have `system: true`
+  (undeletable), reflected in each card's "System role" badge.
+- **No formal Permission entity/API exists on the backend** (confirmed:
+  the fixed-role RBAC model has no ACL framework) — `roles.html`'s
+  "example permissions" and permission badges are illustrative capability
+  groupings I derived from the actual `@PreAuthorize` rules across
+  `UserController`/`RoleController`/`TicketController`/`CommentController`/
+  `AttachmentController`, not a real permissions list a future API call
+  would return verbatim. Assigned user counts (1 Admin / 3 Support
+  Engineers / 4 Users) match `users.html`'s 8 placeholder rows exactly, for
+  narrative consistency between the two pages.
+- `users.html` has no user-details page to link to yet, so unlike
+  `tickets.html` its rows aren't clickable/navigable — every row action
+  (Edit, Activate/Deactivate) is a `data-placeholder-action` toast, mapped
+  to the backend's real distinct actions (`UserController`'s update,
+  `AccountController`'s activate/deactivate) even though none of them do
+  anything yet.

@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users · HelpDesk</title>
+  <meta name="description" content="Manage HelpDesk user accounts." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/shell.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="app-shell" id="app-shell">
+    <aside class="app-shell__sidebar sidebar" id="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <i class="bi bi-headset" aria-hidden="true"></i>
+        <span class="sidebar__brand-text">HelpDesk</span>
+      </div>
+
+      <nav class="sidebar__nav" aria-label="Main navigation">
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="dashboard.html" data-nav="dashboard.html">
+              <i class="bi bi-speedometer2" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="tickets.html" data-nav="tickets.html">
+              <i class="bi bi-ticket-detailed" aria-hidden="true"></i>
+              <span>Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="my-tickets.html" data-nav="my-tickets.html">
+              <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+              <span>My Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="create-ticket.html" data-nav="create-ticket.html">
+              <i class="bi bi-plus-circle" aria-hidden="true"></i>
+              <span>Create Ticket</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="profile.html" data-nav="profile.html">
+              <i class="bi bi-person-circle" aria-hidden="true"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar__divider" role="separator"></div>
+        <p class="sidebar__section-label">Administration</p>
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="users.html" data-nav="users.html">
+              <i class="bi bi-people" aria-hidden="true"></i>
+              <span>Users</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="roles.html" data-nav="roles.html">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+              <span>Roles</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__footer">
+        <button
+          type="button"
+          class="sidebar__link"
+          data-placeholder-action="Sign-out isn't connected to the backend yet."
+        >
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-shell__overlay" id="shell-overlay" hidden></div>
+
+    <header class="app-shell__topbar topbar">
+      <button
+        type="button"
+        class="topbar__menu-toggle"
+        id="sidebar-toggle"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="sidebar"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <p class="topbar__title" aria-hidden="true">Users</p>
+
+      <div class="topbar__search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input
+          type="search"
+          class="topbar__search-input"
+          placeholder="Search tickets…"
+          aria-label="Search tickets"
+        />
+      </div>
+
+      <div class="topbar__actions">
+        <button
+          type="button"
+          class="topbar__icon-btn"
+          aria-label="Notifications, 3 unread"
+          data-placeholder-action="Notifications aren't wired up yet."
+        >
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="topbar__badge" aria-hidden="true">3</span>
+        </button>
+
+        <div class="topbar__user">
+          <button
+            type="button"
+            class="topbar__user-trigger"
+            id="user-menu-trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="user-menu"
+          >
+            <span class="avatar" aria-hidden="true">JD</span>
+            <span class="topbar__user-info">
+              <span class="topbar__user-name">Jordan Diaz</span>
+              <span class="badge badge--brand">Admin</span>
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="dropdown-menu" id="user-menu" role="menu" aria-label="User menu" hidden>
+            <a class="dropdown-menu__item" role="menuitem" href="profile.html">
+              <i class="bi bi-person" aria-hidden="true"></i>
+              Profile
+            </a>
+            <div class="dropdown-menu__divider" role="separator"></div>
+            <button
+              type="button"
+              class="dropdown-menu__item"
+              role="menuitem"
+              data-placeholder-action="Sign-out isn't connected to the backend yet."
+            >
+              <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell__main" id="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-header__title">Users</h1>
+          <p class="page-header__subtitle">Manage accounts, roles, and access across the HelpDesk.</p>
+        </div>
+        <div class="page-header__actions">
+          <button
+            type="button"
+            class="btn btn--primary"
+            data-placeholder-action="User creation isn't wired up yet — this is a UI-only milestone."
+          >
+            <i class="bi bi-person-plus" aria-hidden="true"></i>
+            Add User
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="input-affix filter-bar__search">
+          <i class="bi bi-search input-affix__icon" aria-hidden="true"></i>
+          <input
+            type="search"
+            class="form-control"
+            id="user-search"
+            placeholder="Search by name or email…"
+            aria-label="Search users by name or email"
+          />
+        </div>
+
+        <div class="filter-dropdown" data-filter="role" data-label-prefix="Role">
+          <button
+            type="button"
+            class="filter-dropdown__trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="role-filter-menu"
+          >
+            <span class="filter-dropdown__label">Role: All</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown-menu" id="role-filter-menu" role="menu" hidden>
+            <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="">
+              All roles <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="ADMIN">
+              Admin <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="SUPPORT_ENGINEER">
+              Support Engineer <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="USER">
+              User <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-dropdown" data-filter="status" data-label-prefix="Status">
+          <button
+            type="button"
+            class="filter-dropdown__trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="user-status-filter-menu"
+          >
+            <span class="filter-dropdown__label">Status: All</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown-menu" id="user-status-filter-menu" role="menu" hidden>
+            <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="">
+              All statuses <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="ACTIVE">
+              Active <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="LOCKED">
+              Locked <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="DEACTIVATED">
+              Deactivated <i class="bi bi-check2" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__body">
+          <div class="skeleton-table" id="users-skeleton" aria-hidden="true">
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--lg"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--lg"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--lg"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+            <div class="skeleton-table__row">
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--fill"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--lg"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--sm"></span>
+              <span class="skeleton skeleton-table__cell skeleton-table__cell--md"></span>
+            </div>
+          </div>
+
+          <div class="table-wrapper" id="users-table-wrapper" hidden>
+            <table class="table table--hover table--stack" id="users-table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Created</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr data-role="ADMIN" data-status="ACTIVE">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">JD</span>
+                      Jordan Diaz
+                    </div>
+                  </td>
+                  <td data-label="Email">jordan.diaz@company.com</td>
+                  <td data-label="Role"><span class="badge badge--brand">Admin</span></td>
+                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
+                  <td data-label="Created">Jan 10, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Jordan Diaz" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Jordan Diaz" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="SUPPORT_ENGINEER" data-status="ACTIVE">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">PS</span>
+                      Priya Sharma
+                    </div>
+                  </td>
+                  <td data-label="Email">priya.sharma@company.com</td>
+                  <td data-label="Role"><span class="badge badge--info">Support Engineer</span></td>
+                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
+                  <td data-label="Created">Feb 3, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Priya Sharma" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Priya Sharma" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="SUPPORT_ENGINEER" data-status="ACTIVE">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">AC</span>
+                      Alex Chen
+                    </div>
+                  </td>
+                  <td data-label="Email">alex.chen@company.com</td>
+                  <td data-label="Role"><span class="badge badge--info">Support Engineer</span></td>
+                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
+                  <td data-label="Created">Feb 15, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Alex Chen" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Alex Chen" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="SUPPORT_ENGINEER" data-status="LOCKED">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">SO</span>
+                      Sam Okafor
+                    </div>
+                  </td>
+                  <td data-label="Email">sam.okafor@company.com</td>
+                  <td data-label="Role"><span class="badge badge--info">Support Engineer</span></td>
+                  <td data-label="Status"><span class="badge badge--danger">Locked</span></td>
+                  <td data-label="Created">Mar 1, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Sam Okafor" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn" aria-label="Activate Sam Okafor" data-placeholder-action="Activating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="USER" data-status="ACTIVE">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">ML</span>
+                      Morgan Lee
+                    </div>
+                  </td>
+                  <td data-label="Email">morgan.lee@company.com</td>
+                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
+                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
+                  <td data-label="Created">Mar 20, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Morgan Lee" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Morgan Lee" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="USER" data-status="ACTIVE">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">TB</span>
+                      Taylor Brooks
+                    </div>
+                  </td>
+                  <td data-label="Email">taylor.brooks@company.com</td>
+                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
+                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
+                  <td data-label="Created">Apr 5, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Taylor Brooks" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Taylor Brooks" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="USER" data-status="DEACTIVATED">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">JR</span>
+                      Jamie Rivera
+                    </div>
+                  </td>
+                  <td data-label="Email">jamie.rivera@company.com</td>
+                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
+                  <td data-label="Status"><span class="badge badge--neutral">Deactivated</span></td>
+                  <td data-label="Created">Apr 18, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Jamie Rivera" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn" aria-label="Activate Jamie Rivera" data-placeholder-action="Activating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr data-role="USER" data-status="LOCKED">
+                  <td data-label="Name">
+                    <div class="flex items-center gap-3">
+                      <span class="avatar avatar--sm" aria-hidden="true">CK</span>
+                      Casey Kim
+                    </div>
+                  </td>
+                  <td data-label="Email">casey.kim@company.com</td>
+                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
+                  <td data-label="Status"><span class="badge badge--danger">Locked</span></td>
+                  <td data-label="Created">May 2, 2026</td>
+                  <td data-label="Actions">
+                    <button type="button" class="icon-btn" aria-label="Edit Casey Kim" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="icon-btn" aria-label="Activate Casey Kim" data-placeholder-action="Activating users isn't wired up yet — this is a UI-only milestone.">
+                      <i class="bi bi-check-circle" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" id="users-empty-state" hidden>
+            <i class="bi bi-people empty-state__icon" aria-hidden="true"></i>
+            <h2 class="empty-state__title">No users match your filters</h2>
+            <p class="empty-state__description">Try adjusting or clearing your filters to see more results.</p>
+            <button type="button" class="btn btn--secondary" id="clear-user-filters-button">
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+              Clear filters
+            </button>
+          </div>
+
+          <nav class="pagination" aria-label="User list pages">
+            <p class="pagination__summary" id="user-pagination-summary">Showing 1-8 of 8 users</p>
+            <div class="pagination__controls">
+              <button type="button" class="pagination__button" aria-label="Previous page" disabled>
+                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="pagination__button is-active" aria-current="page" data-page="1">1</button>
+              <button
+                type="button"
+                class="pagination__button"
+                data-placeholder-action="This placeholder demo only has one page of users."
+              >2</button>
+              <button
+                type="button"
+                class="pagination__button"
+                aria-label="Next page"
+                data-placeholder-action="This placeholder demo only has one page of users."
+              >
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/pages/users.js"></script>
+</body>
+</html>

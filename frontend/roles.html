@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roles · HelpDesk</title>
+  <meta name="description" content="View HelpDesk roles and their permissions." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/shell.css" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="app-shell" id="app-shell">
+    <aside class="app-shell__sidebar sidebar" id="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <i class="bi bi-headset" aria-hidden="true"></i>
+        <span class="sidebar__brand-text">HelpDesk</span>
+      </div>
+
+      <nav class="sidebar__nav" aria-label="Main navigation">
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="dashboard.html" data-nav="dashboard.html">
+              <i class="bi bi-speedometer2" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="tickets.html" data-nav="tickets.html">
+              <i class="bi bi-ticket-detailed" aria-hidden="true"></i>
+              <span>Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="my-tickets.html" data-nav="my-tickets.html">
+              <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
+              <span>My Tickets</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="create-ticket.html" data-nav="create-ticket.html">
+              <i class="bi bi-plus-circle" aria-hidden="true"></i>
+              <span>Create Ticket</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="profile.html" data-nav="profile.html">
+              <i class="bi bi-person-circle" aria-hidden="true"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar__divider" role="separator"></div>
+        <p class="sidebar__section-label">Administration</p>
+        <ul class="sidebar__list">
+          <li>
+            <a class="sidebar__link" href="users.html" data-nav="users.html">
+              <i class="bi bi-people" aria-hidden="true"></i>
+              <span>Users</span>
+            </a>
+          </li>
+          <li>
+            <a class="sidebar__link" href="roles.html" data-nav="roles.html">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+              <span>Roles</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__footer">
+        <button
+          type="button"
+          class="sidebar__link"
+          data-placeholder-action="Sign-out isn't connected to the backend yet."
+        >
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-shell__overlay" id="shell-overlay" hidden></div>
+
+    <header class="app-shell__topbar topbar">
+      <button
+        type="button"
+        class="topbar__menu-toggle"
+        id="sidebar-toggle"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="sidebar"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      <p class="topbar__title" aria-hidden="true">Roles</p>
+
+      <div class="topbar__search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input
+          type="search"
+          class="topbar__search-input"
+          placeholder="Search tickets…"
+          aria-label="Search tickets"
+        />
+      </div>
+
+      <div class="topbar__actions">
+        <button
+          type="button"
+          class="topbar__icon-btn"
+          aria-label="Notifications, 3 unread"
+          data-placeholder-action="Notifications aren't wired up yet."
+        >
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="topbar__badge" aria-hidden="true">3</span>
+        </button>
+
+        <div class="topbar__user">
+          <button
+            type="button"
+            class="topbar__user-trigger"
+            id="user-menu-trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="user-menu"
+          >
+            <span class="avatar" aria-hidden="true">JD</span>
+            <span class="topbar__user-info">
+              <span class="topbar__user-name">Jordan Diaz</span>
+              <span class="badge badge--brand">Admin</span>
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="dropdown-menu" id="user-menu" role="menu" aria-label="User menu" hidden>
+            <a class="dropdown-menu__item" role="menuitem" href="profile.html">
+              <i class="bi bi-person" aria-hidden="true"></i>
+              Profile
+            </a>
+            <div class="dropdown-menu__divider" role="separator"></div>
+            <button
+              type="button"
+              class="dropdown-menu__item"
+              role="menuitem"
+              data-placeholder-action="Sign-out isn't connected to the backend yet."
+            >
+              <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell__main" id="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-header__title">Roles</h1>
+          <p class="page-header__subtitle">
+            Fixed system roles and what each one can do. Read-only — roles aren't created or deleted here.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3">
+        <div class="card">
+          <div class="card__header">
+            <h2>Admin</h2>
+            <span class="badge badge--neutral">System role</span>
+          </div>
+          <div class="card__body">
+            <p class="mb-4">Platform owner &mdash; manages users, roles, and categories.</p>
+
+            <p class="form-label mb-2">Example permissions</p>
+            <ul class="flex flex-col gap-2 mb-4">
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Manage users: create, update, deactivate, or reactivate any account
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Manage roles and categories
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Assign or reassign any ticket to an agent
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Edit, reopen, close, or delete any ticket
+              </li>
+            </ul>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="badge badge--brand">User Management</span>
+              <span class="badge badge--brand">Role Management</span>
+              <span class="badge badge--brand">Ticket Assignment</span>
+              <span class="badge badge--brand">Full Ticket Access</span>
+            </div>
+          </div>
+          <div class="card__footer">
+            <i class="bi bi-people" aria-hidden="true"></i>
+            1 user assigned
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <h2>Support Engineer</h2>
+            <span class="badge badge--neutral">System role</span>
+          </div>
+          <div class="card__body">
+            <p class="mb-4">Resolves tickets assigned to them.</p>
+
+            <p class="form-label mb-2">Example permissions</p>
+            <ul class="flex flex-col gap-2 mb-4">
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                View and comment on assigned tickets
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Add internal, staff-only notes
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Update the status of assigned tickets
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Upload attachments to assigned tickets
+              </li>
+            </ul>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="badge badge--info">Assigned Tickets</span>
+              <span class="badge badge--info">Internal Notes</span>
+              <span class="badge badge--info">Status Updates</span>
+            </div>
+          </div>
+          <div class="card__footer">
+            <i class="bi bi-people" aria-hidden="true"></i>
+            3 users assigned
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <h2>User</h2>
+            <span class="badge badge--neutral">System role</span>
+          </div>
+          <div class="card__body">
+            <p class="mb-4">Standard requester &mdash; creates and tracks their own tickets.</p>
+
+            <p class="form-label mb-2">Example permissions</p>
+            <ul class="flex flex-col gap-2 mb-4">
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Create new support tickets
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                View and comment on their own tickets
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Edit their own ticket's title and description while open
+              </li>
+              <li class="flex items-center gap-2">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                Reopen or confirm-close their own resolved tickets
+              </li>
+            </ul>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="badge badge--neutral">Ticket Creation</span>
+              <span class="badge badge--neutral">Own Tickets Only</span>
+            </div>
+          </div>
+          <div class="card__footer">
+            <i class="bi bi-people" aria-hidden="true"></i>
+            4 users assigned
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="js/pages/roles.js"></script>
+</body>
+</html>

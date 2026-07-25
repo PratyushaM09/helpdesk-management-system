@@ -44,12 +44,12 @@ function buildPreviewRow(file) {
       <span class="attachment-row__meta">${formatFileSize(file.size)} &middot; Pending upload</span>
     </span>
     <span class="attachment-row__actions">
-      <button type="button" class="attachment-row__action attachment-row__action--danger" aria-label="Remove ${escapeHtml(file.name)}">
+      <button type="button" class="icon-btn icon-btn--danger" aria-label="Remove ${escapeHtml(file.name)}">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
     </span>
   `;
-  row.querySelector(".attachment-row__action").addEventListener("click", () => row.remove());
+  row.querySelector(".icon-btn").addEventListener("click", () => row.remove());
   return row;
 }
 
