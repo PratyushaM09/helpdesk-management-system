@@ -1,0 +1,189 @@
+/* Login / auth screen only. Split layout: a narrative brand panel on the
+   left, the task (signing in) on the right — the one place in this
+   foundation where the interface is allowed to make a first impression
+   before it gets to work. */
+
+.auth-screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+}
+
+@media (max-width: 1024px) {
+  .auth-screen {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-screen__brand {
+    display: none;
+  }
+}
+
+/* ---------- Brand panel ---------- */
+.auth-screen__brand {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-12);
+  color: var(--color-neutral-50);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(245, 166, 35, 0.16), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(105, 192, 177, 0.18), transparent 50%),
+    linear-gradient(155deg, var(--color-brand-900) 0%, var(--color-neutral-950) 70%);
+}
+
+/* Faint geometric grid — felt as texture, not read as a pattern. */
+.auth-screen__brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(247, 249, 249, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(247, 249, 249, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 85%);
+  pointer-events: none;
+}
+
+.auth-screen__brand-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+  animation: auth-rise var(--transition-slow) var(--ease-standard) both;
+}
+
+.auth-screen__brand-mark .bi {
+  color: var(--color-signal-400);
+  font-size: var(--font-size-xl);
+}
+
+.auth-screen__brand-copy {
+  position: relative;
+  max-width: 30rem;
+  animation: auth-rise var(--transition-slow) var(--ease-standard) both;
+  animation-delay: 80ms;
+}
+
+.auth-screen__brand-copy h1 {
+  font-size: var(--font-size-4xl);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-4);
+}
+
+.auth-screen__brand-copy p {
+  font-size: var(--font-size-md);
+  color: var(--color-neutral-300);
+  line-height: var(--line-height-relaxed);
+}
+
+.auth-screen__brand-footer {
+  position: relative;
+  display: flex;
+  gap: var(--space-6);
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-400);
+  animation: auth-rise var(--transition-slow) var(--ease-standard) both;
+  animation-delay: 160ms;
+}
+
+/* ---------- Form panel ---------- */
+.auth-screen__form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background-color: var(--color-bg-canvas);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-8);
+  animation: auth-rise var(--transition-slow) var(--ease-standard) both;
+  animation-delay: 40ms;
+}
+
+.auth-card__header {
+  margin-bottom: var(--space-8);
+}
+
+.auth-card__header h2 {
+  margin-bottom: var(--space-2);
+}
+
+.auth-card__header p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.auth-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.auth-card__link {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.auth-card__footer {
+  margin-top: var(--space-8);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.input-affix {
+  position: relative;
+}
+
+.input-affix .form-control {
+  padding-left: var(--space-10);
+}
+
+.input-affix__icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.input-affix__toggle {
+  position: absolute;
+  right: var(--space-1);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.input-affix__toggle:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-sunken);
+}
+
+@keyframes auth-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
