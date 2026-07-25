@@ -278,30 +278,7 @@
             <button type="button" class="dropdown-menu__item is-selected" role="menuitemradio" aria-checked="true" data-value="">
               All categories <i class="bi bi-check2" aria-hidden="true"></i>
             </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Software">
-              Software <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Hardware">
-              Hardware <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Network">
-              Network <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Email">
-              Email <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Accounts">
-              Accounts <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Security">
-              Security <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Infrastructure">
-              Infrastructure <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="dropdown-menu__item" role="menuitemradio" aria-checked="false" data-value="Other">
-              Other <i class="bi bi-check2" aria-hidden="true"></i>
-            </button>
+            <!-- Remaining options are populated from GET /categories by tickets.js. -->
           </div>
         </div>
 
@@ -377,169 +354,16 @@
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
-              <tbody id="tickets-table-body">
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000042"
-                  data-status="OPEN"
-                  data-priority="HIGH"
-                  data-category="Network"
-                  data-updated="2026-07-25T08:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000042</span></td>
-                  <td data-label="Title">Cannot connect to VPN</td>
-                  <td data-label="Category">Network</td>
-                  <td data-label="Priority"><span class="badge badge--danger">High</span></td>
-                  <td data-label="Status"><span class="badge badge--info">Open</span></td>
-                  <td data-label="Assigned To">Unassigned</td>
-                  <td data-label="Updated">2 hours ago</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000042" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000041"
-                  data-status="IN_PROGRESS"
-                  data-priority="MEDIUM"
-                  data-category="Hardware"
-                  data-updated="2026-07-25T07:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000041</span></td>
-                  <td data-label="Title">Monitor flickering on startup</td>
-                  <td data-label="Category">Hardware</td>
-                  <td data-label="Priority"><span class="badge badge--signal">Medium</span></td>
-                  <td data-label="Status"><span class="badge badge--signal">In Progress</span></td>
-                  <td data-label="Assigned To">Sam Okafor</td>
-                  <td data-label="Updated">3 hours ago</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000041" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000039"
-                  data-status="WAITING_FOR_CUSTOMER"
-                  data-priority="LOW"
-                  data-category="Accounts"
-                  data-updated="2026-07-25T05:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000039</span></td>
-                  <td data-label="Title">Request access to shared drive</td>
-                  <td data-label="Category">Accounts</td>
-                  <td data-label="Priority"><span class="badge badge--neutral">Low</span></td>
-                  <td data-label="Status"><span class="badge badge--neutral">Waiting for Customer</span></td>
-                  <td data-label="Assigned To">Priya Sharma</td>
-                  <td data-label="Updated">5 hours ago</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000039" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000037"
-                  data-status="RESOLVED"
-                  data-priority="MEDIUM"
-                  data-category="Hardware"
-                  data-updated="2026-07-25T09:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000037</span></td>
-                  <td data-label="Title">Printer offline on 3rd floor</td>
-                  <td data-label="Category">Hardware</td>
-                  <td data-label="Priority"><span class="badge badge--signal">Medium</span></td>
-                  <td data-label="Status"><span class="badge badge--success">Resolved</span></td>
-                  <td data-label="Assigned To">Alex Chen</td>
-                  <td data-label="Updated">1 hour ago</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000037" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000035"
-                  data-status="CLOSED"
-                  data-priority="LOW"
-                  data-category="Infrastructure"
-                  data-updated="2026-07-24T10:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000035</span></td>
-                  <td data-label="Title">Onboarding laptop setup</td>
-                  <td data-label="Category">Infrastructure</td>
-                  <td data-label="Priority"><span class="badge badge--neutral">Low</span></td>
-                  <td data-label="Status"><span class="badge badge--neutral">Closed</span></td>
-                  <td data-label="Assigned To">IT Support</td>
-                  <td data-label="Updated">Yesterday</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000035" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000033"
-                  data-status="ASSIGNED"
-                  data-priority="URGENT"
-                  data-category="Email"
-                  data-updated="2026-07-24T14:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000033</span></td>
-                  <td data-label="Title">Email delivery delayed</td>
-                  <td data-label="Category">Email</td>
-                  <td data-label="Priority"><span class="badge badge--urgent">Urgent</span></td>
-                  <td data-label="Status"><span class="badge badge--brand">Assigned</span></td>
-                  <td data-label="Assigned To">Priya Sharma</td>
-                  <td data-label="Updated">Yesterday</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000033" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000030"
-                  data-status="OPEN"
-                  data-priority="HIGH"
-                  data-category="Accounts"
-                  data-updated="2026-07-23T10:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000030</span></td>
-                  <td data-label="Title">Password reset not working</td>
-                  <td data-label="Category">Accounts</td>
-                  <td data-label="Priority"><span class="badge badge--danger">High</span></td>
-                  <td data-label="Status"><span class="badge badge--info">Open</span></td>
-                  <td data-label="Assigned To">Unassigned</td>
-                  <td data-label="Updated">2 days ago</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000030" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  data-href="ticket-details.html?ticket=HD-2026-000028"
-                  data-status="IN_PROGRESS"
-                  data-priority="URGENT"
-                  data-category="Security"
-                  data-updated="2026-07-22T10:00:00"
-                >
-                  <td data-label="Ticket Number"><span class="badge badge--neutral">HD-2026-000028</span></td>
-                  <td data-label="Title">VPN certificate expired</td>
-                  <td data-label="Category">Security</td>
-                  <td data-label="Priority"><span class="badge badge--urgent">Urgent</span></td>
-                  <td data-label="Status"><span class="badge badge--signal">In Progress</span></td>
-                  <td data-label="Assigned To">Alex Chen</td>
-                  <td data-label="Updated">3 days ago</td>
-                  <td data-label="Actions">
-                    <a href="ticket-details.html?ticket=HD-2026-000028" class="btn btn--ghost btn--sm">
-                      View <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
+              <tbody id="tickets-table-body"></tbody>
             </table>
+          </div>
+
+          <div class="alert alert--danger mb-6" id="tickets-error-state" role="alert" hidden>
+            <i class="bi bi-exclamation-octagon-fill alert__icon" aria-hidden="true"></i>
+            <div>
+              <p class="alert__title">Couldn't load tickets</p>
+              <p id="tickets-error-message"></p>
+            </div>
           </div>
 
           <div class="empty-state" id="tickets-empty-state" hidden>
@@ -553,31 +377,13 @@
           </div>
 
           <nav class="pagination" aria-label="Ticket list pages">
-            <p class="pagination__summary" id="pagination-summary">Showing 1-8 of 8 tickets</p>
-            <div class="pagination__controls">
+            <p class="pagination__summary" id="pagination-summary">Loading…</p>
+            <div class="pagination__controls" id="pagination-controls">
               <button type="button" class="pagination__button" id="pagination-prev" aria-label="Previous page" disabled>
                 <i class="bi bi-chevron-left" aria-hidden="true"></i>
               </button>
-              <button type="button" class="pagination__button is-active" aria-current="page" data-page="1">1</button>
-              <button
-                type="button"
-                class="pagination__button"
-                data-page="2"
-                data-placeholder-action="This placeholder demo only has one page of tickets."
-              >2</button>
-              <button
-                type="button"
-                class="pagination__button"
-                data-page="3"
-                data-placeholder-action="This placeholder demo only has one page of tickets."
-              >3</button>
-              <button
-                type="button"
-                class="pagination__button"
-                id="pagination-next"
-                aria-label="Next page"
-                data-placeholder-action="This placeholder demo only has one page of tickets."
-              >
+              <!-- Page-number buttons are generated by tickets.js from the real totalPages. -->
+              <button type="button" class="pagination__button" id="pagination-next" aria-label="Next page" disabled>
                 <i class="bi bi-chevron-right" aria-hidden="true"></i>
               </button>
             </div>

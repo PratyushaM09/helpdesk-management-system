@@ -179,6 +179,14 @@
         </div>
       </div>
 
+      <div class="alert alert--warning mb-6" id="wrong-role-notice" role="alert" hidden>
+        <i class="bi bi-exclamation-triangle-fill alert__icon" aria-hidden="true"></i>
+        <div>
+          <p class="alert__title">Only standard users can create tickets</p>
+          <p>Support Engineer and Admin accounts don't file tickets on this system — ask the requester to submit it themselves.</p>
+        </div>
+      </div>
+
       <div class="container container--md">
         <div class="card">
           <div class="card__body">
@@ -217,16 +225,8 @@
 
             <div class="form-group">
               <label class="form-label form-label--required" for="category-select">Category</label>
-              <select class="form-control" id="category-select" name="category" aria-describedby="category-error" required>
-                <option value="" disabled selected>Select a category</option>
-                <option value="Software">Software</option>
-                <option value="Hardware">Hardware</option>
-                <option value="Network">Network</option>
-                <option value="Email">Email</option>
-                <option value="Accounts">Accounts</option>
-                <option value="Security">Security</option>
-                <option value="Infrastructure">Infrastructure</option>
-                <option value="Other">Other</option>
+              <select class="form-control" id="category-select" name="category" aria-describedby="category-error" required disabled>
+                <option value="" disabled selected>Loading categories…</option>
               </select>
               <p class="form-error" id="category-error" role="alert" hidden></p>
             </div>

@@ -1,4 +1,4 @@
-# HelpDesk Frontend — Foundation, Auth UI, App Shell, Tickets, Admin & Backend Integration (Phase 4, Milestones 1-6)
+# HelpDesk Frontend — Foundation through Ticket Module Backend Integration (Phase 4, Milestones 1-7)
 
 Vanilla HTML5/CSS3/ES6 frontend for the HelpDesk Management System. No
 framework, no build step — every file is served as-is.
@@ -13,9 +13,9 @@ frontend/
   reset-password.html         New password + confirm, reads ?token= from the URL
   verification-pending.html    "Check your email" holding page after account creation
   dashboard.html                Authenticated app shell (sidebar+topbar) + placeholder dashboard content
-  tickets.html                   Ticket list: filters, sortable/filterable table, pagination chrome
-  ticket-details.html             Full ticket view: description, timeline, comments, attachments, history
-  create-ticket.html               New-ticket form: title/description/category/priority/attachments
+  tickets.html                   Real GET /tickets: server pagination/sort, client-scoped filter/search
+  ticket-details.html             Real ticket by ?id=: detail, actions, comments, attachments, history
+  create-ticket.html               Real POST /tickets + real GET /categories + staged attachment upload
   profile.html                      Personal info, password change, account summary, recent activity
   users.html                         Admin user list: search/role/status filters, responsive table
   roles.html                         Read-only role cards: description, example permissions, user count
@@ -56,9 +56,20 @@ frontend/
       filter-dropdown.js       Wires every [data-filter] dropdown into a single-select filter
       table-filter.js          Filters a static table's rows against [data-filter] dropdowns,
                                  shared by tickets.js and users.js
-      attachment-preview.js    Fake (never-uploaded) attachment preview, shared by 2 pages
+      attachment-preview.js    initFileDropZone (generic drag/drop + click-to-browse wiring) and
+                                 initStagedAttachmentUpload (preview-then-upload-after-creation, for
+                                 create-ticket.html); ticket-details.js uploads immediately instead,
+                                 using this module's exported iconFor/formatFileSize helpers directly
       password-strength-ui.js  Wires a password input to the requirements checklist + strength
                                  meter markup, shared by reset-password.js and profile.js
+      ticket-format.js         Status/priority/history-action → {label, badgeClass} lookups shared
+                                 by tickets.js and ticket-details.js
+      tickets-api.js           Real ticket CRUD/actions (list/get/create/update/assign/reassign/
+                                 status/reopen/delete) + GET /categories with an in-memory cache
+      comments-api.js         Real comment list/add/update/delete
+      attachments-api.js      Real attachment list/get(metadata)/delete via api.js, plus upload via
+                                 XMLHttpRequest — the one deliberate exception to "always use api.js"
+                                 in this codebase, since fetch() can't report upload progress
     pages/
       login.js                     Real POST /auth/login, backend ErrorResponse messages
                                      surfaced verbatim, redirect based on email-verification status
@@ -69,12 +80,15 @@ frontend/
                                         top of core/shell.js's initShell(); summary/activity/table
                                         stay static (no backend endpoint exists for them — see
                                         Backend Integration below)
-      tickets.js                      Skeleton→table swap, filter/sort of static rows,
-                                        row-click navigation, empty-state toggling
-      ticket-details.js                Comment collapse, visibility segmented control,
-                                        attachment upload preview
-      create-ticket.js                 Priority chips, character counter, validation,
-                                        simulated submit/reset, attachment upload preview
+      tickets.js                      Real GET /tickets: server-side page/sort, client-side
+                                        Status/Priority/Category filter + search + Priority
+                                        sort scoped to the loaded page (no such backend params exist)
+      ticket-details.js                Real ticket load-by-id, every action (edit/assign/reassign/
+                                        status/reopen/delete) via a shared generic modal, real
+                                        comment + attachment CRUD, real history
+      create-ticket.js                 Real POST /tickets + GET /categories, staged attachments
+                                        uploaded to the new ticket only after creation succeeds,
+                                        role-gated (USER-only, matching the backend)
       profile.js                        Password toggles, live strength/requirements, two
                                           independent validated forms, both simulated submits
       users.js                          Role/status filtering of static rows (via
@@ -368,6 +382,78 @@ computing counts client-side, which this milestone explicitly excludes
 ("Do NOT implement Tickets"). Confirmed with the user before proceeding;
 revisit once either a real summary endpoint exists or ticket integration
 is in scope.
+
+## Ticket module backend integration (Milestone 7)
+
+Every remaining piece of placeholder ticket data replaced with the real
+backend. Verified end-to-end against a real running instance (not just
+read from source) — see Manual verification in the Milestone 7 report for
+the full request/response trail (login × 3 roles, create, list, detail,
+assign, an illegal status transition rejected with 409, status change,
+public + internal comments with visibility enforcement, comment-edit
+permission enforcement, multipart upload, metadata-only download,
+attachment delete, resolve → reopen, and soft-delete) — every response
+matched the frontend's assumptions exactly.
+
+**Endpoints connected:** `GET/POST /tickets`, `GET/PUT /tickets/{id}`,
+`POST /tickets/{id}/{assign,reassign,status,reopen}`,
+`DELETE /tickets/{id}`, `GET /tickets/{id}/history`,
+`GET/POST /tickets/{id}/comments`, `PUT/DELETE /comments/{id}`,
+`GET/POST /tickets/{id}/attachments`, `GET/DELETE /attachments/{id}`,
+`GET /categories`. Also `GET /users` (admin-only) — used narrowly, only to
+populate the Assign/Reassign modal's support-engineer picker, since
+assigning a ticket needs a real agent id and no other endpoint provides
+one; this is the one place this milestone reaches slightly outside the
+Ticket module, and it's read-only.
+
+**Architecture:** `core/tickets-api.js` / `comments-api.js` /
+`attachments-api.js` are thin `api.js` wrappers, one file per sub-resource
+(matching the existing `auth.js`/`session.js` one-concern-per-file
+convention) — no page ever calls `fetch` directly except `attachments-api.js`'s
+upload functions, which use `XMLHttpRequest` instead (the one deliberate,
+documented exception to "always go through `api.js`," since `fetch()`
+cannot report upload progress and this milestone asked for it). `core/ticket-format.js`
+centralizes the status/priority/history-action → label+badge-class
+mappings so `tickets.js` and `ticket-details.js` can't drift apart.
+`core/attachment-preview.js` was split into a generic `initFileDropZone`
+(detects file selection) plus `initStagedAttachmentUpload` (create-ticket's
+stage-then-upload-after-creation flow) — `ticket-details.js` calls
+`initFileDropZone` directly and uploads immediately instead, since its
+ticket already exists.
+
+**Client-side vs. server-side (per this milestone's own instruction):**
+`GET /tickets` only supports `page`/`size`/`sort` — no status, priority,
+category, or search query params exist on the backend at all (confirmed
+by reading `TicketController`/`TicketServiceImpl`, not assumed). So on
+`tickets.html`: Newest/Oldest sort is real (`sort=updatedAt,desc|asc`);
+Status/Priority/Category filtering, the search box, and "Priority
+(high→low)" sort are all client-side, scoped to whichever page is
+currently loaded — exactly the "otherwise client-side filtering on the
+current page only" fallback the brief specified.
+
+**Two real backend limitations shaped the UI, not the other way round:**
+- `CommentResponse`/`AttachmentResponse` expose the author/uploader's
+  *name* only, never an id. Showing Edit/Delete only on your own
+  comments/attachments is therefore a best-effort name match against the
+  signed-in user — the backend is the actual enforcement (a false-positive
+  button click just gets a real 403/`"Only the ... author or an
+  administrator may modify this ..."`).
+- `GET /attachments/{id}` ("download") is metadata-only — there is no
+  `FileStorageService` anywhere in the backend, confirmed by reading
+  `AttachmentController`/`AttachmentServiceImpl`. Download calls the real
+  endpoint, then explains there's no file content to download, rather than
+  faking a browser download that couldn't possibly work.
+
+**Timeline vs. History, reconciled with real data:** the backend never
+writes a `CREATED` history row (confirmed live — a fresh ticket's history
+is empty until the first real action), so "Created" in both sections is
+synthesized from the ticket's own `createdByName`/`createdAt`, not a
+history entry. **Timeline** (compact status story) shows Created followed
+by real history oldest-first. **History** (the audit log) shows the same
+real entries newest-first, per this milestone's explicit instruction —
+literal backend data only, no synthetic row. Both reuse the identical
+`.timeline` component and a shared row-builder; only the entry order (and
+Timeline's one synthetic leading item) differs.
 
 ## Naming conventions
 

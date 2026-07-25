@@ -160,6 +160,19 @@ export function escapeHtml(value) {
 }
 
 /**
+ * Two-letter initials from a display name (e.g. "Jordan Diaz" → "JD"),
+ * used anywhere a name is shown as a small avatar — the topbar and comment
+ * authors alike.
+ * @param {string} name
+ * @returns {string}
+ */
+export function getInitials(name) {
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0];
+  return initials.toUpperCase();
+}
+
+/**
  * Reads a cookie value by name (used for the double-submit CSRF token).
  * @param {string} name
  * @returns {string|null}

@@ -10,7 +10,7 @@
  * this file — only "who is signed in" belongs here.
  */
 
-import { bindPlaceholderActions } from "./utils.js";
+import { bindPlaceholderActions, getInitials } from "./utils.js";
 import { initDropdown } from "./dropdown.js";
 import { requireAuth } from "./session.js";
 import { logout } from "./auth.js";
@@ -73,12 +73,6 @@ function applyUserToTopbar(user) {
     roleEl.textContent = role.text;
     roleEl.className = `badge ${role.badgeClass}`;
   }
-}
-
-function getInitials(name) {
-  const parts = name.trim().split(/\s+/);
-  const initials = parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0];
-  return initials.toUpperCase();
 }
 
 /** Wires every real logout trigger (sidebar link + user-menu item) to the actual backend call. */

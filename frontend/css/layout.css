@@ -125,6 +125,12 @@
   color: var(--color-text-secondary);
 }
 
+/* Preserves manual line breaks in plain-text backend content (ticket
+   descriptions) without needing dangerouslySetInnerHTML-style HTML. */
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+
 /* ---------- App shell skeleton ---------- */
 /* The structural grid every authenticated page (dashboard, tickets,
    profile, admin, ...) shares. Visual skin for the sidebar/topbar

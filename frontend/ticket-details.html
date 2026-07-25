@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HD-2026-000042 · Ticket Details · HelpDesk</title>
+  <title>Ticket Details · HelpDesk</title>
   <meta name="description" content="HelpDesk ticket details, comments, attachments, and history." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -172,359 +172,240 @@
     </header>
 
     <main class="app-shell__main" id="main-content">
-      <div class="page-header">
-        <div>
-          <a href="tickets.html" class="btn btn--ghost btn--sm mb-2">
-            <i class="bi bi-arrow-left" aria-hidden="true"></i>
-            Back to Tickets
-          </a>
-          <h1 class="page-header__title">Cannot connect to VPN</h1>
-          <div class="flex items-center gap-2 mt-2">
-            <span class="badge badge--neutral">HD-2026-000042</span>
-            <span class="badge badge--info">Open</span>
-            <span class="badge badge--danger">High</span>
-          </div>
-        </div>
-        <div class="page-header__actions">
-          <button
-            type="button"
-            class="btn btn--secondary"
-            data-placeholder-action="Editing isn't wired up yet — this is a UI-only milestone."
-          >
-            <i class="bi bi-pencil" aria-hidden="true"></i>
-            Edit Ticket
-          </button>
-        </div>
+      <a href="tickets.html" class="btn btn--ghost btn--sm mb-2">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        Back to Tickets
+      </a>
+
+      <div class="flex justify-center mt-8" id="ticket-loading">
+        <div class="spinner spinner--lg" role="status"><span class="sr-only">Loading ticket…</span></div>
       </div>
 
-      <div class="grid-detail">
-        <div>
-          <div class="card mb-6">
-            <div class="card__header">
-              <h2>Description</h2>
-            </div>
-            <div class="card__body">
-              <p class="mb-4">
-                I'm unable to connect to the corporate VPN since this morning. I get a
-                "certificate not trusted" error immediately after entering my credentials.
-              </p>
-              <p class="mb-4">
-                I've already tried restarting my laptop and reinstalling the VPN client, but
-                the issue persists. This is blocking me from reaching the shared drive and
-                several internal tools.
-              </p>
-              <p class="text-mono">
-                Device: Company-issued MacBook Pro<br />
-                VPN client version: 4.12.1<br />
-                Error code: ERR_CERT_UNTRUSTED
-              </p>
-            </div>
+      <div class="alert alert--danger mb-6" id="ticket-error" role="alert" hidden>
+        <i class="bi bi-exclamation-octagon-fill alert__icon" aria-hidden="true"></i>
+        <p id="ticket-error-message"></p>
+      </div>
+
+      <div id="ticket-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-header__title" id="ticket-title"></h1>
+            <div class="flex items-center gap-2 mt-2" id="ticket-badges"></div>
           </div>
+          <div class="page-header__actions flex flex-wrap gap-2">
+            <button type="button" class="btn btn--secondary" id="action-edit" hidden>
+              <i class="bi bi-pencil" aria-hidden="true"></i>
+              Edit Ticket
+            </button>
+            <button type="button" class="btn btn--secondary" id="action-assign" hidden>
+              <i class="bi bi-person-plus" aria-hidden="true"></i>
+              Assign
+            </button>
+            <button type="button" class="btn btn--secondary" id="action-reassign" hidden>
+              <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+              Reassign
+            </button>
 
-          <div class="card mb-6">
-            <div class="card__header">
-              <h2>Timeline</h2>
-            </div>
-            <div class="card__body">
-              <div class="timeline">
-                <div class="timeline__item is-complete">
-                  <span class="timeline__rail">
-                    <span class="timeline__marker"></span>
-                    <span class="timeline__line"></span>
-                  </span>
-                  <div class="timeline__content">
-                    <p class="timeline__title">Created</p>
-                    <p class="timeline__meta">Morgan Lee opened this ticket &middot; 2 hours ago</p>
-                  </div>
-                </div>
-                <div class="timeline__item">
-                  <span class="timeline__rail">
-                    <span class="timeline__marker"></span>
-                    <span class="timeline__line"></span>
-                  </span>
-                  <div class="timeline__content">
-                    <p class="timeline__title">Assigned</p>
-                    <p class="timeline__meta">Pending</p>
-                  </div>
-                </div>
-                <div class="timeline__item">
-                  <span class="timeline__rail">
-                    <span class="timeline__marker"></span>
-                    <span class="timeline__line"></span>
-                  </span>
-                  <div class="timeline__content">
-                    <p class="timeline__title">In Progress</p>
-                    <p class="timeline__meta">Pending</p>
-                  </div>
-                </div>
-                <div class="timeline__item">
-                  <span class="timeline__rail">
-                    <span class="timeline__marker"></span>
-                  </span>
-                  <div class="timeline__content">
-                    <p class="timeline__title">Resolved</p>
-                    <p class="timeline__meta">Pending</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card mb-6">
-            <div class="card__header">
-              <h2>Comments</h2>
-            </div>
-            <div class="card__body">
-              <div class="comment">
-                <span class="avatar avatar--sm" aria-hidden="true">ML</span>
-                <div class="comment__content">
-                  <div class="comment__header">
-                    <span class="comment__author">Morgan Lee</span>
-                    <span class="badge badge--neutral">User</span>
-                    <span class="comment__time">45 minutes ago</span>
-                    <button
-                      type="button"
-                      class="comment__collapse"
-                      aria-expanded="true"
-                      aria-controls="comment-1-body"
-                      aria-label="Collapse Morgan Lee's comment"
-                    >
-                      <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                  <p class="comment__body" id="comment-1-body">
-                    I forgot to mention — this started right after the latest macOS update.
-                    Not sure if that's related.
-                  </p>
-                  <p class="comment__preview">
-                    I forgot to mention — this started right after the latest macOS update…
-                  </p>
-                </div>
-              </div>
-
-              <div class="comment comment--internal">
-                <span class="avatar avatar--sm" aria-hidden="true">PS</span>
-                <div class="comment__content">
-                  <div class="comment__header">
-                    <span class="comment__author">Priya Sharma</span>
-                    <span class="badge badge--info">Support Engineer</span>
-                    <span class="badge badge--signal"><i class="bi bi-lock-fill" aria-hidden="true"></i> Internal</span>
-                    <span class="comment__time">12 minutes ago</span>
-                    <button
-                      type="button"
-                      class="comment__collapse"
-                      aria-expanded="true"
-                      aria-controls="comment-2-body"
-                      aria-label="Collapse Priya Sharma's comment"
-                    >
-                      <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                  <p class="comment__body" id="comment-2-body">
-                    Checked the certificate authority logs — the intermediate cert expired
-                    for MacBook clients specifically. Escalating to the Security team.
-                  </p>
-                  <p class="comment__preview">
-                    Checked the certificate authority logs — the intermediate cert expired…
-                  </p>
-                </div>
-              </div>
-
-              <div class="comment-editor">
-                <label class="form-label" for="comment-input">Add a comment</label>
-                <textarea
-                  class="form-control"
-                  id="comment-input"
-                  rows="4"
-                  placeholder="Write an update, ask a question, or leave an internal note…"
-                ></textarea>
-                <div class="comment-editor__toolbar">
-                  <div class="segmented-control" role="radiogroup" aria-label="Comment visibility">
-                    <button
-                      type="button"
-                      class="segmented-control__option is-active"
-                      role="radio"
-                      aria-checked="true"
-                      data-visibility="PUBLIC"
-                    >
-                      <i class="bi bi-globe2" aria-hidden="true"></i>
-                      Public
-                    </button>
-                    <button
-                      type="button"
-                      class="segmented-control__option"
-                      role="radio"
-                      aria-checked="false"
-                      data-visibility="INTERNAL"
-                    >
-                      <i class="bi bi-lock-fill" aria-hidden="true"></i>
-                      Internal
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn--primary"
-                    data-placeholder-action="Posting comments isn't wired up yet — this is a UI-only milestone."
-                  >
-                    <i class="bi bi-send" aria-hidden="true"></i>
-                    Post Comment
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card mb-6">
-            <div class="card__header">
-              <h2>Attachments</h2>
-            </div>
-            <div class="card__body">
-              <div class="attachment-row">
-                <span class="attachment-row__icon"><i class="bi bi-file-earmark-image" aria-hidden="true"></i></span>
-                <span class="attachment-row__body">
-                  <span class="attachment-row__name">vpn-error-screenshot.png</span>
-                  <span class="attachment-row__meta">245 KB &middot; Uploaded by Morgan Lee &middot; 2 hours ago</span>
-                </span>
-                <span class="attachment-row__actions">
-                  <button
-                    type="button"
-                    class="icon-btn"
-                    aria-label="Download vpn-error-screenshot.png"
-                    data-placeholder-action="File downloads aren't wired up yet."
-                  >
-                    <i class="bi bi-download" aria-hidden="true"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn icon-btn--danger"
-                    aria-label="Delete vpn-error-screenshot.png"
-                    data-placeholder-action="Attachment deletion isn't wired up yet."
-                  >
-                    <i class="bi bi-trash" aria-hidden="true"></i>
-                  </button>
-                </span>
-              </div>
-
-              <div class="attachment-row">
-                <span class="attachment-row__icon"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i></span>
-                <span class="attachment-row__body">
-                  <span class="attachment-row__name">certificate-details.pdf</span>
-                  <span class="attachment-row__meta">1.1 MB &middot; Uploaded by Priya Sharma &middot; 12 minutes ago</span>
-                </span>
-                <span class="attachment-row__actions">
-                  <button
-                    type="button"
-                    class="icon-btn"
-                    aria-label="Download certificate-details.pdf"
-                    data-placeholder-action="File downloads aren't wired up yet."
-                  >
-                    <i class="bi bi-download" aria-hidden="true"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn icon-btn--danger"
-                    aria-label="Delete certificate-details.pdf"
-                    data-placeholder-action="Attachment deletion isn't wired up yet."
-                  >
-                    <i class="bi bi-trash" aria-hidden="true"></i>
-                  </button>
-                </span>
-              </div>
-
-              <div id="attachment-preview-list"></div>
-
-              <div
-                class="upload-area mt-4"
-                id="attachment-upload"
-                tabindex="0"
-                role="button"
-                aria-label="Upload an attachment: drag and drop files, or press Enter to browse"
+            <div class="filter-dropdown" id="action-status-dropdown" hidden>
+              <button
+                type="button"
+                class="filter-dropdown__trigger"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="status-action-menu"
               >
-                <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
-                <p><strong>Drag and drop files here</strong>, or click to browse</p>
-                <p class="form-hint">PDF, Word, Excel, ZIP, JPG, or PNG — up to 10 MB</p>
-                <input
-                  type="file"
-                  id="attachment-input"
-                  class="sr-only"
-                  multiple
-                  tabindex="-1"
-                  aria-hidden="true"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.jpg,.jpeg,.png"
-                />
-              </div>
+                <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                <span class="filter-dropdown__label">Change Status</span>
+              </button>
+              <div class="dropdown-menu" id="status-action-menu" role="menu" hidden></div>
             </div>
-          </div>
 
-          <div class="card">
-            <div class="card__header">
-              <h2>History</h2>
-            </div>
-            <div class="card__body">
-              <div class="timeline">
-                <div class="timeline__item is-complete">
-                  <span class="timeline__rail">
-                    <span class="timeline__marker"></span>
-                    <span class="timeline__line"></span>
-                  </span>
-                  <div class="timeline__content">
-                    <p class="timeline__title">Ticket created</p>
-                    <p class="timeline__meta">Morgan Lee &middot; 2 hours ago</p>
-                  </div>
-                </div>
-                <div class="timeline__item is-complete">
-                  <span class="timeline__rail">
-                    <span class="timeline__marker"></span>
-                  </span>
-                  <div class="timeline__content">
-                    <p class="timeline__title">Comment added</p>
-                    <p class="timeline__meta">Priya Sharma &middot; 12 minutes ago</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <button type="button" class="btn btn--secondary" id="action-reopen" hidden>
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+              Reopen
+            </button>
+            <button type="button" class="btn btn--danger" id="action-delete" hidden>
+              <i class="bi bi-trash" aria-hidden="true"></i>
+              Delete
+            </button>
           </div>
         </div>
 
-        <aside class="card grid-detail__sidebar">
-          <div class="card__header">
-            <h2>Ticket Summary</h2>
+        <div class="grid-detail">
+          <div>
+            <div class="card mb-6">
+              <div class="card__header">
+                <h2>Description</h2>
+              </div>
+              <div class="card__body">
+                <p class="whitespace-pre-line" id="ticket-description"></p>
+              </div>
+            </div>
+
+            <div class="card mb-6">
+              <div class="card__header">
+                <h2>Timeline</h2>
+              </div>
+              <div class="card__body">
+                <div class="timeline" id="ticket-timeline"></div>
+              </div>
+            </div>
+
+            <div class="card mb-6">
+              <div class="card__header">
+                <h2>Comments</h2>
+              </div>
+              <div class="card__body">
+                <div id="comments-list"></div>
+
+                <div class="comment-editor">
+                  <label class="form-label" for="comment-input">Add a comment</label>
+                  <textarea
+                    class="form-control"
+                    id="comment-input"
+                    rows="4"
+                    placeholder="Write an update, ask a question, or leave an internal note…"
+                  ></textarea>
+                  <p class="form-error" id="comment-error" role="alert" hidden></p>
+                  <div class="comment-editor__toolbar">
+                    <div class="segmented-control" role="radiogroup" aria-label="Comment visibility" id="comment-visibility">
+                      <button
+                        type="button"
+                        class="segmented-control__option is-active"
+                        role="radio"
+                        aria-checked="true"
+                        data-visibility="PUBLIC"
+                      >
+                        <i class="bi bi-globe2" aria-hidden="true"></i>
+                        Public
+                      </button>
+                      <button
+                        type="button"
+                        class="segmented-control__option"
+                        role="radio"
+                        aria-checked="false"
+                        data-visibility="INTERNAL"
+                        id="comment-visibility-internal"
+                      >
+                        <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                        Internal
+                      </button>
+                    </div>
+                    <button type="button" class="btn btn--primary" id="post-comment-button">
+                      <i class="bi bi-send" aria-hidden="true"></i>
+                      Post Comment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-6">
+              <div class="card__header">
+                <h2>Attachments</h2>
+              </div>
+              <div class="card__body">
+                <div id="attachments-list"></div>
+
+                <div
+                  class="upload-area mt-4"
+                  id="attachment-upload"
+                  tabindex="0"
+                  role="button"
+                  aria-label="Upload an attachment: drag and drop files, or press Enter to browse"
+                >
+                  <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                  <p><strong>Drag and drop files here</strong>, or click to browse</p>
+                  <p class="form-hint">PDF, Word, Excel, ZIP, JPG, or PNG — up to 10 MB</p>
+                  <input
+                    type="file"
+                    id="attachment-input"
+                    class="sr-only"
+                    multiple
+                    tabindex="-1"
+                    aria-hidden="true"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.jpg,.jpeg,.png"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__header">
+                <h2>History</h2>
+              </div>
+              <div class="card__body">
+                <div class="timeline" id="ticket-history"></div>
+              </div>
+            </div>
           </div>
-          <div class="card__body">
-            <ul class="meta-list">
-              <li class="meta-list__item">
-                <span class="meta-list__label">Requester</span>
-                <span class="meta-list__value">Morgan Lee</span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Assigned To</span>
-                <span class="meta-list__value">Unassigned</span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Category</span>
-                <span class="meta-list__value">Network</span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Priority</span>
-                <span class="meta-list__value"><span class="badge badge--danger">High</span></span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Status</span>
-                <span class="meta-list__value"><span class="badge badge--info">Open</span></span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Created</span>
-                <span class="meta-list__value">Jul 25, 2026, 8:00 AM</span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Last Updated</span>
-                <span class="meta-list__value">2 hours ago</span>
-              </li>
-            </ul>
-          </div>
-        </aside>
+
+          <aside class="card grid-detail__sidebar">
+            <div class="card__header">
+              <h2>Ticket Summary</h2>
+            </div>
+            <div class="card__body">
+              <ul class="meta-list">
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Requester</span>
+                  <span class="meta-list__value" id="summary-requester"></span>
+                </li>
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Assigned To</span>
+                  <span class="meta-list__value" id="summary-assignee"></span>
+                </li>
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Category</span>
+                  <span class="meta-list__value" id="summary-category"></span>
+                </li>
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Priority</span>
+                  <span class="meta-list__value" id="summary-priority"></span>
+                </li>
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Status</span>
+                  <span class="meta-list__value" id="summary-status"></span>
+                </li>
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Created</span>
+                  <span class="meta-list__value" id="summary-created"></span>
+                </li>
+                <li class="meta-list__item">
+                  <span class="meta-list__label">Last Updated</span>
+                  <span class="meta-list__value" id="summary-updated"></span>
+                </li>
+                <li class="meta-list__item" id="summary-resolved-row" hidden>
+                  <span class="meta-list__label">Resolved</span>
+                  <span class="meta-list__value" id="summary-resolved"></span>
+                </li>
+                <li class="meta-list__item" id="summary-closed-row" hidden>
+                  <span class="meta-list__label">Closed</span>
+                  <span class="meta-list__value" id="summary-closed"></span>
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </div>
       </div>
     </main>
+  </div>
+
+  <div class="modal-overlay" id="action-modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="action-modal-title">
+      <div class="modal__header">
+        <h2 id="action-modal-title">Action</h2>
+        <button type="button" class="modal__close" id="action-modal-close" aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <form id="action-modal-form">
+        <div class="modal__body" id="action-modal-body"></div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="action-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="action-modal-confirm">Confirm</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script type="module" src="js/pages/ticket-details.js"></script>

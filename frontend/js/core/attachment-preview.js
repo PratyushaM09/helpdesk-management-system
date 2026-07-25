@@ -1,10 +1,14 @@
 /**
- * Fake attachment upload preview — shared by ticket-details.html (adding an
- * attachment to an existing ticket) and create-ticket.html (attaching files
- * while filing a new one). Reads real File objects the user picked/dropped
- * so the preview (name, size, icon) is genuine, but nothing is ever sent
- * anywhere: there is no fetch, no XHR, no storage — "Remove" just deletes
- * the preview row.
+ * File-selection UI shared by every page with an upload drop-zone.
+ * `initFileDropZone` only detects "the user picked/dropped these files" (via
+ * click-to-browse or drag-and-drop) — what happens next is the caller's
+ * concern, because the two current callers need genuinely different
+ * behavior: create-ticket.html has no ticket id yet, so it stages files as
+ * preview rows and uploads them only after the ticket is created
+ * (`initStagedAttachmentUpload`); ticket-details.html's ticket already
+ * exists, so it uploads each file immediately with real progress (built
+ * directly in ticket-details.js using the exported `iconFor`/`formatFileSize`
+ * helpers, not this module's staging list).
  */
 
 import { escapeHtml } from "./utils.js";
@@ -20,11 +24,11 @@ const FILE_ICONS = {
   "image/jpeg": "bi-file-earmark-image",
 };
 
-function iconFor(mimeType) {
+export function iconFor(mimeType) {
   return FILE_ICONS[mimeType] ?? "bi-file-earmark";
 }
 
-function formatFileSize(bytes) {
+export function formatFileSize(bytes) {
   if (bytes < 1024) {
     return `${bytes} B`;
   }
@@ -34,36 +38,17 @@ function formatFileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function buildPreviewRow(file) {
-  const row = document.createElement("div");
-  row.className = "attachment-row attachment-row--pending";
-  row.innerHTML = `
-    <span class="attachment-row__icon"><i class="bi ${iconFor(file.type)}" aria-hidden="true"></i></span>
-    <span class="attachment-row__body">
-      <span class="attachment-row__name">${escapeHtml(file.name)}</span>
-      <span class="attachment-row__meta">${formatFileSize(file.size)} &middot; Pending upload</span>
-    </span>
-    <span class="attachment-row__actions">
-      <button type="button" class="icon-btn icon-btn--danger" aria-label="Remove ${escapeHtml(file.name)}">
-        <i class="bi bi-x-lg" aria-hidden="true"></i>
-      </button>
-    </span>
-  `;
-  row.querySelector(".icon-btn").addEventListener("click", () => row.remove());
-  return row;
-}
-
 /**
- * @param {{ uploadArea: HTMLElement, fileInput: HTMLInputElement, list: HTMLElement }} elements
+ * Wires a drop-zone `.upload-area` + hidden file input to call
+ * `onFilesSelected(File[])` whenever files are picked or dropped —
+ * click-to-browse, keyboard (Enter/Space), and drag-and-drop all funnel
+ * through the same callback.
+ * @param {{ uploadArea: HTMLElement, fileInput: HTMLInputElement, onFilesSelected: (files: File[]) => void }} options
  */
-export function initAttachmentUpload({ uploadArea, fileInput, list }) {
-  if (!uploadArea || !fileInput || !list) {
+export function initFileDropZone({ uploadArea, fileInput, onFilesSelected }) {
+  if (!uploadArea || !fileInput || !onFilesSelected) {
     return;
   }
-
-  const addFiles = (fileList) => {
-    Array.from(fileList ?? []).forEach((file) => list.appendChild(buildPreviewRow(file)));
-  };
 
   uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -88,11 +73,64 @@ export function initAttachmentUpload({ uploadArea, fileInput, list }) {
   uploadArea.addEventListener("drop", (event) => {
     event.preventDefault();
     uploadArea.classList.remove("is-dragover");
-    addFiles(event.dataTransfer?.files);
+    onFilesSelected(Array.from(event.dataTransfer?.files ?? []));
   });
 
   fileInput.addEventListener("change", () => {
-    addFiles(fileInput.files);
+    onFilesSelected(Array.from(fileInput.files ?? []));
     fileInput.value = "";
   });
+}
+
+function buildStagedRow(file, onRemove) {
+  const row = document.createElement("div");
+  row.className = "attachment-row attachment-row--pending";
+  row.innerHTML = `
+    <span class="attachment-row__icon"><i class="bi ${iconFor(file.type)}" aria-hidden="true"></i></span>
+    <span class="attachment-row__body">
+      <span class="attachment-row__name">${escapeHtml(file.name)}</span>
+      <span class="attachment-row__meta">${formatFileSize(file.size)} &middot; Will upload after the ticket is created</span>
+    </span>
+    <span class="attachment-row__actions">
+      <button type="button" class="icon-btn icon-btn--danger" aria-label="Remove ${escapeHtml(file.name)}">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </span>
+  `;
+  row.querySelector(".icon-btn").addEventListener("click", onRemove);
+  return row;
+}
+
+/**
+ * Stages files as preview rows (no upload — there's no ticket id yet on
+ * create-ticket.html). The caller reads back the staged `File` objects via
+ * `getFiles()` once the ticket is actually created, to upload them for real.
+ * @param {{ uploadArea: HTMLElement, fileInput: HTMLInputElement, list: HTMLElement }} elements
+ * @returns {{ getFiles: () => File[], clear: () => void }}
+ */
+export function initStagedAttachmentUpload({ uploadArea, fileInput, list }) {
+  let stagedFiles = [];
+
+  initFileDropZone({
+    uploadArea,
+    fileInput,
+    onFilesSelected: (files) => {
+      files.forEach((file) => {
+        stagedFiles.push(file);
+        const row = buildStagedRow(file, () => {
+          stagedFiles = stagedFiles.filter((staged) => staged !== file);
+          row.remove();
+        });
+        list.appendChild(row);
+      });
+    },
+  });
+
+  return {
+    getFiles: () => stagedFiles,
+    clear: () => {
+      stagedFiles = [];
+      list.replaceChildren();
+    },
+  };
 }
