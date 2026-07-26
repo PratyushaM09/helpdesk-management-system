@@ -12,8 +12,13 @@
 
 import { bindPlaceholderActions, getInitials } from "./utils.js";
 import { initDropdown } from "./dropdown.js";
-import { requireAuth } from "./session.js";
+import { requireAuth, handleSessionExpired } from "./session.js";
 import { logout } from "./auth.js";
+import { onSessionExpired } from "./api.js";
+
+// Registered once per page load — this is what makes an expired/revoked
+// session behave consistently everywhere, not just at initial page load.
+onSessionExpired(handleSessionExpired);
 
 const ROLE_LABELS = {
   ADMIN: { text: "Admin", badgeClass: "badge--brand" },

@@ -8,6 +8,7 @@
 
 import { ApiError } from "./api.js";
 import { getCurrentUser, refreshToken } from "./auth.js";
+import { showToast } from "./utils.js";
 
 /**
  * Resolves the current session, transparently recovering from an expired
@@ -55,8 +56,9 @@ export async function requireAuth() {
 }
 
 /**
- * Guards login.html: if a session is already active, redirect straight to
- * the dashboard instead of showing the sign-in form again.
+ * Guards login.html (and the other pre-login auth pages): if a session is
+ * already active, redirect straight to the dashboard instead of showing the
+ * form again.
  * @returns {Promise<void>}
  */
 export async function redirectIfAuthenticated() {
@@ -68,5 +70,34 @@ export async function redirectIfAuthenticated() {
   }
   if (user) {
     window.location.href = "dashboard.html";
+  }
+}
+
+let handlingSessionExpiry = false;
+
+/**
+ * Registered with core/api.js via onSessionExpired() so a 401 from *any*
+ * authenticated call — not just the page-load bootstrap — is handled the
+ * same way everywhere: one silent refresh attempt, then either a toast
+ * (session quietly recovered — the failed action itself still surfaces its
+ * own error normally) or a redirect to login (refresh also failed, meaning
+ * the session is genuinely over: expired past the refresh window, or
+ * revoked by an admin deactivating/reactivating the account, which the
+ * backend enforces on every request, not just at login). De-duplicates
+ * itself so several requests failing at once don't trigger overlapping
+ * refresh attempts or redirects.
+ */
+export async function handleSessionExpired() {
+  if (handlingSessionExpiry) {
+    return;
+  }
+  handlingSessionExpiry = true;
+  try {
+    await refreshToken();
+    showToast("Your session was refreshed — please try that again.", "info");
+  } catch {
+    window.location.href = "login.html";
+  } finally {
+    handlingSessionExpiry = false;
   }
 }

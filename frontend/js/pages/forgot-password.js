@@ -8,6 +8,9 @@
 
 import { setFieldError, setButtonLoading } from "../core/utils.js";
 import { isValidEmail } from "../core/validation.js";
+import { redirectIfAuthenticated } from "../core/session.js";
+
+redirectIfAuthenticated();
 
 const form = document.getElementById("forgot-password-form");
 const emailInput = document.getElementById("email");

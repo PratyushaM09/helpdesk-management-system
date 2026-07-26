@@ -48,12 +48,6 @@
             </a>
           </li>
           <li>
-            <a class="sidebar__link" href="my-tickets.html" data-nav="my-tickets.html">
-              <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
-              <span>My Tickets</span>
-            </a>
-          </li>
-          <li>
             <a class="sidebar__link" href="create-ticket.html" data-nav="create-ticket.html">
               <i class="bi bi-plus-circle" aria-hidden="true"></i>
               <span>Create Ticket</span>
@@ -177,16 +171,6 @@
           <h1 class="page-header__title">Users</h1>
           <p class="page-header__subtitle">Manage accounts, roles, and access across the HelpDesk.</p>
         </div>
-        <div class="page-header__actions">
-          <button
-            type="button"
-            class="btn btn--primary"
-            data-placeholder-action="User creation isn't wired up yet — this is a UI-only milestone."
-          >
-            <i class="bi bi-person-plus" aria-hidden="true"></i>
-            Add User
-          </button>
-        </div>
       </div>
 
       <div class="filter-bar">
@@ -301,169 +285,16 @@
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
-              <tbody id="users-table-body">
-                <tr data-role="ADMIN" data-status="ACTIVE">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">JD</span>
-                      Jordan Diaz
-                    </div>
-                  </td>
-                  <td data-label="Email">jordan.diaz@company.com</td>
-                  <td data-label="Role"><span class="badge badge--brand">Admin</span></td>
-                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
-                  <td data-label="Created">Jan 10, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Jordan Diaz" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Jordan Diaz" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="SUPPORT_ENGINEER" data-status="ACTIVE">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">PS</span>
-                      Priya Sharma
-                    </div>
-                  </td>
-                  <td data-label="Email">priya.sharma@company.com</td>
-                  <td data-label="Role"><span class="badge badge--info">Support Engineer</span></td>
-                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
-                  <td data-label="Created">Feb 3, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Priya Sharma" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Priya Sharma" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="SUPPORT_ENGINEER" data-status="ACTIVE">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">AC</span>
-                      Alex Chen
-                    </div>
-                  </td>
-                  <td data-label="Email">alex.chen@company.com</td>
-                  <td data-label="Role"><span class="badge badge--info">Support Engineer</span></td>
-                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
-                  <td data-label="Created">Feb 15, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Alex Chen" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Alex Chen" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="SUPPORT_ENGINEER" data-status="LOCKED">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">SO</span>
-                      Sam Okafor
-                    </div>
-                  </td>
-                  <td data-label="Email">sam.okafor@company.com</td>
-                  <td data-label="Role"><span class="badge badge--info">Support Engineer</span></td>
-                  <td data-label="Status"><span class="badge badge--danger">Locked</span></td>
-                  <td data-label="Created">Mar 1, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Sam Okafor" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn" aria-label="Activate Sam Okafor" data-placeholder-action="Activating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-check-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="USER" data-status="ACTIVE">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">ML</span>
-                      Morgan Lee
-                    </div>
-                  </td>
-                  <td data-label="Email">morgan.lee@company.com</td>
-                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
-                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
-                  <td data-label="Created">Mar 20, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Morgan Lee" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Morgan Lee" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="USER" data-status="ACTIVE">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">TB</span>
-                      Taylor Brooks
-                    </div>
-                  </td>
-                  <td data-label="Email">taylor.brooks@company.com</td>
-                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
-                  <td data-label="Status"><span class="badge badge--success">Active</span></td>
-                  <td data-label="Created">Apr 5, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Taylor Brooks" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Deactivate Taylor Brooks" data-placeholder-action="Deactivating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-slash-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="USER" data-status="DEACTIVATED">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">JR</span>
-                      Jamie Rivera
-                    </div>
-                  </td>
-                  <td data-label="Email">jamie.rivera@company.com</td>
-                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
-                  <td data-label="Status"><span class="badge badge--neutral">Deactivated</span></td>
-                  <td data-label="Created">Apr 18, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Jamie Rivera" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn" aria-label="Activate Jamie Rivera" data-placeholder-action="Activating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-check-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr data-role="USER" data-status="LOCKED">
-                  <td data-label="Name">
-                    <div class="flex items-center gap-3">
-                      <span class="avatar avatar--sm" aria-hidden="true">CK</span>
-                      Casey Kim
-                    </div>
-                  </td>
-                  <td data-label="Email">casey.kim@company.com</td>
-                  <td data-label="Role"><span class="badge badge--neutral">User</span></td>
-                  <td data-label="Status"><span class="badge badge--danger">Locked</span></td>
-                  <td data-label="Created">May 2, 2026</td>
-                  <td data-label="Actions">
-                    <button type="button" class="icon-btn" aria-label="Edit Casey Kim" data-placeholder-action="Editing users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-pencil" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="icon-btn" aria-label="Activate Casey Kim" data-placeholder-action="Activating users isn't wired up yet — this is a UI-only milestone.">
-                      <i class="bi bi-check-circle" aria-hidden="true"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
+              <tbody id="users-table-body"></tbody>
             </table>
+          </div>
+
+          <div class="alert alert--danger mb-6" id="users-error-state" role="alert" hidden>
+            <i class="bi bi-exclamation-octagon-fill alert__icon" aria-hidden="true"></i>
+            <div>
+              <p class="alert__title">Couldn't load users</p>
+              <p id="users-error-message"></p>
+            </div>
           </div>
 
           <div class="empty-state" id="users-empty-state" hidden>
@@ -477,23 +308,13 @@
           </div>
 
           <nav class="pagination" aria-label="User list pages">
-            <p class="pagination__summary" id="user-pagination-summary">Showing 1-8 of 8 users</p>
-            <div class="pagination__controls">
-              <button type="button" class="pagination__button" aria-label="Previous page" disabled>
+            <p class="pagination__summary" id="user-pagination-summary">Loading…</p>
+            <div class="pagination__controls" id="user-pagination-controls">
+              <button type="button" class="pagination__button" id="user-pagination-prev" aria-label="Previous page" disabled>
                 <i class="bi bi-chevron-left" aria-hidden="true"></i>
               </button>
-              <button type="button" class="pagination__button is-active" aria-current="page" data-page="1">1</button>
-              <button
-                type="button"
-                class="pagination__button"
-                data-placeholder-action="This placeholder demo only has one page of users."
-              >2</button>
-              <button
-                type="button"
-                class="pagination__button"
-                aria-label="Next page"
-                data-placeholder-action="This placeholder demo only has one page of users."
-              >
+              <!-- Page-number buttons are generated by users.js from the real totalPages. -->
+              <button type="button" class="pagination__button" id="user-pagination-next" aria-label="Next page" disabled>
                 <i class="bi bi-chevron-right" aria-hidden="true"></i>
               </button>
             </div>
@@ -501,6 +322,24 @@
         </div>
       </div>
     </main>
+  </div>
+
+  <div class="modal-overlay" id="action-modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="action-modal-title">
+      <div class="modal__header">
+        <h2 id="action-modal-title">Action</h2>
+        <button type="button" class="modal__close" id="action-modal-close" aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <form id="action-modal-form">
+        <div class="modal__body" id="action-modal-body"></div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" id="action-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="action-modal-confirm">Confirm</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script type="module" src="js/pages/users.js"></script>

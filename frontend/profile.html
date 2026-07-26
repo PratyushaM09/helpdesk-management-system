@@ -48,12 +48,6 @@
             </a>
           </li>
           <li>
-            <a class="sidebar__link" href="my-tickets.html" data-nav="my-tickets.html">
-              <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
-              <span>My Tickets</span>
-            </a>
-          </li>
-          <li>
             <a class="sidebar__link" href="create-ticket.html" data-nav="create-ticket.html">
               <i class="bi bi-plus-circle" aria-hidden="true"></i>
               <span>Create Ticket</span>
@@ -195,7 +189,6 @@
                     id="name-input"
                     name="name"
                     maxlength="100"
-                    value="Jordan Diaz"
                     aria-describedby="name-error"
                     required
                   />
@@ -209,7 +202,6 @@
                     type="email"
                     id="email-input"
                     name="email"
-                    value="jordan.diaz@company.com"
                     aria-describedby="email-hint"
                     disabled
                   />
@@ -380,25 +372,19 @@
             <ul class="meta-list">
               <li class="meta-list__item">
                 <span class="meta-list__label">Role</span>
-                <span class="meta-list__value"><span class="badge badge--brand">Admin</span></span>
+                <span class="meta-list__value" id="profile-role-value"></span>
               </li>
               <li class="meta-list__item">
                 <span class="meta-list__label">Status</span>
-                <span class="meta-list__value"><span class="badge badge--success">Active</span></span>
+                <span class="meta-list__value" id="profile-status-value"></span>
               </li>
               <li class="meta-list__item">
                 <span class="meta-list__label">Email Verification</span>
-                <span class="meta-list__value">
-                  <span class="badge badge--success"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verified</span>
-                </span>
+                <span class="meta-list__value" id="profile-verified-value"></span>
               </li>
               <li class="meta-list__item">
                 <span class="meta-list__label">Member Since</span>
-                <span class="meta-list__value">Jan 10, 2026</span>
-              </li>
-              <li class="meta-list__item">
-                <span class="meta-list__label">Last Updated</span>
-                <span class="meta-list__value">3 days ago</span>
+                <span class="meta-list__value" id="profile-created-value"></span>
               </li>
             </ul>
           </div>

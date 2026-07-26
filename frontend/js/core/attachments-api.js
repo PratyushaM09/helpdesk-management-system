@@ -2,7 +2,7 @@
  * Attachment API calls. List/get/delete reuse core/api.js exactly like
  * every other module; upload is the one deliberate exception in this
  * codebase to "always go through api.js" — fetch() has no way to report
- * upload progress, so the two upload functions use XMLHttpRequest instead,
+ * upload progress, so uploadTicketAttachment uses XMLHttpRequest instead,
  * hand-mirroring api.js's credentials/CSRF handling since XHR's API shape
  * doesn't match fetch's. Nothing else in the app needs this; every other
  * request stays on api.js.
@@ -44,16 +44,6 @@ export async function deleteAttachment(attachmentId) {
  */
 export function uploadTicketAttachment(ticketId, file, options = {}) {
   return uploadFile(`/tickets/${ticketId}/attachments`, file, options);
-}
-
-/**
- * POST /comments/{commentId}/attachments, multipart/form-data, field name "file".
- * @param {number} commentId
- * @param {File} file
- * @param {{ onProgress?: (percent: number) => void }} [options]
- */
-export function uploadCommentAttachment(commentId, file, options = {}) {
-  return uploadFile(`/comments/${commentId}/attachments`, file, options);
 }
 
 function uploadFile(path, file, { onProgress } = {}) {

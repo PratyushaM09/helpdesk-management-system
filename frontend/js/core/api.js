@@ -15,6 +15,21 @@ import { getCookie } from "./utils.js";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
+/**
+ * Registered once by core/shell.js (never imported here directly, to avoid
+ * a circular dependency — shell.js already imports this module) so that a
+ * 401 from any authenticated call, anywhere in the app, is handled the same
+ * way: attempt one silent refresh, then redirect to login if that also
+ * fails. Deliberately not triggered for /auth/* calls themselves (a plain
+ * wrong-password 401 from login.html is not a "session expired" event).
+ * @param {() => void} handler
+ */
+export function onSessionExpired(handler) {
+  sessionExpiredHandler = handler;
+}
+
+let sessionExpiredHandler = null;
+
 export class ApiError extends Error {
   constructor(message, { status = 0, errorCode = null, validationErrors = null, path = null } = {}) {
     super(message);
@@ -82,6 +97,9 @@ async function request(method, path, body, options = {}) {
 
   if (!response.ok) {
     const errorBody = payload ?? {};
+    if (response.status === 401 && !path.startsWith("/auth/")) {
+      sessionExpiredHandler?.();
+    }
     throw new ApiError(errorBody.message || `Request failed with status ${response.status}`, {
       status: response.status,
       errorCode: errorBody.errorCode ?? null,

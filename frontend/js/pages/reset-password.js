@@ -10,6 +10,11 @@
 import { setFieldError, setButtonLoading, setupPasswordToggle } from "../core/utils.js";
 import { meetsAllPasswordRequirements, passwordsMatch } from "../core/validation.js";
 import { initPasswordStrengthUI } from "../core/password-strength-ui.js";
+import { redirectIfAuthenticated } from "../core/session.js";
+
+// An already-authenticated visitor has Profile's real change-password
+// instead — consistent with every other pre-login auth page.
+redirectIfAuthenticated();
 
 const resetView = document.getElementById("reset-view");
 const invalidView = document.getElementById("invalid-view");

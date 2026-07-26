@@ -203,6 +203,7 @@ async function init() {
       button.className = page === currentPage ? "pagination__button is-active" : "pagination__button";
       button.dataset.page = String(page);
       button.textContent = String(page + 1);
+      button.setAttribute("aria-label", `Page ${page + 1}`);
       if (page === currentPage) {
         button.setAttribute("aria-current", "page");
       }

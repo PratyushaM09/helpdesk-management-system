@@ -39,7 +39,9 @@ import {
 } from "../core/attachments-api.js";
 import { formatStatus, formatPriority, formatHistoryAction } from "../core/ticket-format.js";
 import { escapeHtml, formatDate, getInitials, showToast, setFieldError, setButtonLoading } from "../core/utils.js";
-import { api, ApiError } from "../core/api.js";
+import { ApiError } from "../core/api.js";
+import { listUsers } from "../core/users-api.js";
+import { initModal } from "../core/modal.js";
 
 /** Status transitions POST /tickets/{id}/status allows — mirrors TicketServiceImpl.LEGAL_STATUS_TRANSITIONS exactly. */
 const LEGAL_TRANSITIONS = {
@@ -72,7 +74,6 @@ async function init(currentUser) {
   let comments = [];
   let attachments = [];
   let historyEntries = [];
-  let modalSubmitHandler = null;
 
   if (!ticketId) {
     showLoadError("No ticket was specified.");
@@ -84,7 +85,6 @@ async function init(currentUser) {
     menu: document.getElementById("status-action-menu"),
   });
 
-  wireModal();
   wireCommentEditor();
   initFileDropZone({
     uploadArea: document.getElementById("attachment-upload"),
@@ -267,40 +267,19 @@ async function init(currentUser) {
     }
   }
 
-  // ---------- Generic action modal ----------
+  // ---------- Generic action modal (core/modal.js — shared with users.js) ----------
 
-  function wireModal() {
-    document.getElementById("action-modal-close").addEventListener("click", closeModal);
-    document.getElementById("action-modal-cancel").addEventListener("click", closeModal);
-    modalOverlay.addEventListener("click", (event) => {
-      if (event.target === modalOverlay) {
-        closeModal();
-      }
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !modalOverlay.hidden) {
-        closeModal();
-      }
-    });
-    modalForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      await modalSubmitHandler?.();
-    });
-  }
-
-  function openModal(title, bodyHtml, onSubmit) {
-    modalTitle.textContent = title;
-    modalBody.innerHTML = bodyHtml;
-    modalSubmitHandler = onSubmit;
-    modalOverlay.hidden = false;
-    modalBody.querySelector("input, select, textarea")?.focus();
-  }
-
-  function closeModal() {
-    modalOverlay.hidden = true;
-    modalSubmitHandler = null;
-    modalForm.reset();
-  }
+  const modal = initModal({
+    overlay: modalOverlay,
+    title: modalTitle,
+    body: modalBody,
+    form: modalForm,
+    cancelButton: document.getElementById("action-modal-cancel"),
+    closeButton: document.getElementById("action-modal-close"),
+    inertTarget: contentEl,
+  });
+  const openModal = modal.open;
+  const closeModal = modal.close;
 
   // ---------- Actions: edit / assign / reassign / status / reopen / delete ----------
 
@@ -353,7 +332,7 @@ async function init(currentUser) {
         </div>
       `;
       modalBody.querySelector("select")?.focus();
-      modalSubmitHandler = async () => {
+      modal.setSubmitHandler(async () => {
         const agentId = Number(document.getElementById("modal-agent-select").value);
         if (!agentId) {
           return;
@@ -363,14 +342,14 @@ async function init(currentUser) {
           renderTicket();
           showToast(isReassign ? "Ticket reassigned." : "Ticket assigned.", "success");
         });
-      };
+      });
     } catch {
       modalBody.innerHTML = '<p class="form-hint">Couldn\'t load support engineers.</p>';
     }
   }
 
   async function listSupportEngineers() {
-    const result = await api.get("/users?page=0&size=100");
+    const result = await listUsers({ page: 0, size: 100 });
     return result.content.filter((candidate) => candidate.role === "SUPPORT_ENGINEER");
   }
 
