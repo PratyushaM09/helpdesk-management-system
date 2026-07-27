@@ -69,12 +69,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Server-rendered views -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-
         <!-- MySQL JDBC driver -->
         <dependency>
             <groupId>com.mysql</groupId>

@@ -1,0 +1,96 @@
+# Phase 5, Milestone 1 — Dockerization only (no deployment). Brings up the
+# complete stack (MySQL, backend, frontend) with one command:
+#   docker compose up --build
+#
+# Configuration comes from a .env file in this directory (see .env.example);
+# docker compose loads it automatically. No secrets are committed here or in
+# .env.example — every sensitive value below has no fallback default, so a
+# developer must create .env from .env.example before the stack will start.
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: helpdesk-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-helpdesk}
+      MYSQL_USER: ${DB_USERNAME:-helpdesk_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      # Published so a developer can connect a local MySQL client if they
+      # want to; remove this mapping if port 3306 is already in use locally
+      # (the backend reaches this container over the internal network
+      # either way, via the "mysql" service name).
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - helpdesk-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: helpdesk-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-helpdesk}
+      DB_USERNAME: ${DB_USERNAME:-helpdesk_app}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-admin@helpdesk.local}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-Dev0nly!AdminBootstrapPassword}
+      # Must match wherever the frontend container actually gets published
+      # (FRONTEND_PORT below) — the browser's real origin is what the
+      # backend's CORS allow-list has to match, not any in-network address.
+      # Defaults assume the default FRONTEND_PORT/BACKEND_PORT (3000/8080);
+      # if you override either port in .env, set these explicitly too (see
+      # .env.example — Compose does not recursively expand a variable
+      # referenced inside another variable's default).
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      API_SERVER_URL: ${API_SERVER_URL:-http://localhost:8080}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - helpdesk-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: helpdesk-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      # Resolved from the host's perspective (the browser, not the frontend
+      # container, is what calls this URL) — see
+      # frontend/docker/40-inject-api-base-url.sh. Default assumes the
+      # default BACKEND_PORT (8080); if you override it in .env, set this
+      # explicitly too.
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080/api/v1}
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    networks:
+      - helpdesk-network
+
+networks:
+  helpdesk-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

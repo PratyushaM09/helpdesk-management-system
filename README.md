@@ -4,7 +4,15 @@ A centralized web platform for reporting, assigning, tracking, and resolving int
 
 ## Project Status
 
-**Architecture and Security Architecture phases complete.** The SRS ([docs/01-SRS.md](docs/01-SRS.md)) is approved, the Software Architecture Document set is accepted, and the full Enterprise Security Architecture Document (SecAD) is accepted. No implementation exists yet in [backend/](backend/) or [frontend/](frontend/) — these phases produced design only, no code.
+**Phases 1–4 implemented; Phase 5 (production readiness) in progress.** The
+SRS ([docs/01-SRS.md](docs/01-SRS.md)), Software Architecture Document set,
+and full Enterprise Security Architecture Document (SecAD) are accepted.
+[backend/](backend/) (Spring Boot REST API — auth, tickets, comments,
+attachments, users, roles) and [frontend/](frontend/) (static HTML/CSS/JS)
+are both fully implemented and integrated. Phase 5 has completed
+Dockerization (Milestone 1 — see [DOCKER.md](DOCKER.md)) and a production
+configuration review (Milestone 2); Docker execution verification and actual
+deployment are still pending.
 
 ## Repository Structure
 
@@ -28,8 +36,10 @@ HelpDesk-Management-System/
 │   ├── Decisions.md                  Index of accepted ADRs
 │   └── Security-Decisions.md         Index of accepted SDRs
 │
-├── backend/                          (empty — implementation not started)
-├── frontend/                         (empty — implementation not started)
+├── backend/                          Spring Boot REST API (Java 21, Maven, MySQL)
+├── frontend/                         Static HTML/CSS/JS frontend (no build step)
+├── docker-compose.yml, DOCKER.md,
+│   .env.example                      Local containerized startup (Phase 5, Milestone 1)
 └── README.md
 ```
 
@@ -40,25 +50,4 @@ HelpDesk-Management-System/
 3. [docs/03-Security.md](docs/03-Security.md), [docs/04-API-Design.md](docs/04-API-Design.md), [docs/05-Database.md](docs/05-Database.md), [docs/06-Testing.md](docs/06-Testing.md) — detailed design following architecture sign-off.
 4. [docs/07-Security-Architecture.md](docs/07-Security-Architecture.md) → [08-Security-Controls.md](docs/08-Security-Controls.md) → [09-Security-Operations.md](docs/09-Security-Operations.md) → [10-Security-Assurance.md](docs/10-Security-Assurance.md) — the full Enterprise Security Architecture Document (SecAD): threat model, authentication/authorization/session design, Spring Security design, OWASP Top 10 compliance mapping, and the future security roadmap.
 5. [docs/ADR/](docs/ADR/) and [docs/SDR/](docs/SDR/) — the specific hard-to-reverse architecture and security decisions made along the way, indexed in [docs/Decisions.md](docs/Decisions.md) and [docs/Security-Decisions.md](docs/Security-Decisions.md) respectively.
-6. [docs/11-Development-Rules.md](docs/11-Development-Rules.md) — the binding coding standard for all implementation from this point forward. **Note:** this document targets MySQL/Thymeleaf/Tailwind/JavaScript as given for that phase, which differs from the PostgreSQL/React SPA stack chosen in [docs/02-Architecture.md](docs/02-Architecture.md)/ADR-0002 — this needs a reconciling decision before implementation begins in earnest.
-
-
-HelpDesk Management System
-|
-Enterprise Ticket Management System
-|
-Status
-|
-Planning Phase Completed
-|
-Documentation
-|
-docs/01-SRS.md
-|
-docs/02-Architecture.md
-|
-docs/03-Security.md
-|
-Next
-|
-Backend Development
+6. [docs/11-Development-Rules.md](docs/11-Development-Rules.md) — the binding coding standard for all implementation. **Note:** implementation followed this document's MySQL/JavaScript stack (not the PostgreSQL/React SPA stack originally chosen in [docs/02-Architecture.md](docs/02-Architecture.md)/ADR-0002) — Thymeleaf was pulled in as a dependency early on but was never actually used (this is a pure REST API; see backend/pom.xml) and was removed in Phase 5, Milestone 2. Tailwind was likewise not used — the frontend is hand-written CSS. This divergence from ADR-0002 was never formally re-recorded as its own ADR; worth doing if the document set is revisited.

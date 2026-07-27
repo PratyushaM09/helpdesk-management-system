@@ -1,0 +1,74 @@
+# Docker Compose profile (Phase 5, Milestone 1).
+#
+# This is deliberately NOT the same as application-prod.yml. It exists so a
+# freshly cloned repo can run `docker compose up` and get a production-*like*
+# container (no devtools, no SQL/parameter debug logging, no dev-shaped
+# ddl-auto=update... except see below) without also requiring the things a
+# real deployment needs and this milestone explicitly excludes:
+#   - generating an RS256 keypair (JWT_PRIVATE_KEY/JWT_PUBLIC_KEY) just to
+#     start a local container, and
+#   - Swagger/OpenAPI being reachable for local verification, which
+#     application-prod.yml disables outright by design
+#     (09-Security-Operations.md §17.6).
+# application-prod.yml is untouched and remains the profile a real
+# deployment (Phase 5, a later milestone) will use.
+spring:
+  datasource:
+    # "mysql" is the Docker Compose service name for the database container
+    # (Compose's embedded DNS resolves it on the shared network) — overridable
+    # for any other container/host layout.
+    url: jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:helpdesk}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=false
+    username: ${DB_USERNAME:helpdesk_app}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # No Flyway/migration tooling exists in this project yet (confirmed by
+      # reading the codebase) — validate (application-prod.yml's setting)
+      # would fail startup on a brand-new empty database with nothing to
+      # validate against. update is the same pragmatic choice application-dev.yml
+      # already makes, kept here for the same reason: a fresh container's
+      # database has no schema at all until something creates it.
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+app:
+  jwt:
+    # HS512, like application-dev.yml — RS256 key management is a real-
+    # deployment concern (Phase 5, a later milestone), not something a
+    # developer should need to do just to run `docker compose up`. Requires
+    # a real value at container start (no default) so at least a
+    # deliberately-set secret is used, even for local containers; see
+    # .env.example.
+    algorithm: HS512
+    secret: ${JWT_SECRET}
+  admin-bootstrap:
+    email: ${ADMIN_BOOTSTRAP_EMAIL:admin@helpdesk.local}
+    password: ${ADMIN_BOOTSTRAP_PASSWORD:Dev0nly!AdminBootstrapPassword}
+  cors:
+    # Matches the frontend container's published host port (see
+    # docker-compose.yml / DOCKER.md) — override if that port changes.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  openapi:
+    server:
+      url: ${API_SERVER_URL:http://localhost:${SERVER_PORT:8080}}
+      description: ${API_SERVER_DESCRIPTION:Docker Compose}
+
+# Left enabled (unlike application-prod.yml) — this milestone's own
+# verification step requires Swagger to remain reachable for a developer
+# running the stack locally.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.helpdesk: INFO
+    org.hibernate.SQL: WARN

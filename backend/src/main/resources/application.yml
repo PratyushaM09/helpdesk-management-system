@@ -54,6 +54,19 @@ spring:
         max-page-size: 100
         default-page-size: 20
 
+  servlet:
+    multipart:
+      # Phase 5 Milestone 2 fix: previously unset anywhere, which left Spring
+      # Boot's own defaults in effect (max-file-size=1MB, max-request-size=10MB)
+      # — stricter than AttachmentServiceImpl.MAX_SIZE_BYTES (10MB), so any
+      # upload between 1-10MB was rejected by Spring's multipart parsing
+      # (MaxUploadSizeExceededException, already handled in GlobalExceptionHandler)
+      # before ever reaching that check. Now sized to match it exactly, and
+      # externalized since a future change to that constant should not also
+      # require hunting down this otherwise-easy-to-miss ceiling.
+      max-file-size: ${UPLOAD_MAX_FILE_SIZE:10MB}
+      max-request-size: ${UPLOAD_MAX_REQUEST_SIZE:10MB}
+
 server:
   port: ${SERVER_PORT:8080}
   # Stop accepting new requests but let in-flight ones complete, bounded by

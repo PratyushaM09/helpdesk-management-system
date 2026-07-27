@@ -1,0 +1,9 @@
+README.md
+.git
+
+# NOTE: Dockerfile/nginx.conf/docker/ are intentionally NOT listed here —
+# the Dockerfile explicitly COPYs each of them to a specific destination,
+# and an ignored path can't be COPYed at all (not just excluded from a
+# wildcard). They never reach /usr/share/nginx/html regardless, since that
+# destination is populated by explicit per-directory COPY instructions, not
+# a blanket `COPY . .` — see Dockerfile.

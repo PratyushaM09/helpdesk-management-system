@@ -6,6 +6,21 @@
 # never fall back to a dev-shaped convenience value. Populate these via the
 # deployment platform's environment/secret mechanism (see docs/09-Security-Operations.md
 # §17 — plain env vars today, a managed secret store later per SDR-015).
+server:
+  # Phase 5 Milestone 2 fix: unset anywhere previously, which meant Spring
+  # Boot's own default (NONE) applied — X-Forwarded-Proto/Host/Port from a
+  # TLS-terminating reverse proxy or load balancer (the standard production
+  # topology; this app itself never terminates TLS) were silently ignored,
+  # so request.isSecure() always returned false behind one. That silently
+  # disabled HSTS (HttpStrictTransportSecurityHeaderWriter in SecurityConfig
+  # only ever writes the header when isSecure() is true) even though the
+  # filter chain is otherwise fully configured to emit it. Only set in this
+  # profile, not the base application.yml: trusting these headers is only
+  # correct when the proxy in front of the app is trusted to strip/set them
+  # itself (any reverse proxy worth using does) — a bare local/dev/docker
+  # instance with no proxy in front has no such guarantee.
+  forward-headers-strategy: framework
+
 spring:
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true&serverTimezone=UTC
