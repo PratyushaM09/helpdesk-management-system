@@ -8,14 +8,12 @@
  * cookie-based auth to work.
  */
 export const CONFIG = Object.freeze({
-  API_BASE_URL: "http://localhost:8080/api/v1",
+  API_BASE_URL:
+    window.location.hostname === "localhost"
+      ? "http://localhost:8080/api/v1"
+      : "https://helpdesk-management-system-n5tt.onrender.com/api/v1",
+
   REQUEST_TIMEOUT_MS: 15000,
 
-  // Double-submit CSRF: the backend hands the SPA a readable csrf_token
-  // cookie and expects it echoed back on this header for unsafe methods.
-  CSRF_COOKIE_NAME: "csrf_token",
-  CSRF_HEADER_NAME: "X-CSRF-Token",
-
-  APP_NAME: "HelpDesk",
-  TOAST_DEFAULT_DURATION_MS: 4000,
+  // ...
 });
