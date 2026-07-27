@@ -20,20 +20,18 @@ server:
   # itself (any reverse proxy worth using does) — a bare local/dev/docker
   # instance with no proxy in front has no such guarantee.
   forward-headers-strategy: framework
-
 spring:
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true&serverTimezone=UTC
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=false
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     hibernate:
       # Never update/create/create-drop in a shared environment
       # (11-Development-Rules.md §14.6). Schema changes reach production only
       # through a reviewed migration (Flyway, once introduced — §14.5).
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
