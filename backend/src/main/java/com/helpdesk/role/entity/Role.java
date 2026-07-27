@@ -39,8 +39,8 @@ public class Role extends AuditableEntity {
     @Column(name = "description", length = 255)
     private String description;
 
-    @Column(nullable = false)
-    private boolean system = true;
+    @Column(name = "is_system")
+private boolean system = true;
 
     protected Role() {
     }
