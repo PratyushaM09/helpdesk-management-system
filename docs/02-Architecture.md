@@ -354,7 +354,7 @@ sequenceDiagram
         S->>J: issueAccessToken(user), issueRefreshToken(user)
         J-->>S: access JWT, refresh token
         S-->>C: tokens
-        C-->>B: 200, Set-Cookie: access_token (HttpOnly, Secure, SameSite=Strict), refresh_token
+        C-->>B: 200, Set-Cookie: access_token (HttpOnly, Secure, SameSite=None), refresh_token
     end
 ```
 

@@ -58,7 +58,7 @@ Mechanism: **stateless JWT** (ADR-0003). Flow detail in [02-Architecture.md §8]
 ## 3. Session Management
 
 - No server-side `HttpSession` is used (ADR-0003) — the application tier is fully stateless.
-- **Access token:** JWT, 15-minute expiry, signed RS256 in `prod` (asymmetric — verification key can be distributed to other services later without sharing the signing secret, relevant to the microservices roadmap item), HS512 acceptable in `dev`. Claims: `sub` (user id), `role`, `tokenVersion`, `iat`, `exp`. Delivered as an `HttpOnly`, `Secure`, `SameSite=Strict` cookie — never accessible to JavaScript, closing the primary XSS-token-theft vector (ADR-0003).
+- **Access token:** JWT, 15-minute expiry, signed RS256 in `prod` (asymmetric — verification key can be distributed to other services later without sharing the signing secret, relevant to the microservices roadmap item), HS512 acceptable in `dev`. Claims: `sub` (user id), `role`, `tokenVersion`, `iat`, `exp`. Delivered as an `HttpOnly`, `Secure`, `SameSite=None` cookie (see SDR-002 amendment — frontend/backend are cross-subdomain) — never accessible to JavaScript, closing the primary XSS-token-theft vector (ADR-0003).
 - **Refresh token:** Opaque random value (not a JWT), stored server-side only as a salted hash (never plaintext) in a `refresh_token` table keyed by user, with `expires_at` and `revoked_at`. Rotated on every use (old refresh token invalidated the moment a new one is issued) — a replayed stolen refresh token is usable exactly once before detection (reuse of an already-rotated token triggers immediate revocation of the entire token family, a standard breach-detection pattern).
 - **Forced global logout:** Incrementing a user's `tokenVersion` (on password change, password reset, or an Administrator-initiated "log out this user everywhere") invalidates every outstanding access token on next verification, without needing a token blocklist.
 - **Idle/absolute expiry:** Refresh token's 7-day absolute expiry forces re-authentication at least weekly regardless of activity, satisfying SRS §8's "session tokens shall expire."
@@ -135,7 +135,7 @@ Request pipeline order (Servlet filters run before Spring's `DispatcherServlet`;
 
 Because authentication uses a cookie (`HttpOnly` access-token cookie, Section 3), CSRF is a relevant threat (unlike a pure `Authorization: Bearer` header scheme, which is naturally CSRF-immune). Mitigations, layered:
 
-- **`SameSite=Strict`** on both the access and refresh token cookies — the primary defense; the browser itself refuses to attach these cookies to a cross-site request.
+- **`SameSite=None`** on both the access and refresh token cookies (revised from `Strict` per the SDR-002 amendment, since the frontend and backend are deployed on different subdomains — a genuinely cross-site relationship where `Strict`/`Lax` cookies are never attached). CSRF defense here now rests entirely on the double-submit token below, not on `SameSite` enforcement.
 - **CSRF token (double-submit)** for state-changing (`POST`/`PUT`/`PATCH`/`DELETE`) requests as defense in depth, since `SameSite` support/behavior can vary by browser/proxy configuration: the SPA reads a non-`HttpOnly` CSRF token cookie set at login and echoes it in a custom request header (`X-CSRF-Token`); Spring Security validates the header matches the cookie. A cross-site request cannot read the cookie to construct the matching header.
 - **State-changing operations are never triggered by a plain `GET`** (no state change hides behind a link/image tag).
 

@@ -144,7 +144,7 @@ Every non-public endpoint requires a valid access-token cookie (Section 3 of [07
 Two-layer RBAC (Section 4.4 of [07-Security-Architecture.md](07-Security-Architecture.md#44-method-level-authorization-strategy)) — enforced at filter step 6 and at every Service method.
 
 ### 12.3 CSRF
-Double-submit token + `SameSite=Strict` (Section 9 of [03-Security.md](03-Security.md#9-csrf); SDR-007) — enforced at filter step 5.
+Double-submit token (Section 9 of [03-Security.md](03-Security.md#9-csrf); SDR-007) — enforced at filter step 5. `SameSite=None` (revised from `Strict`, SDR-002 amendment) no longer contributes CSRF resistance; the double-submit token is the sole CSRF control.
 
 ### 12.4 CORS
 Strict origin allow-list, credentials permitted only for the allow-listed SPA origin, never a wildcard (Section 10 of [03-Security.md](03-Security.md#10-cors)) — enforced at filter step 1.

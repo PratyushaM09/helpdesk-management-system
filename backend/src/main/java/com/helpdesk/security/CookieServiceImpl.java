@@ -9,11 +9,18 @@ import java.util.List;
 
 /**
  * Every cookie this application issues shares {@code Secure} and
- * {@code SameSite=Strict} unconditionally (07-Security-Architecture.md
- * §5.8) — {@code Secure} is never conditionally omitted per profile; a
- * {@code dev} browser testing over {@code http://localhost} still works
- * because browsers themselves treat {@code localhost} as a secure context
- * even without TLS (the documented exception ADR-0003/SDR-002 rely on), not
+ * {@code SameSite=None} unconditionally (07-Security-Architecture.md
+ * §5.8, revised — frontend and backend are deployed on different Render
+ * subdomains, which the browser treats as different sites; {@code
+ * SameSite=Strict}/{@code Lax} cookies are never sent on such cross-site
+ * requests, so {@code None} is required for the SPA to stay authenticated
+ * at all). CSRF defense no longer has {@code SameSite} as a redundant
+ * second layer and now rests solely on the double-submit token
+ * (SDR-007) — still a complete, independent defense on its own.
+ * {@code Secure} is never conditionally omitted per profile; a {@code
+ * dev} browser testing over {@code http://localhost} still works because
+ * browsers themselves treat {@code localhost} as a secure context even
+ * without TLS (the documented exception ADR-0003/SDR-002 rely on), not
  * because this service relaxes the flag.
  */
 @Service
@@ -58,7 +65,7 @@ public class CookieServiceImpl implements CookieService {
         return ResponseCookie.from(name, value)
                 .httpOnly(httpOnly)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .path(path)
                 .maxAge(maxAge)
                 .build();
@@ -68,7 +75,7 @@ public class CookieServiceImpl implements CookieService {
         return ResponseCookie.from(name, "")
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .path(path)
                 .maxAge(Duration.ZERO)
                 .build();

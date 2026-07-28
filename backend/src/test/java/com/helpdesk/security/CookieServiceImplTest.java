@@ -35,7 +35,7 @@ class CookieServiceImplTest {
         assertEquals("token-value", cookie.getValue());
         assertTrue(cookie.isHttpOnly());
         assertTrue(cookie.isSecure());
-        assertEquals("Strict", cookie.getSameSite());
+        assertEquals("None", cookie.getSameSite());
         assertEquals("/api/v1", cookie.getPath());
         assertEquals(ACCESS_TTL, cookie.getMaxAge());
     }
@@ -51,13 +51,13 @@ class CookieServiceImplTest {
     }
 
     @Test
-    void createCsrfTokenCookie_shouldNotBeHttpOnly_butStillSecureAndStrict() {
+    void createCsrfTokenCookie_shouldNotBeHttpOnly_butStillSecureAndNone() {
         ResponseCookie cookie = cookieService.createCsrfTokenCookie("csrf-value");
 
         assertEquals(SecurityConstants.CSRF_COOKIE, cookie.getName());
         assertFalse(cookie.isHttpOnly());
         assertTrue(cookie.isSecure());
-        assertEquals("Strict", cookie.getSameSite());
+        assertEquals("None", cookie.getSameSite());
         assertEquals(REFRESH_TTL, cookie.getMaxAge());
     }
 

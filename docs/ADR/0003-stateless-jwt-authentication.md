@@ -13,7 +13,7 @@ Use **stateless JWT access tokens + rotating refresh tokens**, not server-side (
 
 - Access token: short-lived (15 minutes), signed (HS512 in dev / RS256 in prod via asymmetric keys), carries subject (user ID), role, and a token version claim.
 - Refresh token: longer-lived (7 days), opaque, stored server-side (hashed) in a `refresh_token` table so it can be revoked (logout, password change, admin-forced logout) — this is what makes "logout invalidates the active session" (FR-AUTH-4) possible despite JWTs being otherwise unrevokable by nature.
-- Delivered to the SPA via an `HttpOnly`, `Secure`, `SameSite=Strict` cookie (not `localStorage`) to remove XSS token-theft as an attack vector — see [03-Security.md](../03-Security.md#session-management).
+- Delivered to the SPA via an `HttpOnly`, `Secure`, `SameSite=None` cookie (not `localStorage`) to remove XSS token-theft as an attack vector — see [03-Security.md](../03-Security.md#session-management). (`SameSite` revised from `Strict` to `None` per the SDR-002 amendment, since deployment placed frontend and backend on different subdomains.)
 
 ## Consequences
 

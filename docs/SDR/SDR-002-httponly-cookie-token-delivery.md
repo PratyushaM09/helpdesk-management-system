@@ -26,3 +26,10 @@ ADR-0003 already committed to stateless JWT authentication for a decoupled SPA. 
 
 ## Future Impact
 A future native mobile client or third-party API integrator (SRS §15) authenticates via `Authorization: Bearer <token>` instead of cookies — a mode the JWT authentication filter (Section 8.1 of [08-Security-Controls.md](../08-Security-Controls.md#81-authentication-filter-chain)) is designed to accept as an alternative credential-extraction source alongside the cookie, without any change to token issuance, verification, or the RBAC layer downstream.
+
+## Amendment (2026-07-28): SameSite relaxed to `None`
+Deployment put the SPA and API on different Render subdomains, which browsers treat as different sites — `SameSite=Strict` (and `Lax`) cookies are never attached to cross-site requests, so every post-login request was silently unauthenticated (cookies stored, never sent). This was not anticipated by the original "Alternatives Considered" analysis, which reasoned about `Strict` vs. `Lax` assuming a same-origin SPA.
+
+All three cookies now use `SameSite=None` (still `Secure`, still `HttpOnly` for the token cookies). This removes `SameSite` as the "first of two independent layers" CSRF defense described under Pros above — CSRF protection now rests solely on the double-submit token (SDR-007), which was always an independent, complete control on its own and needs no change. The XSS-token-theft property (the primary Reason for this SDR) is unaffected, since it comes entirely from `HttpOnly`, not `SameSite`.
+
+If frontend and backend are ever moved to the same origin (e.g. served from one deployment, or under one domain with a reverse proxy), reverting to `SameSite=Strict` restores the redundant layer with zero functional cost, per the original reasoning.

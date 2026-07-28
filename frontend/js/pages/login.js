@@ -100,10 +100,28 @@ loginForm?.addEventListener("submit", async (event) => {
   setButtonLoading(submitButton, true, "Signing in…");
 
   try {
-    await login({ email: emailInput.value.trim(), password: passwordInput.value });
-    const profile = await getCurrentUser({ forceRefetch: true });
-    window.location.href = profile.emailVerified ? "dashboard.html" : "verification-pending.html";
-  } catch (error) {
+  console.log("1. Before login");
+
+  await login({
+    email: emailInput.value.trim(),
+    password: passwordInput.value,
+  });
+
+  console.log("2. Login completed");
+
+  const profile = await getCurrentUser({
+    forceRefetch: true,
+  });
+
+  console.log("3. Profile:", profile);
+
+  window.location.href = profile.emailVerified
+    ? "dashboard.html"
+    : "verification-pending.html";
+
+  console.log("4. Redirect");
+} catch (error) {
+  console.error("ERROR:", error);
     setButtonLoading(submitButton, false);
     passwordInput.value = "";
 

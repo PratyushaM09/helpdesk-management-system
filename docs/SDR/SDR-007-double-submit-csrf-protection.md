@@ -5,7 +5,7 @@
 **Related:** [03-Security.md §9](../03-Security.md#9-csrf), [08-Security-Controls.md §13.1](../08-Security-Controls.md#131-csrf-protection)
 
 ## Decision
-Use the double-submit cookie pattern for CSRF protection: a non-`HttpOnly` CSRF token cookie set at login, echoed by the SPA into a custom `X-CSRF-Token` request header on every state-changing request, validated server-side for equality — layered on top of, not instead of, `SameSite=Strict` cookies (SDR-002).
+Use the double-submit cookie pattern for CSRF protection: a non-`HttpOnly` CSRF token cookie set at login, echoed by the SPA into a custom `X-CSRF-Token` request header on every state-changing request, validated server-side for equality — originally layered on top of `SameSite=Strict` cookies (SDR-002), which was later revised to `SameSite=None` (SDR-002 amendment) for the cross-subdomain deployment, leaving this double-submit check as the sole CSRF control.
 
 ## Reason
 Cookie-based authentication (SDR-002) reintroduces CSRF exposure that a pure `Authorization: Bearer`-header scheme wouldn't have. A CSRF defense is therefore required, and the specific pattern matters: the classic "synchronizer token" pattern stores the expected token server-side per session, which requires server-side session state — directly in tension with this system's stateless-JWT architecture (ADR-0003). The double-submit pattern achieves an equivalent security property without any server-side session storage: it relies on the fact that a cross-site attacker's forged request can trigger the browser to *send* the cookie automatically, but cannot *read* the cookie's value to construct the matching header, since cross-origin JavaScript cannot access another origin's cookies (same-origin policy).
@@ -17,7 +17,7 @@ Cookie-based authentication (SDR-002) reintroduces CSRF exposure that a pure `Au
 
 ## Pros
 - No server-side session state required — fully consistent with the stateless architecture (ADR-0003).
-- Two independent CSRF defenses (`SameSite=Strict` + double-submit) — a gap in browser `SameSite` enforcement is still caught by the token check, and vice versa.
+- Originally two independent CSRF defenses (`SameSite=Strict` + double-submit) — a gap in browser `SameSite` enforcement was still caught by the token check, and vice versa. Since the SDR-002 amendment moved `SameSite` to `None` for cross-subdomain deployment, the double-submit token is now the sole CSRF control, but it remains a complete defense on its own.
 - Standard, well-understood pattern with first-class Spring Security support.
 
 ## Cons
