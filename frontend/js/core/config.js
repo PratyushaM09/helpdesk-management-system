@@ -13,7 +13,10 @@ export const CONFIG = Object.freeze({
       ? "http://localhost:8080/api/v1"
       : "https://helpdesk-management-system-n5tt.onrender.com/api/v1",
 
-  REQUEST_TIMEOUT_MS: 15000,
+  // Render's free-tier backend spins down after ~15 minutes idle, and
+  // waking it back up can take 50+ seconds (Render's own dashboard warning)
+  // - this needs to outlast that cold start, not just a normal round trip.
+  REQUEST_TIMEOUT_MS: 60000,
 
   // Matches SecurityConstants.CSRF_HEADER on the backend (SDR-007).
   CSRF_HEADER_NAME: "X-CSRF-Token",
