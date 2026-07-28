@@ -9,9 +9,10 @@ framework, no build step — every file is served as-is.
 frontend/
   index.html               Entry point; redirects to login.html (no dashboard yet)
   login.html                Sign-in screen — real POST /auth/login (Milestone 6)
-  forgot-password.html       Request a reset link (email only, simulated send)
-  reset-password.html         New password + confirm, reads ?token= from the URL
-  verification-pending.html    "Check your email" holding page after account creation
+  forgot-password.html       "Coming soon" notice — self-service password reset isn't built
+  reset-password.html         "Coming soon" notice — same reason as forgot-password.html
+  verification-pending.html    Real resend (POST /account/resend-verification) after account creation
+  verify-email.html            Real GET ?token= redemption (POST /account/verify-email)
   dashboard.html                Authenticated app shell (sidebar+topbar) + placeholder dashboard content
   tickets.html                   Real GET /tickets: server pagination/sort, client-scoped filter/search
   ticket-details.html             Real ticket by ?id=: detail, actions, comments, attachments, history
@@ -73,9 +74,11 @@ frontend/
     pages/
       login.js                     Real POST /auth/login, backend ErrorResponse messages
                                      surfaced verbatim, redirect based on email-verification status
-      forgot-password.js            Email validation, simulated send, success-state swap
-      reset-password.js              Token check, live requirements/strength, simulated submit
-      verification-pending.js        Resend button placeholder with cooldown timer
+      forgot-password.js            Static "coming soon" page - only guards against an
+                                       already-authenticated visitor landing here
+      reset-password.js              Same "coming soon" treatment as forgot-password.js
+      verify-email.js                 Real POST /account/verify-email against ?token= from the link
+      verification-pending.js        Real POST /account/resend-verification, with cooldown timer
       dashboard.js                    Real current-user greeting + email-verification banner on
                                         top of core/shell.js's initShell(); summary/activity/table
                                         stay static (no backend endpoint exists for them — see
