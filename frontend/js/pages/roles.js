@@ -60,7 +60,14 @@ const ROLE_DISPLAY = {
 
 const user = await initShell();
 if (user) {
-  init();
+  // GET /roles is admin-only on the backend - a non-admin landing here via
+  // a direct URL (the sidebar link is already hidden for them, shell.js's
+  // applyRoleVisibility) would otherwise just see a raw 403 error state.
+  if (user.role !== "ADMIN") {
+    window.location.href = "dashboard.html";
+  } else {
+    init();
+  }
 }
 
 async function init() {

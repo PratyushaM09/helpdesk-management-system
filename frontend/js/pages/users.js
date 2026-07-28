@@ -51,7 +51,15 @@ const STATUS_LABELS = {
 
 const currentUser = await initShell();
 if (currentUser) {
-  init();
+  // GET /users (and every other action here) is admin-only on the backend -
+  // a non-admin landing here via a direct URL (the sidebar link is already
+  // hidden for them, shell.js's applyRoleVisibility) would otherwise just
+  // see a raw "Couldn't load users" 403 error state, as seen in the wild.
+  if (currentUser.role !== "ADMIN") {
+    window.location.href = "dashboard.html";
+  } else {
+    init();
+  }
 }
 
 async function init() {

@@ -53,6 +53,7 @@ export async function initShell() {
   }
 
   applyUserToTopbar(user);
+  applyRoleVisibility(user);
   initSidebarToggle();
   initNavHighlighting();
   initUserMenu();
@@ -60,6 +61,35 @@ export async function initShell() {
   initLogout();
   bindPlaceholderActions();
   return user;
+}
+
+/**
+ * Hides the sidebar's "Administration" section (Users/Roles) for any
+ * non-ADMIN role — those two pages' own backends are admin-only
+ * (@PreAuthorize("hasRole('ADMIN')")), so a USER/SUPPORT_ENGINEER account
+ * could previously see and click into a link that only ever produced a
+ * "Couldn't load users" 403. This is UI-level only, matching every other
+ * page's approach: the backend is still the actual enforcement point (see
+ * users.js/roles.js's own redirect for a direct-URL visit).
+ */
+function applyRoleVisibility(user) {
+  if (user.role === "ADMIN") {
+    return;
+  }
+  document.querySelectorAll(".sidebar__section-label").forEach((label) => {
+    if (label.textContent.trim() !== "Administration") {
+      return;
+    }
+    const divider = label.previousElementSibling;
+    const list = label.nextElementSibling;
+    if (divider?.classList.contains("sidebar__divider")) {
+      divider.hidden = true;
+    }
+    label.hidden = true;
+    if (list?.classList.contains("sidebar__list")) {
+      list.hidden = true;
+    }
+  });
 }
 
 function applyUserToTopbar(user) {
