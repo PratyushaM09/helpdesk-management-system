@@ -349,7 +349,7 @@ tree, not assumed).
 | `POST /auth/login` | `auth.js`'s `login()` | Body `{email,password}`; response is `{id,name,email,role}` only — no `status`/`emailVerified` |
 | `GET /account/me` | `auth.js`'s `getCurrentUser()` | The only endpoint with `status`/`emailVerified`; used by session bootstrap and login's post-success redirect decision |
 | `POST /auth/refresh` | `auth.js`'s `refreshToken()` | No body — reads the `refresh_token` cookie automatically (its `Path` is scoped to exactly this endpoint) |
-| `POST /auth/logout` | `auth.js`'s `logout()`, wired to every `[data-logout-action]` element by `shell.js` | Requires a currently-valid access token; the in-memory user cache is cleared regardless of whether the call itself succeeds |
+| `POST /auth/logout` | `auth.js`'s `logout()`, wired to every `[data-logout-action]` element by `shell.js` | Public endpoint — driven by the `refresh_token` cookie, not the access token, so it still revokes the session even if the access token already expired; the in-memory user cache is cleared regardless of whether the call itself succeeds |
 
 **Session architecture:** `core/auth.js` (raw API calls + an in-memory-only
 `cachedUser` — never `localStorage`, matching the backend's httpOnly-cookie

@@ -212,8 +212,9 @@ class AuthenticationControllerIntegrationTest {
         Cookie accessCookie = loginResult.getResponse().getCookie(SecurityConstants.ACCESS_TOKEN_COOKIE);
         Cookie refreshCookie = loginResult.getResponse().getCookie(SecurityConstants.REFRESH_TOKEN_COOKIE);
 
-        // /auth/logout itself requires authentication (07-Security-Architecture.md
-        // §3.3), hence the access token cookie here too - not just the refresh one.
+        // /auth/logout is public (SecurityConfig PUBLIC_PATHS) - it's driven
+        // solely by the refresh_token cookie, so the access cookie here is
+        // incidental, not required.
         mockMvc.perform(post(AUTH_URL + "/logout").cookie(accessCookie, refreshCookie)).andExpect(status().isOk());
 
         mockMvc.perform(post(AUTH_URL + "/refresh").cookie(refreshCookie))
@@ -266,9 +267,7 @@ class AuthenticationControllerIntegrationTest {
      * The scenario the controller's null-refresh-cookie fallback actually
      * exists for: an authenticated caller (real access token) with no
      * refresh cookie at all - a Bearer-only client, per SDR-002's
-     * alternative path. Calling logout with literally no cookies at all
-     * would correctly 401 at the authorization layer before ever reaching
-     * the controller, since /auth/logout itself requires authentication.
+     * alternative path.
      */
     @Test
     void logout_shouldReturn200_whenAuthenticatedButNoRefreshCookiePresent() throws Exception {
@@ -276,6 +275,33 @@ class AuthenticationControllerIntegrationTest {
         Cookie accessCookie = login(user.getEmail()).getResponse().getCookie(SecurityConstants.ACCESS_TOKEN_COOKIE);
 
         mockMvc.perform(post(AUTH_URL + "/logout").cookie(accessCookie))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * The scenario this endpoint being public actually exists for: the
+     * access token already expired (15-minute TTL) by the time the user
+     * clicks logout. Before /auth/logout was added to PUBLIC_PATHS, this
+     * request 401'd at the authorization layer before ever reaching the
+     * controller, leaving the refresh token un-revoked - so the very next
+     * /auth/refresh (e.g. the login page's redirectIfAuthenticated bootstrap)
+     * silently resurrected the session the user believed they'd ended.
+     */
+    @Test
+    void logout_shouldRevokeRefreshToken_whenNoAccessCookiePresent() throws Exception {
+        User user = persistUser("logout-no-access-cookie@example.com", RoleName.USER);
+        Cookie refreshCookie = login(user.getEmail()).getResponse().getCookie(SecurityConstants.REFRESH_TOKEN_COOKIE);
+
+        mockMvc.perform(post(AUTH_URL + "/logout").cookie(refreshCookie))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post(AUTH_URL + "/refresh").cookie(refreshCookie))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logout_shouldReturn200_whenNoCookiesAtAll() throws Exception {
+        mockMvc.perform(post(AUTH_URL + "/logout"))
                 .andExpect(status().isOk());
     }
 

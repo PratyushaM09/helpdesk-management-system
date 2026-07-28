@@ -137,6 +137,17 @@ public class SecurityConfig {
             ApiConstants.API_BASE_PATH + "/health",
             ApiConstants.API_BASE_PATH + "/auth/login",
             ApiConstants.API_BASE_PATH + "/auth/refresh",
+            // logout is driven entirely by the refresh_token cookie
+            // (@CookieValue, AuthenticationController.logout) — it never
+            // reads SecurityContext/Authentication, so requiring a
+            // still-valid access token to reach it was actively harmful:
+            // an expired access token made the revoke-refresh-token call
+            // itself 401 before it ran, leaving the refresh token live and
+            // letting the very next /auth/refresh silently resurrect the
+            // "logged out" session. CSRF double-submit still applies here
+            // regardless of this permitAll, since CsrfValidationFilter runs
+            // unconditionally on non-safe methods, independent of auth state.
+            ApiConstants.API_BASE_PATH + "/auth/logout",
             // Unauthenticated by necessity (Milestone 4): the caller has no
             // session yet, or is presenting a possessed token instead of one.
             // resend-verification is deliberately NOT here - it stays

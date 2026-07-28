@@ -104,7 +104,7 @@ Foundational mechanism: stateless JWT access token + rotating opaque refresh tok
 8. Response: `200` with a minimal body (`userId`, `role`, `name`) — the tokens travel only as cookies, never in the JSON body (keeps them out of browser history, JS-accessible memory, and application logs that might record response bodies).
 
 ### 3.3 Logout Flow (FR-AUTH-4)
-1. Client calls `POST /auth/logout` (authenticated).
+1. Client calls `POST /auth/logout` — public (`SecurityConfig` `PUBLIC_PATHS`), like `/auth/refresh`, since the endpoint reads only the `refresh_token` cookie and never `SecurityContext`/`Authentication`. Requiring a valid access token here was tried and reverted: an already-expired access token made the revoke call itself `401` before it ran, leaving the refresh token live and letting the next `/auth/refresh` silently resurrect the "logged out" session.
 2. Server resolves the refresh token from the cookie and marks its server-side record `revoked_at = now()` — this is what makes logout an actual security event, not just a client-side cookie deletion (a stolen refresh token captured before logout is now unusable).
 3. Both cookies are cleared (`Set-Cookie` with immediate expiry).
 4. The just-issued access token remains cryptographically valid until its own natural 15-minute expiry — an accepted, documented tradeoff (ADR-0003) given the short TTL bounds the exposure window.
