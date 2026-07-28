@@ -1,29 +1,51 @@
 /**
  * Authentication module. The frontend never stores a token itself — every
  * call here relies on the httpOnly access_token/refresh_token cookies the
- * backend sets/rotates/clears, and api.js already mirrors the readable
- * csrf_token cookie into the X-CSRF-Token header for unsafe methods. The
- * only client-side state is an in-memory cache of the last-known user
+ * backend sets/rotates/clears. The one exception is the CSRF double-submit
+ * value: the csrf_token cookie's Domain belongs to the API's origin, which a
+ * frontend on a different subdomain can never read via document.cookie
+ * (cookie visibility to JS is scoped to the setting origin, independent of
+ * SameSite) — so it travels once in a JSON response body instead
+ * (primeCsrfToken/login below) and is cached in memory via api.js's
+ * setCsrfToken, which echoes it back as X-CSRF-Token on later requests. The
+ * only other client-side state is an in-memory cache of the last-known user
  * profile, intentionally never persisted (no localStorage/sessionStorage) —
  * a hard refresh always re-derives it from the cookie jar via
  * getCurrentUser({ forceRefetch: true }).
  */
 
-import { api } from "./api.js";
+import { api, setCsrfToken } from "./api.js";
 
 let cachedUser = null;
+
+/**
+ * (Re)populates the in-memory CSRF token via GET /auth/csrf-token. Every
+ * page here is a separate script context (no client-side router), so this
+ * runs on every page load — same reasoning as getCurrentUser's
+ * forceRefetch on session bootstrap. Safe to call regardless of login
+ * state; the endpoint is public and merely rotates the csrf_token cookie.
+ * @returns {Promise<void>}
+ */
+export async function primeCsrfToken() {
+  const { csrfToken } = await api.get("/auth/csrf-token");
+  setCsrfToken(csrfToken);
+}
 
 /**
  * Logs a user in with email/password via POST /auth/login. On success the
  * backend sets access_token, refresh_token, and csrf_token cookies and this
  * resolves with { id, name, email, role } (no status/emailVerified — see
- * getCurrentUser for the full profile). Throws ApiError on failure:
- * 401 for invalid credentials, 423 for a locked account.
+ * getCurrentUser for the full profile). The response's csrfToken field is
+ * cached via setCsrfToken and stripped out before caching the rest as
+ * cachedUser — callers of getCachedUser()/getCurrentUser() should never see
+ * it. Throws ApiError on failure: 401 for invalid credentials, 423 for a
+ * locked account.
  * @param {{ email: string, password: string }} credentials
  * @returns {Promise<{id:number,name:string,email:string,role:string}>}
  */
 export async function login({ email, password }) {
-  const user = await api.post("/auth/login", { email, password });
+  const { csrfToken, ...user } = await api.post("/auth/login", { email, password });
+  setCsrfToken(csrfToken);
   cachedUser = user;
   return user;
 }

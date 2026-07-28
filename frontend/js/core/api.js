@@ -11,7 +11,6 @@
  */
 
 import { CONFIG } from "./config.js";
-import { getCookie } from "./utils.js";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -29,6 +28,33 @@ export function onSessionExpired(handler) {
 }
 
 let sessionExpiredHandler = null;
+
+/**
+ * The CSRF double-submit value, cached in memory only. Not read from the
+ * csrf_token cookie via document.cookie, because that cookie's Domain
+ * belongs to the API's origin — a frontend on a different subdomain can
+ * never see it via JS, regardless of SameSite/Secure (cookie visibility to
+ * JS is scoped to the setting origin, a separate axis entirely). auth.js's
+ * primeCsrfToken()/login() populate this from the API's response body
+ * instead (core/auth.js, GET /auth/csrf-token and POST /auth/login).
+ * @param {string} token
+ */
+export function setCsrfToken(token) {
+  csrfToken = token;
+}
+
+/**
+ * Synchronous access to the cached CSRF token, for the one caller that
+ * can't go through this module's own request() — attachments-api.js's
+ * upload path uses XMLHttpRequest directly (for progress events), so it
+ * attaches the header itself instead.
+ * @returns {string|null}
+ */
+export function getCsrfToken() {
+  return csrfToken;
+}
+
+let csrfToken = null;
 
 export class ApiError extends Error {
   constructor(message, { status = 0, errorCode = null, validationErrors = null, path = null } = {}) {
@@ -66,11 +92,8 @@ async function request(method, path, body, options = {}) {
   }
   // Double-submit CSRF only applies to state-changing requests; the
   // backend's CsrfValidationFilter ignores it entirely for GET/HEAD/OPTIONS.
-  if (!SAFE_METHODS.has(method)) {
-    const csrfToken = getCookie(CONFIG.CSRF_COOKIE_NAME);
-    if (csrfToken) {
-      headers.set(CONFIG.CSRF_HEADER_NAME, csrfToken);
-    }
+  if (!SAFE_METHODS.has(method) && csrfToken) {
+    headers.set(CONFIG.CSRF_HEADER_NAME, csrfToken);
   }
 
   let response;

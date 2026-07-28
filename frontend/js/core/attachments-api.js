@@ -17,9 +17,8 @@
  * triggering a browser download.
  */
 
-import { api, ApiError } from "./api.js";
+import { api, ApiError, getCsrfToken } from "./api.js";
 import { CONFIG } from "./config.js";
-import { getCookie } from "./utils.js";
 
 /** GET /tickets/{ticketId}/attachments — paginated; INTERNAL-comment attachments already excluded server-side for USER. */
 export async function listAttachments(ticketId, { page = 0, size = 20 } = {}) {
@@ -55,7 +54,7 @@ function uploadFile(path, file, { onProgress } = {}) {
     xhr.open("POST", `${CONFIG.API_BASE_URL}${path}`);
     xhr.withCredentials = true;
 
-    const csrfToken = getCookie(CONFIG.CSRF_COOKIE_NAME);
+    const csrfToken = getCsrfToken();
     if (csrfToken) {
       xhr.setRequestHeader(CONFIG.CSRF_HEADER_NAME, csrfToken);
     }

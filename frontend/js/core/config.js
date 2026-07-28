@@ -15,5 +15,8 @@ export const CONFIG = Object.freeze({
 
   REQUEST_TIMEOUT_MS: 15000,
 
+  // Matches SecurityConstants.CSRF_HEADER on the backend (SDR-007).
+  CSRF_HEADER_NAME: "X-CSRF-Token",
+
   // ...
 });

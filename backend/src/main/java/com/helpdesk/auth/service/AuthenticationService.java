@@ -40,6 +40,20 @@ public interface AuthenticationService {
     List<ResponseCookie> logout(String rawRefreshToken);
 
     /**
+     * Issues a fresh CSRF double-submit cookie, unconditionally — cheap and
+     * stateless (nothing is persisted; the value is a pure comparison
+     * token), so callers rotate it freely rather than conditionally reusing
+     * whatever cookie may already be present. Exists for a frontend on a
+     * different subdomain than the API: such a frontend cannot read the
+     * existing {@code csrf_token} cookie via {@code document.cookie} at all
+     * (cookie visibility to JS is scoped to the setting origin), so the
+     * caller (a public endpoint, {@code /auth/csrf-token}) hands the value
+     * back in the response body instead, letting that frontend cache it in
+     * memory and echo it as {@code X-CSRF-Token} on later requests.
+     */
+    ResponseCookie issueCsrfCookie();
+
+    /**
      * Revokes every currently-live refresh token issued to {@code user},
      * across every session/device/family — the "log out everywhere"
      * primitive security-invalidating events need (password change, password

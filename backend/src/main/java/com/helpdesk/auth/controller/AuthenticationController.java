@@ -1,6 +1,7 @@
 package com.helpdesk.auth.controller;
 
 import com.helpdesk.auth.dto.request.LoginRequest;
+import com.helpdesk.auth.dto.response.CsrfTokenResponse;
 import com.helpdesk.auth.dto.response.LoginResponse;
 import com.helpdesk.auth.service.AuthenticationResult;
 import com.helpdesk.auth.service.AuthenticationService;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,6 +77,20 @@ public class AuthenticationController {
         AuthenticationResult result = authenticationService.refresh(refreshToken);
         return withCookies(ResponseEntity.ok(), result.cookies())
                 .body(ApiResponse.success(result.response()));
+    }
+
+    @Operation(summary = "Get a CSRF token",
+            description = "Issues/rotates the csrf_token cookie and echoes its value in the body — the value must "
+                    + "be readable by frontend JS to echo back as X-CSRF-Token, but a frontend on a different "
+                    + "subdomain than this API cannot read the cookie directly (document.cookie is scoped to the "
+                    + "setting origin). Call on every page load to (re)populate an in-memory copy.")
+    @SecurityRequirements
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Token issued")
+    @GetMapping("/csrf-token")
+    public ResponseEntity<ApiResponse<CsrfTokenResponse>> csrfToken() {
+        ResponseCookie cookie = authenticationService.issueCsrfCookie();
+        return withCookies(ResponseEntity.ok(), List.of(cookie))
+                .body(ApiResponse.success(new CsrfTokenResponse(cookie.getValue())));
     }
 
     @Operation(summary = "Log out", description = "Revokes the current refresh token and clears every auth cookie. Idempotent.")

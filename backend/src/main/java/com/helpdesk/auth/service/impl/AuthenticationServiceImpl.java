@@ -132,6 +132,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public ResponseCookie issueCsrfCookie() {
+        return cookieService.createCsrfTokenCookie(generateRawToken());
+    }
+
+    @Override
     @Transactional
     public void revokeAllRefreshTokensForUser(User user) {
         Instant now = Instant.now();
@@ -222,16 +227,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private AuthenticationResult buildResult(User user, GeneratedRefreshToken generated, boolean includeCsrfCookie) {
         String accessToken = jwtService.generateAccessToken(toPrincipal(user));
 
-        List<ResponseCookie> cookies = includeCsrfCookie
-                ? List.of(
-                        cookieService.createAccessTokenCookie(accessToken),
-                        cookieService.createRefreshTokenCookie(generated.rawValue()),
-                        cookieService.createCsrfTokenCookie(generateRawToken()))
-                : List.of(
-                        cookieService.createAccessTokenCookie(accessToken),
-                        cookieService.createRefreshTokenCookie(generated.rawValue()));
+        List<ResponseCookie> cookies;
+        String csrfToken;
+        if (includeCsrfCookie) {
+            ResponseCookie csrfCookie = cookieService.createCsrfTokenCookie(generateRawToken());
+            csrfToken = csrfCookie.getValue();
+            cookies = List.of(
+                    cookieService.createAccessTokenCookie(accessToken),
+                    cookieService.createRefreshTokenCookie(generated.rawValue()),
+                    csrfCookie);
+        } else {
+            csrfToken = null;
+            cookies = List.of(
+                    cookieService.createAccessTokenCookie(accessToken),
+                    cookieService.createRefreshTokenCookie(generated.rawValue()));
+        }
 
-        LoginResponse response = new LoginResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().getName());
+        LoginResponse response = new LoginResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().getName(), csrfToken);
         return new AuthenticationResult(response, cookies);
     }
 

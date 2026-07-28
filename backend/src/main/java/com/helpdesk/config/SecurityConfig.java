@@ -137,6 +137,10 @@ public class SecurityConfig {
             ApiConstants.API_BASE_PATH + "/health",
             ApiConstants.API_BASE_PATH + "/auth/login",
             ApiConstants.API_BASE_PATH + "/auth/refresh",
+            // GET, so CsrfValidationFilter's own SAFE_METHODS bypass already
+            // applies regardless - public here just means no access-token
+            // cookie is required to call it (there usually isn't one yet).
+            ApiConstants.API_BASE_PATH + "/auth/csrf-token",
             // logout is driven entirely by the refresh_token cookie
             // (@CookieValue, AuthenticationController.logout) — it never
             // reads SecurityContext/Authentication, so requiring a

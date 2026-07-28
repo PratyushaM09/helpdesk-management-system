@@ -106,6 +106,31 @@ class AuthenticationControllerIntegrationTest {
         assertEquals(false, csrfCookie.isHttpOnly());
     }
 
+    /**
+     * The csrfToken body field exists specifically because a frontend on a
+     * different subdomain than this API cannot read the csrf_token cookie
+     * via document.cookie at all (cookie visibility to JS is scoped to the
+     * setting origin, independent of SameSite) - so the value must also
+     * travel in the body the frontend can actually read, and it must be the
+     * exact same value as the cookie, since CsrfValidationFilter compares
+     * the two verbatim.
+     */
+    @Test
+    void login_shouldReturnCsrfTokenInBody_matchingTheCookieValue() throws Exception {
+        User user = persistUser("login-csrf-body@example.com", RoleName.USER);
+
+        MvcResult result = mockMvc.perform(post(AUTH_URL + "/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson(user.getEmail(), VALID_PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Cookie csrfCookie = result.getResponse().getCookie(SecurityConstants.CSRF_COOKIE);
+        JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertNotNull(csrfCookie);
+        assertEquals(csrfCookie.getValue(), body.get("data").get("csrfToken").asText());
+    }
+
     @Test
     void login_shouldReturn401_whenPasswordWrong() throws Exception {
         User user = persistUser("wrong-password@example.com", RoleName.USER);
@@ -241,6 +266,50 @@ class AuthenticationControllerIntegrationTest {
 
         mockMvc.perform(post(AUTH_URL + "/refresh").cookie(rotatedRefreshCookie))
                 .andExpect(status().isUnauthorized());
+    }
+
+    // --- csrf-token ---
+
+    @Test
+    void csrfToken_shouldReturn200AndSetCookie_withBodyMatchingCookieValue() throws Exception {
+        MvcResult result = mockMvc.perform(get(AUTH_URL + "/csrf-token"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Cookie csrfCookie = result.getResponse().getCookie(SecurityConstants.CSRF_COOKIE);
+        JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertNotNull(csrfCookie);
+        assertEquals(csrfCookie.getValue(), body.get("data").get("csrfToken").asText());
+    }
+
+    @Test
+    void csrfToken_shouldBeCallableWithNoPriorCookiesAtAll() throws Exception {
+        mockMvc.perform(get(AUTH_URL + "/csrf-token"))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * The scenario this endpoint exists for: a stale csrf_token cookie from
+     * an earlier session is still present (e.g. a different user logging in
+     * on a shared browser). Without re-priming, the frontend's in-memory
+     * value wouldn't match what the browser actually sends, and
+     * CsrfValidationFilter would reject the very next state-changing
+     * request - this proves the endpoint hands back a value that matches
+     * whatever cookie the response just set, closing that gap.
+     */
+    @Test
+    void csrfToken_shouldRotateStaleCookie_andReturnMatchingNewValue() throws Exception {
+        User user = persistUser("csrf-rotate@example.com", RoleName.USER);
+        Cookie staleCsrfCookie = login(user.getEmail()).getResponse().getCookie(SecurityConstants.CSRF_COOKIE);
+
+        MvcResult result = mockMvc.perform(get(AUTH_URL + "/csrf-token").cookie(staleCsrfCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Cookie rotatedCsrfCookie = result.getResponse().getCookie(SecurityConstants.CSRF_COOKIE);
+        JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertNotNull(rotatedCsrfCookie);
+        assertEquals(rotatedCsrfCookie.getValue(), body.get("data").get("csrfToken").asText());
     }
 
     // --- logout ---

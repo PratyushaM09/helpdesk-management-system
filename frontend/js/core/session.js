@@ -7,20 +7,23 @@
  */
 
 import { ApiError } from "./api.js";
-import { getCurrentUser, refreshToken } from "./auth.js";
+import { getCurrentUser, primeCsrfToken, refreshToken } from "./auth.js";
 import { showToast } from "./utils.js";
 
 /**
  * Resolves the current session, transparently recovering from an expired
- * access token: tries GET /account/me first; on a 401 (expired/missing
- * access token), attempts exactly one silent POST /auth/refresh, then
- * retries /account/me once more. Returns the user, or null if there is no
- * recoverable session (never logged in, or the refresh token is also
- * invalid/expired/reused). Network/unexpected errors are rethrown so a
- * caller can distinguish "not logged in" from "couldn't reach the server."
+ * access token: primes the in-memory CSRF token (every page here is a
+ * fresh script context, so it's never already cached), tries GET
+ * /account/me, and on a 401 (expired/missing access token), attempts
+ * exactly one silent POST /auth/refresh, then retries /account/me once
+ * more. Returns the user, or null if there is no recoverable session (never
+ * logged in, or the refresh token is also invalid/expired/reused).
+ * Network/unexpected errors are rethrown so a caller can distinguish "not
+ * logged in" from "couldn't reach the server."
  * @returns {Promise<object|null>}
  */
 export async function bootstrapSession() {
+  await primeCsrfToken();
   try {
     return await getCurrentUser({ forceRefetch: true });
   } catch (error) {
