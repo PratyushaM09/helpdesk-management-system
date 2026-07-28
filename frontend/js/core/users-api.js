@@ -6,6 +6,15 @@
 import { api } from "./api.js";
 
 /**
+ * POST /users — admin-provisioned account creation (no self-service
+ * registration exists in this app). 409 if the email is already taken.
+ * @param {{name: string, email: string, password: string, role: string}} request
+ */
+export async function createUser(request) {
+  return api.post("/users", request);
+}
+
+/**
  * GET /users — paginated; only page/size/sort exist as query params on
  * this endpoint (no name/email/role/status filter or search — confirmed by
  * reading UserController/UserServiceImpl). Sortable properties: id, name,
