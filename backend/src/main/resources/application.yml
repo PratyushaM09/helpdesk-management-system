@@ -98,6 +98,16 @@ app:
     refresh-token-ttl: 7d
     issuer: helpdesk-management-system
 
+  # FrontendProperties (com.helpdesk.config) binds this block — the base URL
+  # SmtpNotificationServiceImpl (prod only; see that class and
+  # LoggingNotificationServiceImpl) builds the emailed verification link
+  # against. Dev-friendly default matches the frontend's typical local
+  # static-file-server port; production overrides with a required,
+  # no-default value (same "no dev-shaped default leaks into prod" rule as
+  # CORS/OpenAPI above).
+  frontend:
+    base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
+
   # OpenAPiConfig binds this block (OpenApiProperties). Contact/license
   # values are clearly-generic placeholders — replace with real
   # organizational details before a production release; nothing in the

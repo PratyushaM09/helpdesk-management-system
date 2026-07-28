@@ -47,6 +47,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Email delivery (SmtpNotificationServiceImpl, prod profile only) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- JWT issuance/verification (ADR-0003) - api is compile-scope (the
              fluent Jwts.builder()/Jwts.parser() surface JwtService codes
              against); impl/jackson are runtime-only, never referenced
