@@ -2,6 +2,8 @@
 
 A centralized web platform for reporting, assigning, tracking, and resolving internal support tickets, with dedicated experiences for Users, Support Engineers, and Administrators.
 
+**Live:** [Frontend](https://helpdesk-management-system-1.onrender.com) · [Backend API](https://helpdesk-management-system-n5tt.onrender.com/api/v1/health) — hosted on Render's free tier, so the backend spins down after ~15 minutes idle; the first request after that can take 30-60s to wake it back up.
+
 ## Project Status
 
 **Phases 1–4 implemented; Phase 5 (production readiness) in progress.** The
@@ -9,10 +11,15 @@ SRS ([docs/01-SRS.md](docs/01-SRS.md)), Software Architecture Document set,
 and full Enterprise Security Architecture Document (SecAD) are accepted.
 [backend/](backend/) (Spring Boot REST API — auth, tickets, comments,
 attachments, users, roles) and [frontend/](frontend/) (static HTML/CSS/JS)
-are both fully implemented and integrated. Phase 5 has completed
-Dockerization (Milestone 1 — see [DOCKER.md](DOCKER.md)) and a production
-configuration review (Milestone 2); Docker execution verification and actual
-deployment are still pending.
+are both fully implemented, integrated, and **deployed live** (Render: a
+static site for the frontend, a web service for the backend, MySQL via
+Aiven). Phase 5 has completed Dockerization (Milestone 1 — see
+[DOCKER.md](DOCKER.md)) and a production configuration review (Milestone 2);
+actual deployment happened directly on Render rather than through the Docker
+images, since local Docker execution verification is currently blocked by a
+Docker Desktop version issue on the development machine — the
+`docker-compose.yml`/`Dockerfile`s exist and are believed correct, but
+haven't been run end-to-end locally to confirm.
 
 ## Repository Structure
 
